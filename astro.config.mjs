@@ -5,6 +5,10 @@ export default defineConfig({
   output: "static",
   site: "https://manny.aero",
   integrations: [sitemap()],
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: "viewport",
+  },
   build: {
     inlineStylesheets: "auto",
     assets: "_astro",
