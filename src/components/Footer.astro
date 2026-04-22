@@ -1,0 +1,134 @@
+---
+const socials = [
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/manny-aero" },
+  { label: "Instagram", href: "https://www.instagram.com/manny.aero" },
+  { label: "Facebook", href: "https://www.facebook.com/manny.aero" },
+  { label: "YouTube", href: "https://www.youtube.com/@manny-aero" },
+  { label: "TikTok", href: "https://www.tiktok.com/@manny.aero" },
+];
+---
+
+<footer class="footer">
+  <div class="footer__inner container">
+    <div class="footer__logo">
+      <img src="/logo-manny.svg" alt="Manny Aero" width="500" height="294" />
+    </div>
+
+    <div class="footer__legal">
+      <span>MANNY © 2026.</span>
+      <a href="/privacy">PRIVACY NOTICE</a>
+      <a href="/terms">TERMS OF SERVICE</a>
+    </div>
+
+    <div class="footer__contact">
+      <div class="footer__phones">
+        <span>US &amp; CAN <a href="tel:+18775062669">1 877 50 MANNY</a></span>
+        <span>MEX <a href="tel:+527222730981">+52 722 273 0981</a></span>
+      </div>
+      <div class="footer__socials">
+        {socials.map((s) => <a href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>)}
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--color-bg-footer);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-block: 32px;
+    font-size: var(--fs-micro);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .footer__inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .footer__logo {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+  }
+
+  .footer__logo img {
+    height: 40px;
+    width: auto;
+    display: block;
+  }
+
+  .footer__legal {
+    display: flex;
+    gap: 20px;
+    color: var(--color-text-dim);
+    justify-self: center;
+    flex-wrap: wrap;
+  }
+
+  .footer__legal a {
+    color: var(--color-text-dim);
+    transition: color 0.25s var(--ease-out);
+  }
+
+  .footer__legal a:hover {
+    color: var(--color-text);
+  }
+
+  .footer__contact {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .footer__phones {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .footer__phones a {
+    color: inherit;
+  }
+
+  .footer__phones a:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .footer__socials {
+    display: flex;
+    gap: 14px;
+    color: var(--color-text-muted);
+  }
+
+  .footer__socials a {
+    transition: color 0.25s var(--ease-out);
+  }
+
+  .footer__socials a:hover {
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 1024px) {
+    .footer__inner {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      text-align: center;
+    }
+    .footer__legal {
+      justify-self: center;
+    }
+    .footer__contact {
+      align-items: center;
+    }
+    .footer__logo {
+      justify-self: center;
+    }
+  }
+</style>

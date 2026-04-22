@@ -1,0 +1,69 @@
+:root {
+  /* Brand */
+  --color-accent: #ffb900;
+  --color-accent-hover: #ffc933;
+
+  /* Text */
+  --color-text: #ffffff;
+  --color-text-muted: rgba(255, 255, 255, 0.7);
+  --color-text-dim: rgba(255, 255, 255, 0.45);
+
+  /* Glass surfaces */
+  --color-surface: rgba(255, 255, 255, 0.06);
+  --color-surface-hover: rgba(255, 255, 255, 0.1);
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Solid background (footer only) */
+  --color-bg-footer: #0a0a0a;
+
+  /* Map pins */
+  --pin-gold: #ffb900;
+  --pin-red: #e84040;
+  --pin-blue: #4a90d9;
+  --pin-orange: #f37b3a;
+
+  /* Global page gradient */
+  --bg-gradient: linear-gradient(
+    180deg,
+    #141418 0%,
+    #0f0f14 25%,
+    #0a0a0f 55%,
+    #020208 100%
+  );
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --fs-micro: 12px;
+  --fs-label: 15px;
+  --fs-body: 17px;
+  --fs-lead: 20px;
+  --fs-h3: clamp(24px, 2.8vw, 32px);
+  --fs-h2: clamp(36px, 4.5vw, 60px);
+  --fs-hero: clamp(52px, 7.5vw, 96px);
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius: 16px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-card-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+
+  /* Spacing */
+  --pad-x: clamp(16px, 2.5vw, 40px);
+  --pad-section: clamp(64px, 10vh, 120px);
+  --max-w: 1600px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Photo filters (per spec) */
+  --filter-photo: brightness(0.88) saturate(0.85);
+  --filter-photo-bw: grayscale(1) brightness(0.85);
+}

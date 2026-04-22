@@ -1,0 +1,198 @@
+---
+import GlassButton from "./ui/GlassButton.astro";
+---
+
+<section class="subhero section" id="about" aria-labelledby="subhero-title">
+  <div class="container">
+    <div class="subhero__grid">
+      <article class="subhero__feature reveal">
+        <div class="subhero__feature-img" aria-hidden="true"></div>
+        <div class="subhero__feature-overlay" aria-hidden="true"></div>
+        <div class="subhero__feature-content">
+          <p class="subhero__years">
+            <span class="subhero__years-num">25+</span>
+          </p>
+          <h2 id="subhero-title" class="subhero__title">
+            Years of experience,<br />
+            precision and trust
+          </h2>
+          <p class="subhero__desc">
+            FBO coordination, permits, catering, and ground handling — executed
+            with precision, 24/7.
+          </p>
+          <GlassButton href="#about" variant="outline">Meet Our Founder</GlassButton>
+        </div>
+      </article>
+
+      <div class="subhero__stack">
+        <div class="subhero__photo reveal" aria-label="Manny agents on tarmac">
+          <div class="subhero__photo-bg subhero__photo-bg--1"></div>
+        </div>
+        <div class="subhero__photo reveal" aria-label="Technician working on landing gear">
+          <div class="subhero__photo-bg subhero__photo-bg--2"></div>
+        </div>
+        <div class="subhero__photo reveal" aria-label="Operations dispatcher with headset">
+          <div class="subhero__photo-bg subhero__photo-bg--3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .subhero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: stretch;
+  }
+
+  .subhero__feature {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    min-height: 560px;
+    box-shadow: var(--shadow-card-lg);
+    isolation: isolate;
+  }
+
+  .subhero__feature-img {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.08), transparent 50%),
+      linear-gradient(135deg, #2a2a30 0%, #1a1a20 50%, #0f0f15 100%);
+    filter: var(--filter-photo-bw);
+    z-index: -2;
+  }
+
+  .subhero__feature-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.4) 50%,
+      rgba(0, 0, 0, 0.85) 100%
+    );
+    z-index: -1;
+  }
+
+  .subhero__feature-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 44px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .subhero__years-num {
+    font-size: clamp(48px, 6vw, 76px);
+    font-weight: 900;
+    color: var(--color-accent);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .subhero__title {
+    font-size: clamp(28px, 3.2vw, 42px);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+    color: var(--color-text);
+  }
+
+  .subhero__desc {
+    font-size: var(--fs-body);
+    color: var(--color-text-muted);
+    max-width: 480px;
+    line-height: 1.55;
+  }
+
+  .subhero__stack {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 16px;
+    min-height: 560px;
+  }
+
+  .subhero__photo {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    min-height: 170px;
+  }
+
+  .subhero__photo-bg {
+    position: absolute;
+    inset: 0;
+    filter: var(--filter-photo-bw);
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .subhero__photo:hover .subhero__photo-bg {
+    transform: scale(1.04);
+  }
+
+  .subhero__photo-bg--1 {
+    background:
+      radial-gradient(circle at 40% 50%, rgba(255, 255, 255, 0.12), transparent 55%),
+      linear-gradient(120deg, #3a3a42 0%, #1e1e26 100%);
+  }
+
+  .subhero__photo-bg--2 {
+    background:
+      radial-gradient(circle at 55% 50%, rgba(255, 255, 255, 0.1), transparent 55%),
+      linear-gradient(120deg, #2e2e36 0%, #18181e 100%);
+  }
+
+  .subhero__photo-bg--3 {
+    background:
+      radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.14), transparent 55%),
+      linear-gradient(120deg, #323238 0%, #14141a 100%);
+  }
+
+  @media (max-width: 1024px) {
+    .subhero__grid {
+      grid-template-columns: 1fr;
+    }
+    .subhero__feature {
+      min-height: 480px;
+    }
+    .subhero__stack {
+      grid-template-rows: none;
+      grid-template-columns: repeat(3, 1fr);
+      min-height: 0;
+    }
+    .subhero__photo {
+      min-height: 180px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .subhero__feature {
+      min-height: 380px;
+    }
+    .subhero__feature-content {
+      padding: 24px;
+      gap: 14px;
+    }
+    .subhero__photo {
+      min-height: 110px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .subhero__feature {
+      min-height: 320px;
+    }
+    .subhero__feature-content {
+      padding: 20px;
+    }
+  }
+</style>

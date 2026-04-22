@@ -1,0 +1,551 @@
+---
+type ActiveLink = "home" | "about" | "services" | "map" | "news" | "contact";
+
+interface Props {
+  activeLink?: ActiveLink;
+}
+
+const { activeLink = "home" } = Astro.props;
+
+const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean }[] = [
+  { key: "home",     label: "Home",     href: "/" },
+  { key: "about",    label: "About",    href: "#about" },
+  { key: "services", label: "Services", href: "#services", dropdown: true },
+  { key: "map",      label: "Map",      href: "#map" },
+  { key: "news",     label: "News",     href: "#news" },
+];
+---
+
+<header class="nav" data-nav>
+  <!-- Desktop pill nav -->
+  <nav class="nav__pill" aria-label="Primary">
+    {links.map((l) => (
+      l.dropdown ? (
+        <div class={`nav__drop-wrap ${l.key === activeLink ? "is-active" : ""}`}>
+          <button class={`nav__item nav__item--drop ${l.key === activeLink ? "is-active" : ""}`}
+            aria-haspopup="true" aria-expanded="false" type="button">
+            {l.label}
+            <svg class="nav__chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+              <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="nav__dropdown" role="menu">
+            <a href="/services"              class="nav__dd-item nav__dd-item--full" role="menuitem">All Services</a>
+            <a href="/services/permits"      class="nav__dd-item" role="menuitem">Permits &amp; Authorization</a>
+            <a href="/services/isbah"        class="nav__dd-item nav__dd-item--divider" role="menuitem">IS-BAH</a>
+            <a href="/services/catering"     class="nav__dd-item" role="menuitem">Manny's Catering</a>
+            <a href="/services/chauffeur"    class="nav__dd-item" role="menuitem">Majola Chauffeur</a>
+          </div>
+        </div>
+      ) : (
+        <a href={l.href} class={`nav__item ${l.key === activeLink ? "is-active" : ""}`}>
+          {l.label}
+        </a>
+      )
+    ))}
+    <a href="#contact" class={`nav__item nav__item--cta ${activeLink === "contact" ? "is-active" : ""}`}>
+      Contact
+    </a>
+  </nav>
+
+  <!-- Hamburger button (mobile) -->
+  <button class="nav__burger" aria-label="Open menu" aria-expanded="false" id="nav-burger">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- Mobile flyout -->
+<div class="flyout" id="nav-flyout" aria-hidden="true">
+  <div class="flyout__backdrop" id="nav-backdrop"></div>
+  <nav class="flyout__panel" aria-label="Mobile navigation">
+    <button class="flyout__close" aria-label="Close menu" id="nav-close">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M3 3L17 17M17 3L3 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <div class="flyout__logo">
+      <img src="/logo-manny.svg" alt="Manny Aero" width="500" height="294" />
+    </div>
+
+    <ul class="flyout__links">
+      <li><a href="/"         class="flyout__link">Home</a></li>
+      <li><a href="#about"    class="flyout__link">About</a></li>
+      <li class="flyout__group">
+        <button type="button" class="flyout__link flyout__link--toggle" id="flyout-services-toggle" aria-expanded="false">
+          Services
+          <svg class="flyout__chevron" width="12" height="8" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+            <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <ul class="flyout__sub" id="flyout-services-sub">
+          <li><a href="/services"           class="flyout__sublink flyout__sublink--all">All Services</a></li>
+          <li><a href="/services/permits"   class="flyout__sublink">Permits &amp; Authorization</a></li>
+          <li><a href="/services/isbah"     class="flyout__sublink flyout__sublink--divider">IS-BAH</a></li>
+          <li><a href="/services/catering"  class="flyout__sublink">Manny's Catering</a></li>
+          <li><a href="/services/chauffeur" class="flyout__sublink">Majola Chauffeur</a></li>
+        </ul>
+      </li>
+      <li><a href="#map"      class="flyout__link">Map</a></li>
+      <li><a href="#news"     class="flyout__link">News</a></li>
+      <li><a href="#contact"  class="flyout__link flyout__link--cta">Contact</a></li>
+    </ul>
+  </nav>
+</div>
+
+<style>
+  /* ── Fixed header shell ── */
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    padding: 20px var(--pad-x);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  /* ── Desktop pill ── */
+  .nav__pill {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    backdrop-filter: blur(24px) saturate(1.6);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+
+  :global(body[data-scrolled="true"]) .nav__pill {
+    background: rgba(10, 10, 15, 0.55);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+
+  /* ── Nav items ── */
+  .nav__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 25px;
+    border-radius: var(--radius-pill);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-text);
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    transition: background-color 0.25s var(--ease-out), color 0.25s var(--ease-out);
+    border: none;
+    background: none;
+    cursor: pointer;
+    line-height: 1;
+    font-family: var(--font-sans);
+  }
+
+  /* Subtle golden hover */
+  .nav__item:hover:not(.is-active) {
+    background: rgba(255, 185, 0, 0.12);
+    color: rgba(255, 210, 80, 0.95);
+  }
+
+  .nav__item.is-active {
+    background: var(--color-accent);
+    color: #0d0d0d;
+    font-weight: 700;
+  }
+
+  .nav__item.is-active:hover {
+    background: var(--color-accent-hover);
+  }
+
+  /* CTA — Contact button: subtle gold outline, fills on hover */
+  .nav__item--cta {
+    background: rgba(255, 185, 0, 0.14);
+    color: var(--color-accent);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px rgba(255, 185, 0, 0.45);
+  }
+
+  .nav__item--cta:hover:not(.is-active) {
+    background: var(--color-accent);
+    color: #0d0d0d;
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+  }
+
+  .nav__chevron {
+    transition: transform 0.25s var(--ease-out);
+  }
+
+  /* ── Dropdown wrapper ── */
+  .nav__drop-wrap {
+    position: relative;
+  }
+
+  .nav__drop-wrap:hover .nav__dropdown,
+  .nav__drop-wrap.is-open .nav__dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+
+  .nav__drop-wrap:hover .nav__chevron,
+  .nav__drop-wrap.is-open .nav__chevron {
+    transform: rotate(180deg);
+  }
+
+  /* ── Dropdown panel ── */
+  .nav__dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    min-width: 260px;
+    padding: 8px;
+    border-radius: var(--radius);
+    background: rgba(14, 14, 20, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    backdrop-filter: blur(24px) saturate(1.6);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out), visibility 0.22s;
+    z-index: 60;
+  }
+
+  .nav__dd-item {
+    display: block;
+    padding: 11px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+    white-space: nowrap;
+  }
+
+  .nav__dd-item:hover {
+    background: rgba(255, 185, 0, 0.08);
+    color: rgba(255, 210, 80, 0.95);
+  }
+
+  .nav__dd-item--full {
+    font-weight: 700;
+    color: var(--color-accent);
+    font-size: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 4px;
+    padding-bottom: 14px;
+  }
+
+  .nav__dd-item--full:hover {
+    background: rgba(255, 185, 0, 0.06);
+    color: var(--color-accent-hover);
+  }
+
+  /* Divider line after IS-BAH */
+  .nav__dd-item--divider {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 4px;
+    padding-bottom: 14px;
+  }
+
+  /* ── Hamburger ── */
+  .nav__burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
+    backdrop-filter: blur(24px) saturate(1.6);
+    pointer-events: auto;
+    cursor: pointer;
+    transition: background-color 0.25s var(--ease-out);
+  }
+
+  .nav__burger:hover {
+    background: rgba(255, 185, 0, 0.12);
+  }
+
+  .nav__burger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--color-text);
+    border-radius: 2px;
+    transition: transform 0.3s var(--ease-out), opacity 0.3s var(--ease-out);
+  }
+
+  @media (max-width: 1024px) {
+    .nav {
+      justify-content: flex-end;
+    }
+    .nav__pill { display: none; }
+    .nav__burger { display: flex; }
+  }
+
+  /* ══════════════════════════════════
+     FLYOUT
+  ══════════════════════════════════ */
+  .flyout {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .flyout.is-open {
+    pointer-events: auto;
+  }
+
+  .flyout__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    transition: opacity 0.35s var(--ease-out);
+  }
+
+  .flyout.is-open .flyout__backdrop {
+    opacity: 1;
+  }
+
+  .flyout__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: min(380px, 90vw);
+    height: 100%;
+    background: rgba(10, 10, 16, 0.97);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+    padding: 28px 28px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    transform: translateX(100%);
+    transition: transform 0.4s var(--ease-out);
+    overflow-y: auto;
+  }
+
+  .flyout.is-open .flyout__panel {
+    transform: translateX(0);
+  }
+
+  .flyout__close {
+    align-self: flex-end;
+    display: inline-flex;
+    padding: 10px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background-color 0.25s var(--ease-out);
+  }
+
+  .flyout__close:hover {
+    background: rgba(255, 185, 0, 0.12);
+    color: var(--color-accent);
+  }
+
+  .flyout__logo img {
+    height: 52px;
+    width: auto;
+  }
+
+  .flyout__links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .flyout__link {
+    display: block;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text);
+    transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+  }
+
+  .flyout__link:hover {
+    background: rgba(255, 185, 0, 0.1);
+    color: var(--color-accent);
+  }
+
+  /* Services toggle — matches flyout__link but with chevron */
+  .flyout__link--toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .flyout__chevron {
+    transition: transform 0.25s var(--ease-out);
+    opacity: 0.7;
+  }
+
+  .flyout__group.is-open .flyout__chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Contact CTA in mobile flyout */
+  .flyout__link--cta {
+    margin-top: 12px;
+    background: rgba(255, 185, 0, 0.14);
+    color: var(--color-accent);
+    box-shadow: inset 0 0 0 1px rgba(255, 185, 0, 0.45);
+    text-align: center;
+  }
+
+  .flyout__link--cta:hover {
+    background: var(--color-accent);
+    color: #0d0d0d;
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+  }
+
+  .flyout__sub {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-left: 2px solid rgba(255, 185, 0, 0.25);
+    margin-left: 16px;
+    padding-left: 4px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s var(--ease-out), opacity 0.25s var(--ease-out),
+      margin-top 0.3s var(--ease-out), margin-bottom 0.3s var(--ease-out);
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .flyout__group.is-open .flyout__sub {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+
+  .flyout__sublink {
+    display: block;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+  }
+
+  .flyout__sublink:hover {
+    background: rgba(255, 185, 0, 0.08);
+    color: var(--color-accent);
+  }
+
+  .flyout__sublink--all {
+    font-weight: 700;
+    color: var(--color-accent);
+  }
+
+  .flyout__sublink--divider {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 14px;
+    margin-bottom: 4px;
+  }
+</style>
+
+<script>
+  const burger   = document.getElementById("nav-burger")!;
+  const flyout   = document.getElementById("nav-flyout")!;
+  const backdrop = document.getElementById("nav-backdrop")!;
+  const closeBtn = document.getElementById("nav-close")!;
+
+  function openFlyout() {
+    flyout.classList.add("is-open");
+    flyout.setAttribute("aria-hidden", "false");
+    burger.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeFlyout() {
+    flyout.classList.remove("is-open");
+    flyout.setAttribute("aria-hidden", "true");
+    burger.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+  }
+
+  burger.addEventListener("click", openFlyout);
+  closeBtn.addEventListener("click", closeFlyout);
+  backdrop.addEventListener("click", closeFlyout);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeFlyout();
+  });
+
+  // Close flyout when a link is clicked
+  flyout.querySelectorAll("a").forEach((a) =>
+    a.addEventListener("click", closeFlyout)
+  );
+
+  // Services accordion inside flyout
+  const servicesToggle = document.getElementById("flyout-services-toggle");
+  if (servicesToggle) {
+    servicesToggle.addEventListener("click", () => {
+      const group = servicesToggle.closest(".flyout__group");
+      if (!group) return;
+      const isOpen = group.classList.toggle("is-open");
+      servicesToggle.setAttribute("aria-expanded", String(isOpen));
+    });
+  }
+
+  // Desktop dropdown toggle (touch devices)
+  document.querySelectorAll<HTMLButtonElement>(".nav__item--drop").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const wrap = btn.closest(".nav__drop-wrap");
+      if (!wrap) return;
+      const isOpen = wrap.classList.toggle("is-open");
+      btn.setAttribute("aria-expanded", String(isOpen));
+    });
+  });
+
+  document.addEventListener("click", (e) => {
+    document.querySelectorAll(".nav__drop-wrap.is-open").forEach((wrap) => {
+      if (!wrap.contains(e.target as Node)) {
+        wrap.classList.remove("is-open");
+        wrap.querySelector("[aria-expanded]")?.setAttribute("aria-expanded", "false");
+      }
+    });
+  });
+</script>

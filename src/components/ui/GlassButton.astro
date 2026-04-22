@@ -1,0 +1,77 @@
+---
+interface Props {
+  href?: string;
+  type?: "button" | "submit";
+  variant?: "glass" | "outline" | "solid";
+  class?: string;
+}
+
+const { href, type = "button", variant = "glass", class: className = "" } = Astro.props;
+const Tag = href ? "a" : "button";
+const classes = `gbtn gbtn--${variant} ${className}`.trim();
+---
+
+<Tag
+  class={classes}
+  {...href ? { href } : { type }}
+>
+  <slot />
+</Tag>
+
+<style>
+  .gbtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: transform 0.3s var(--ease-out),
+      background-color 0.3s var(--ease-out),
+      border-color 0.3s var(--ease-out),
+      color 0.3s var(--ease-out);
+    border: 1px solid transparent;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .gbtn--glass {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--color-text);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+
+  .gbtn--glass:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .gbtn--outline {
+    background: transparent;
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+  }
+
+  .gbtn--outline:hover {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+  }
+
+  .gbtn--solid {
+    background: var(--color-accent);
+    color: #0a0a0a;
+    border-color: var(--color-accent);
+  }
+
+  .gbtn--solid:hover {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+</style>

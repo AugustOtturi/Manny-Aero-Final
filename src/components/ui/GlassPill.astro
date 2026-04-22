@@ -1,0 +1,57 @@
+---
+interface Props {
+  href?: string;
+  active?: boolean;
+  class?: string;
+}
+
+const { href, active = false, class: className = "" } = Astro.props;
+const Tag = href ? "a" : "span";
+const classes = `gpill ${active ? "gpill--active" : ""} ${className}`.trim();
+---
+
+<Tag class={classes} {...href ? { href } : {}}>
+  <slot />
+</Tag>
+
+<style>
+  .gpill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: var(--fs-micro);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transition: background-color 0.25s var(--ease-out),
+      color 0.25s var(--ease-out),
+      border-color 0.25s var(--ease-out);
+    white-space: nowrap;
+  }
+
+  .gpill:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: var(--color-text);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+
+  .gpill--active {
+    background: var(--color-accent);
+    color: #0d0d0d;
+    border-color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .gpill--active:hover {
+    background: var(--color-accent-hover);
+    color: #0d0d0d;
+    border-color: var(--color-accent-hover);
+  }
+</style>

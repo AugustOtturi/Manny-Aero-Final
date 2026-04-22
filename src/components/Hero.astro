@@ -1,0 +1,184 @@
+---
+import GlassButton from "./ui/GlassButton.astro";
+
+const YT_ID = "pdzFD9W6x5g";
+const YT_PARAMS = new URLSearchParams({
+  autoplay: "1",
+  mute: "1",
+  loop: "1",
+  playlist: YT_ID,
+  controls: "0",
+  showinfo: "0",
+  rel: "0",
+  modestbranding: "1",
+  playsinline: "1",
+  disablekb: "1",
+  iv_load_policy: "3",
+  fs: "0",
+});
+const videoSrc = `https://www.youtube-nocookie.com/embed/${YT_ID}?${YT_PARAMS.toString()}`;
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__media" aria-hidden="true">
+    <iframe
+      class="hero__video"
+      src={videoSrc}
+      title="Manny Aero — operations video"
+      frameborder="0"
+      allow="autoplay; encrypted-media; picture-in-picture"
+      allowfullscreen
+      tabindex="-1"></iframe>
+    <div class="hero__overlay"></div>
+  </div>
+
+  <a href="/" class="hero__logo" aria-label="Manny Aero — Home">
+    <img src="/logo-manny.svg" alt="Manny Aero" width="500" height="294" />
+  </a>
+
+  <div class="hero__inner container">
+    <p class="hero__super">With Manny, Mexico is yours!</p>
+    <h1 id="hero-title" class="hero__title">
+      Seamless ops <br /> across Mexico <br /> delivered by experts.
+    </h1>
+    <div class="hero__cta">
+      <GlassButton href="#contact">
+        <span class="hero__dot" aria-hidden="true"></span>
+        24/7 Service — Request Now
+      </GlassButton>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding-top: 120px;
+    padding-bottom: 80px;
+    overflow: hidden;
+  }
+
+  .hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: #0a0a0f;
+  }
+
+  /* Cover behaviour for 16:9 YouTube iframe inside fullscreen hero */
+  .hero__video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 177.77vh;       /* 100vh * 16 / 9 */
+    height: 56.25vw;       /* 100vw * 9 / 16 */
+    min-width: 100%;
+    min-height: 100%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    border: 0;
+    filter: grayscale(1) brightness(0.9);
+  }
+
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.35) 0%,
+      rgba(0, 0, 0, 0.55) 60%,
+      rgba(2, 2, 8, 0.9) 100%
+    );
+  }
+
+  .hero__logo {
+    position: absolute;
+    top: 32px;
+    left: var(--pad-x);
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+  }
+
+  .hero__logo img {
+    display: block;
+    height: 100px;
+    width: auto;
+    filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1100px;
+  }
+
+  .hero__super {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin-bottom: 28px;
+  }
+
+  .hero__title {
+    font-size: var(--fs-hero);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin-bottom: 44px;
+    text-shadow: 0 2px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .hero__cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .hero__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 185, 0, 0.25);
+    animation: heroPulse 2s var(--ease-in-out) infinite;
+  }
+
+  @keyframes heroPulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 3px rgba(255, 185, 0, 0.25);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(255, 185, 0, 0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding-top: 100px;
+      padding-bottom: 60px;
+    }
+    .hero__title br {
+      display: none;
+    }
+    .hero__title {
+      margin-bottom: 32px;
+    }
+    .hero__logo {
+      top: 24px;
+    }
+    .hero__logo img {
+      height: 64px;
+    }
+  }
+</style>

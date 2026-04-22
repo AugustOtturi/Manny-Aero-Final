@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/Hero.astro";
+import SubHero from "../components/SubHero.astro";
+import ServiceCards from "../components/ServiceCards.astro";
+import MapSection from "../components/MapSection.astro";
+import FinalCTA from "../components/FinalCTA.astro";
+---
+
+<BaseLayout
+  title="Manny Aero — Seamless aircraft handling across Mexico"
+  description="Manny Aero delivers premium aircraft ground handling, permits & authorizations, in-flight catering, and IS-BAH / IS-BAO audits across Mexico. 24/7 service, 300+ trip providers, 10,000+ operations handled."
+  activeLink="home"
+>
+  <Hero />
+  <SubHero />
+  <ServiceCards />
+  <MapSection />
+  <FinalCTA />
+</BaseLayout>

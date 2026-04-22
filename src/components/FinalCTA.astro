@@ -1,0 +1,352 @@
+---
+import GlassButton from "./ui/GlassButton.astro";
+import { EVENT_LOGOS } from "../data/events";
+
+// Duplicate the list for seamless marquee loop
+const marqueeItems = [...EVENT_LOGOS, ...EVENT_LOGOS];
+---
+
+<section class="final section" id="contact" aria-labelledby="final-title">
+  <div class="container">
+    <div class="final__grid">
+      <!-- LEFT COLUMN -->
+      <div class="final__left reveal">
+        <h2 id="final-title" class="final__title">
+          Contact Manny to seamlessly secure your parking &amp; landing
+          approvals for Mexico's premier events, with expert
+          <span class="accent">coordination and personalized service.</span>
+        </h2>
+
+        <div class="final__cta">
+          <GlassButton href="#form" variant="outline">Explore More</GlassButton>
+        </div>
+
+        <div class="marquee" aria-label="Events we support">
+          <div class="marquee__track">
+            {
+              marqueeItems.map((logo, i) => (
+                <span
+                  class="marquee__item"
+                  aria-hidden={i >= EVENT_LOGOS.length ? "true" : "false"}
+                >
+                  {logo.short}
+                </span>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN — FORM -->
+      <div class="final__right reveal">
+        <div class="form-card">
+          <h3 class="form-card__title">Ready for take off?</h3>
+          <p class="form-card__desc">
+            Manny's client service lines are available 24/7, offering immediate,
+            personalized attention to every request, delivering a seamless and
+            elevated service experience at any hour.
+          </p>
+
+          <form
+            id="form"
+            class="form"
+            action="#"
+            method="post"
+            novalidate
+            onsubmit="event.preventDefault(); return false;"
+          >
+            <div class="form__row">
+              <label class="field">
+                <span>First name</span>
+                <input type="text" name="firstName" required autocomplete="given-name" />
+              </label>
+              <label class="field">
+                <span>Last name</span>
+                <input type="text" name="lastName" required autocomplete="family-name" />
+              </label>
+            </div>
+
+            <div class="form__row">
+              <label class="field">
+                <span>Email</span>
+                <input type="email" name="email" required autocomplete="email" />
+              </label>
+              <label class="field">
+                <span>Phone</span>
+                <input type="tel" name="phone" autocomplete="tel" />
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Company</span>
+              <input type="text" name="company" autocomplete="organization" />
+            </label>
+
+            <label class="field">
+              <span>Message</span>
+              <textarea name="message" rows="5" required></textarea>
+            </label>
+
+            <div class="form__actions">
+              <button class="form__submit" type="submit">
+                Send Message
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path
+                    d="M3 9H15M15 9L10 4M15 9L10 14"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .final__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  /* LEFT */
+  .final__left {
+    overflow: hidden; /* contain marquee */
+    min-width: 0;     /* fix grid overflow */
+  }
+
+  .final__title {
+    font-size: clamp(20px, 2.2vw, 30px);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin-bottom: 28px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .final__cta {
+    margin-bottom: 48px;
+  }
+
+  .marquee {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      black 10%,
+      black 90%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      black 10%,
+      black 90%,
+      transparent 100%
+    );
+  }
+
+  .marquee__track {
+    display: flex;
+    gap: 48px;
+    align-items: center;
+    width: max-content;
+    animation: marquee 30s linear infinite;
+  }
+
+  .marquee__item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    height: 48px;
+    padding: 0 20px;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.03);
+    white-space: nowrap;
+    transition: color 0.3s var(--ease-out), border-color 0.3s var(--ease-out),
+      background-color 0.3s var(--ease-out);
+  }
+
+  .marquee__item:hover {
+    color: var(--color-text);
+    border-color: var(--color-border-strong);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__track {
+      animation: none;
+    }
+  }
+
+  /* RIGHT — FORM CARD */
+  .form-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: clamp(28px, 4vw, 48px);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-card);
+  }
+
+  .form-card__title {
+    font-size: clamp(30px, 3.4vw, 44px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .form-card__desc {
+    font-size: var(--fs-label);
+    line-height: 1.55;
+    color: var(--color-text-muted);
+    margin-bottom: 32px;
+    max-width: 480px;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field > span {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-dim);
+    font-weight: 600;
+  }
+
+  .field input,
+  .field textarea {
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-pill);
+    color: var(--color-text);
+    font-size: var(--fs-label);
+    font-family: var(--font-sans);
+    transition: border-color 0.25s var(--ease-out),
+      background-color 0.25s var(--ease-out);
+  }
+
+  .field textarea {
+    border-radius: var(--radius);
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.5;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .form__actions {
+    margin-top: 10px;
+  }
+
+  .form__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: var(--color-accent);
+    color: #0a0a0a;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: var(--fs-label);
+    transition: background-color 0.25s var(--ease-out),
+      transform 0.25s var(--ease-out);
+    border: none;
+    cursor: pointer;
+  }
+
+  .form__submit:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 1024px) {
+    .final__grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .final__left {
+      overflow: hidden;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .final__title {
+      font-size: clamp(18px, 4.5vw, 26px);
+    }
+    .marquee__item {
+      min-width: 90px;
+      height: 40px;
+      padding: 0 14px;
+      font-size: 12px;
+    }
+    .marquee__track {
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .form__row {
+      grid-template-columns: 1fr;
+    }
+    .form-card {
+      padding: 24px 20px;
+    }
+  }
+</style>
