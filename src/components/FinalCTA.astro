@@ -316,6 +316,18 @@ const marqueeItems = [...EVENT_LOGOS, ...EVENT_LOGOS];
     transform: translateY(-1px);
   }
 
+  @media (max-width: 1440px) {
+    .final__grid {
+      gap: 48px;
+    }
+    .final__cta {
+      margin-bottom: 36px;
+    }
+    .marquee__track {
+      gap: 32px;
+    }
+  }
+
   @media (max-width: 1024px) {
     .final__grid {
       grid-template-columns: 1fr;

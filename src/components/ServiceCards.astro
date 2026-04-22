@@ -191,6 +191,19 @@ import GlassPill from "./ui/GlassPill.astro";
     border-color: var(--color-accent);
   }
 
+  @media (max-width: 1440px) {
+    .services__grid {
+      gap: 14px;
+    }
+    .card {
+      padding: 16px 18px 22px;
+    }
+    .card__arrow {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
   @media (max-width: 1024px) {
     .services__grid {
       grid-template-columns: repeat(2, 1fr);

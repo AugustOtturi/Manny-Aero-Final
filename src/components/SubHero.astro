@@ -184,6 +184,23 @@ import GlassButton from "./ui/GlassButton.astro";
       url("https://images.unsplash.com/photo-1583416750470-965b2707b355?w=1000&q=80&auto=format&fit=crop");
   }
 
+  @media (max-width: 1440px) {
+    .subhero__grid {
+      gap: 20px;
+    }
+    .subhero__feature {
+      min-height: 560px;
+    }
+    .subhero__feature-content {
+      padding: 32px;
+      gap: 14px;
+    }
+    .subhero__stack {
+      min-height: 560px;
+      gap: 14px;
+    }
+  }
+
   @media (max-width: 1024px) {
     .subhero__grid {
       grid-template-columns: 1fr;

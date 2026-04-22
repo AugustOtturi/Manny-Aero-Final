@@ -292,6 +292,16 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
     transition: transform 0.3s var(--ease-out), opacity 0.3s var(--ease-out);
   }
 
+  @media (max-width: 1440px) {
+    .nav {
+      padding: 16px var(--pad-x);
+    }
+    .nav__item {
+      padding: 9px 20px;
+      font-size: 15px;
+    }
+  }
+
   @media (max-width: 1024px) {
     .nav {
       justify-content: flex-end;

@@ -62,7 +62,7 @@
   --fs-lead: 20px;
   --fs-h3: clamp(24px, 2.8vw, 32px);
   --fs-h2: clamp(36px, 4.5vw, 60px);
-  --fs-hero: clamp(52px, 7.5vw, 96px);
+  --fs-hero: clamp(52px, 7.5vw, 88px);
 
   /* Radii */
   --radius-sm: 8px;
@@ -76,8 +76,13 @@
 
   /* Spacing */
   --pad-x: clamp(16px, 2.5vw, 40px);
-  --pad-section: clamp(64px, 10vh, 120px);
-  --max-w: 1600px;
+  --pad-section: clamp(64px, 10vh, 100px);
+  --max-w: 1400px;
+
+  /* Breakpoints (reference) */
+  --bp-laptop: 1440px;
+  --bp-tablet: 1024px;
+  --bp-mobile: 768px;
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
