@@ -51,18 +51,25 @@ import GlassButton from "./ui/GlassButton.astro";
     position: relative;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    min-height: 560px;
-    box-shadow: var(--shadow-card-lg);
+    min-height: 640px;
+    box-shadow:
+      0 18px 40px rgba(0, 0, 0, 0.55),
+      0 6px 14px rgba(0, 0, 0, 0.35),
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.35);
     isolation: isolate;
   }
 
   .subhero__feature-img {
     position: absolute;
     inset: 0;
-    background:
-      radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.08), transparent 50%),
-      linear-gradient(135deg, #2a2a30 0%, #1a1a20 50%, #0f0f15 100%);
-    filter: var(--filter-photo-bw);
+    background-color: #1a1a20;
+    background-image:
+      linear-gradient(135deg, rgba(42, 42, 48, 0.35) 0%, rgba(15, 15, 21, 0.55) 100%),
+      url("https://images.unsplash.com/photo-1569629743817-70d8db6c323b?w=1600&q=80&auto=format&fit=crop");
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.98) saturate(1.05);
     z-index: -2;
   }
 
@@ -71,10 +78,11 @@ import GlassButton from "./ui/GlassButton.astro";
     inset: 0;
     background: linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.1) 0%,
-      rgba(0, 0, 0, 0.4) 50%,
-      rgba(0, 0, 0, 0.85) 100%
+      rgba(168, 164, 164, 0.05) 0%,
+      rgba(109, 102, 102, 0.35) 50%,
+      rgba(97, 92, 92, 0.85) 100%
     );
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.12);
     z-index: -1;
   }
 
@@ -86,6 +94,7 @@ import GlassButton from "./ui/GlassButton.astro";
     padding: 44px;
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 18px;
   }
 
@@ -117,21 +126,39 @@ import GlassButton from "./ui/GlassButton.astro";
     display: grid;
     grid-template-rows: repeat(3, 1fr);
     gap: 16px;
-    min-height: 560px;
+    min-height: 640px;
   }
 
   .subhero__photo {
     position: relative;
     border-radius: var(--radius);
     overflow: hidden;
-    box-shadow: var(--shadow-card);
+    box-shadow:
+      0 18px 40px rgba(0, 0, 0, 0.55),
+      0 6px 14px rgba(0, 0, 0, 0.35),
+      0 1px 2px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.35);
     min-height: 170px;
+    isolation: isolate;
+  }
+
+  .subhero__photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.12);
+    border-radius: inherit;
+    z-index: 1;
   }
 
   .subhero__photo-bg {
     position: absolute;
     inset: 0;
-    filter: var(--filter-photo-bw);
+    background-color: #1a1a20;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.98) saturate(1.05);
     transition: transform 0.6s var(--ease-out);
   }
 
@@ -140,59 +167,73 @@ import GlassButton from "./ui/GlassButton.astro";
   }
 
   .subhero__photo-bg--1 {
-    background:
-      radial-gradient(circle at 40% 50%, rgba(255, 255, 255, 0.12), transparent 55%),
-      linear-gradient(120deg, #3a3a42 0%, #1e1e26 100%);
+    background-image:
+      linear-gradient(120deg, rgba(58, 58, 66, 0.25) 0%, rgba(30, 30, 38, 0.4) 100%),
+      url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1000&q=80&auto=format&fit=crop");
   }
 
   .subhero__photo-bg--2 {
-    background:
-      radial-gradient(circle at 55% 50%, rgba(255, 255, 255, 0.1), transparent 55%),
-      linear-gradient(120deg, #2e2e36 0%, #18181e 100%);
+    background-image:
+      linear-gradient(120deg, rgba(46, 46, 54, 0.25) 0%, rgba(24, 24, 30, 0.4) 100%),
+      url("https://images.unsplash.com/photo-1540962351504-03099e0a754b?w=1000&q=80&auto=format&fit=crop");
   }
 
   .subhero__photo-bg--3 {
-    background:
-      radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.14), transparent 55%),
-      linear-gradient(120deg, #323238 0%, #14141a 100%);
+    background-image:
+      linear-gradient(120deg, rgba(50, 50, 56, 0.25) 0%, rgba(20, 20, 26, 0.4) 100%),
+      url("https://images.unsplash.com/photo-1583416750470-965b2707b355?w=1000&q=80&auto=format&fit=crop");
   }
 
   @media (max-width: 1024px) {
     .subhero__grid {
       grid-template-columns: 1fr;
+      gap: 40px;
     }
     .subhero__feature {
-      min-height: 480px;
+      min-height: 560px;
     }
     .subhero__stack {
       grid-template-rows: none;
       grid-template-columns: repeat(3, 1fr);
       min-height: 0;
+      gap: 20px;
     }
     .subhero__photo {
-      min-height: 180px;
+      min-height: 220px;
     }
   }
 
   @media (max-width: 768px) {
+    .subhero__grid {
+      gap: 32px;
+    }
     .subhero__feature {
-      min-height: 380px;
+      min-height: 440px;
     }
     .subhero__feature-content {
       padding: 24px;
       gap: 14px;
     }
+    .subhero__stack {
+      grid-template-columns: 1fr;
+      grid-template-rows: repeat(3, auto);
+      gap: 24px;
+    }
     .subhero__photo {
-      min-height: 110px;
+      min-height: 0;
+      aspect-ratio: 16 / 8;
     }
   }
 
   @media (max-width: 480px) {
     .subhero__feature {
-      min-height: 320px;
+      min-height: 380px;
     }
     .subhero__feature-content {
       padding: 20px;
+    }
+    .subhero__photo {
+      aspect-ratio: 16 / 9;
     }
   }
 </style>

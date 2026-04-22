@@ -24,12 +24,16 @@
   --pin-orange: #f37b3a;
 
   /* Global page gradient — continuous top→bottom grey */
-  --bg-top: #141414;
-  --bg-bottom: #020202;
-  --bg-gradient: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+  --bg-top: #c0c0c0;
+  --bg-bottom: #424040;
+  --bg-gradient: linear-gradient(
+    180deg,
+    var(--bg-top) 0%,
+    var(--bg-bottom) 100%
+  );
 
   /* Noise overlay */
-  --noise-opacity: 0.15;
+  --noise-opacity: 0.5;
 
   /* Blobs — anchored at Y positions in page (not viewport-fixed) */
   --blob-1-color: rgba(255, 255, 255, 0.22);
@@ -48,8 +52,9 @@
   --blob-3-y: 3000px;
 
   /* Typography */
-  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans:
+    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
 
   --fs-micro: 12px;
   --fs-label: 15px;

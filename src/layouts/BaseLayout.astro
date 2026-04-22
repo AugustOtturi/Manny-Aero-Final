@@ -98,6 +98,21 @@ const orgJsonLd = {
     <slot name="head" />
   </head>
   <body data-active-link={activeLink}>
+    <div class="app-loader" id="app-loader" aria-hidden="true">
+      <div class="app-loader__inner">
+        <img
+          src="/logo-manny.svg"
+          alt=""
+          class="app-loader__logo"
+          width="500"
+          height="294"
+        />
+        <div class="app-loader__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <div class="app-loader__bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
       <filter id="grain">
         <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" />
@@ -119,6 +134,17 @@ const orgJsonLd = {
     </main>
 
     <Footer />
+
+    <script is:inline>
+      document.documentElement.style.overflow = "hidden";
+      window.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+          const l = document.getElementById("app-loader");
+          if (l) l.classList.add("is-hidden");
+          document.documentElement.style.overflow = "";
+        }, 1200);
+      });
+    </script>
 
     <script>
       // Navbar scroll state + scroll-reveal observer
