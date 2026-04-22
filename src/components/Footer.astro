@@ -121,20 +121,74 @@ const socials = [
     }
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1200px) {
+    .footer__inner {
+      grid-template-columns: 1fr 1fr;
+      gap: 24px 32px;
+      align-items: start;
+    }
+    .footer__logo {
+      grid-column: 1 / -1;
+      justify-self: center;
+    }
+    .footer__legal {
+      justify-self: start;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .footer__contact {
+      align-items: flex-end;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .footer {
+      padding-block: 28px;
+    }
     .footer__inner {
       grid-template-columns: 1fr;
       gap: 24px;
       text-align: center;
     }
+    .footer__logo {
+      justify-self: center;
+    }
+    .footer__logo img {
+      height: 36px;
+    }
     .footer__legal {
       justify-self: center;
+      flex-direction: row;
+      gap: 16px;
+      justify-content: center;
     }
     .footer__contact {
       align-items: center;
+      gap: 12px;
     }
-    .footer__logo {
-      justify-self: center;
+    .footer__phones {
+      align-items: center;
+      text-align: center;
+    }
+    .footer__socials {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px 16px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .footer {
+      font-size: 11px;
+    }
+    .footer__logo img {
+      height: 32px;
+    }
+    .footer__legal {
+      gap: 10px 14px;
+    }
+    .footer__phones {
+      font-size: 12px;
     }
   }
 </style>

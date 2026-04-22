@@ -67,6 +67,18 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       </div>
     </div>
 
+    <div class="map-modal" id="map-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="map-modal-title">
+      <div class="map-modal__backdrop" data-close></div>
+      <div class="map-modal__dialog">
+        <button type="button" class="map-modal__close" aria-label="Close" data-close>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </button>
+        <div class="map-modal__body" id="map-modal-body"></div>
+      </div>
+    </div>
+
     <div class="map__stats reveal">
       <div class="map__stat">
         <span class="map__stat-num">{totalLocations}</span>
@@ -130,26 +142,26 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       `;
     }
 
-    const isMobile = window.matchMedia("(max-width: 860px)").matches;
+    const isMobile = window.matchMedia("(max-width: 1024px)").matches;
 
     const map = L.map(container, {
       center: [23.4, -102.5],
       zoom: isMobile ? 4 : 5,
       minZoom: 4,
-      maxZoom: isMobile ? 5 : 6,
+      maxZoom: isMobile ? 6 : 6,
       zoomSnap: 0.25,
       renderer: isMobile
         ? L.canvas({ padding: 0.5 })
         : L.svg({ padding: 2 }),
       attributionControl: false,
-      zoomControl: false,
+      zoomControl: isMobile,
       scrollWheelZoom: false,
-      doubleClickZoom: false,
-      dragging: false,
-      touchZoom: false,
+      doubleClickZoom: isMobile,
+      dragging: isMobile,
+      touchZoom: isMobile,
       keyboard: false,
       boxZoom: false,
-      inertia: false,
+      inertia: isMobile,
       tap: false,
     });
 
@@ -170,6 +182,9 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         padding: isMobile ? [12, 12] : [4, 4],
         animate: false,
       });
+      if (isMobile) {
+        map.setMaxBounds(bounds.pad(0.15));
+      }
     } catch (e) {
       console.warn("Mexico GeoJSON failed to load", e);
     }
@@ -193,10 +208,40 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       className: "map-popup-wrapper",
       maxWidth: 260,
       minWidth: 200,
-      closeButton: isMobile,
+      closeButton: false,
       offset: [0, -2] as [number, number],
       autoPan: false,
     };
+
+    const modal = document.getElementById("map-modal");
+    const modalBody = document.getElementById("map-modal-body");
+    let lastFocused: HTMLElement | null = null;
+
+    function openModal(a: Airport) {
+      if (!modal || !modalBody) return;
+      lastFocused = document.activeElement as HTMLElement;
+      modalBody.innerHTML = buildPopupHtml(a);
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      document.documentElement.style.overflow = "hidden";
+      const closeBtn = modal.querySelector<HTMLButtonElement>(".map-modal__close");
+      closeBtn?.focus();
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      document.documentElement.style.overflow = "";
+      lastFocused?.focus();
+    }
+
+    modal?.querySelectorAll<HTMLElement>("[data-close]").forEach((el) => {
+      el.addEventListener("click", closeModal);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal?.classList.contains("is-open")) closeModal();
+    });
 
     if (isMobile) {
       for (const a of sortedAirports) {
@@ -209,7 +254,8 @@ const categoryEntries = Object.entries(CATEGORIES) as [
           fillOpacity: 1,
           opacity: 1,
           bubblingMouseEvents: false,
-        }).bindPopup(buildPopupHtml(a), popupOpts).addTo(map);
+        }).addTo(map);
+        marker.on("click", () => openModal(a));
         markers.push({ airport: a, marker });
       }
     } else {
@@ -570,11 +616,6 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     }
     .map__canvas {
       aspect-ratio: 4 / 3;
-    }
-  }
-
-  @media (max-width: 860px) {
-    .map__canvas {
       background: linear-gradient(180deg, #1a1a20 0%, #0f0f14 100%);
       border-radius: var(--radius-lg);
       overflow: hidden;
@@ -585,11 +626,8 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         inset 0 0 0 1px rgba(255, 255, 255, 0.12);
     }
     #map-container {
-      touch-action: pan-y;
+      touch-action: none;
     }
-  }
-
-  @media (max-width: 860px) {
     .map__pills {
       display: none;
     }
@@ -652,14 +690,14 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     overflow: visible !important;
   }
 
-  /* Mobile/tablet (≤860px): map canvas is clipped by .map__canvas (rounded card
-     with inner shadow). Popups stay inside — no autoPan because the map is static. */
-  @media (max-width: 860px) {
+  /* Mobile/tablet (≤1024px): map canvas is clipped by .map__canvas (rounded card
+     with inner shadow). Markers open a centered modal instead of Leaflet popups. */
+  @media (max-width: 1024px) {
     #map-container.leaflet-container {
       overflow: hidden !important;
     }
 
-    /* Zoom controls (only rendered below 1024px) */
+    /* Zoom controls (only rendered in mobile/tablet mode) */
     .leaflet-bar {
       border: 1px solid var(--color-border-strong) !important;
       background: rgba(15, 15, 20, 0.9) !important;
@@ -698,20 +736,6 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       color: var(--color-accent) !important;
     }
 
-    /* Close button on popup for tap UX */
-    .map-popup-wrapper .leaflet-popup-close-button {
-      display: block !important;
-      color: var(--color-text-muted) !important;
-      font-size: 18px !important;
-      padding: 6px 10px 0 0 !important;
-      width: auto !important;
-      height: auto !important;
-      background: transparent !important;
-    }
-
-    .map-popup-wrapper .leaflet-popup-close-button:hover {
-      color: var(--color-text) !important;
-    }
   }
 
   .leaflet-container a {
@@ -831,6 +855,98 @@ const categoryEntries = Object.entries(CATEGORIES) as [
 
   .map-popup__btn:hover svg {
     transform: translateY(1px);
+  }
+
+  /* Centered modal for mobile/tablet marker taps */
+  .map-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .map-modal.is-open {
+    display: flex;
+  }
+
+  .map-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    animation: mapModalFade 0.22s var(--ease-out);
+  }
+
+  .map-modal__dialog {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    background: rgba(15, 15, 20, 0.96);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius);
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.6),
+      0 8px 20px rgba(0, 0, 0, 0.4);
+    animation: mapModalIn 0.28s var(--ease-out);
+  }
+
+  .map-modal__close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+    z-index: 2;
+  }
+
+  .map-modal__close:hover,
+  .map-modal__close:focus-visible {
+    background: rgba(255, 185, 0, 0.18);
+    color: var(--color-accent);
+    outline: none;
+  }
+
+  .map-modal__body .map-popup {
+    padding: 20px 22px;
+  }
+
+  .map-modal__body .map-popup__title {
+    font-size: 17px;
+    padding-right: 28px;
+  }
+
+  .map-modal__body .map-popup__info {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  @keyframes mapModalFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes mapModalIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .map-modal__backdrop,
+    .map-modal__dialog {
+      animation: none;
+    }
   }
 
 </style>

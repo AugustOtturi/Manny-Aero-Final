@@ -2,24 +2,7 @@
 import { Image } from "astro:assets";
 import GlassButton from "./ui/GlassButton.astro";
 import posterHero from "../assets/poster-hero.webp";
-
-const YT_ID = "pdzFD9W6x5g";
-const YT_PARAMS = new URLSearchParams({
-  autoplay: "1",
-  mute: "1",
-  loop: "1",
-  playlist: YT_ID,
-  controls: "0",
-  showinfo: "0",
-  rel: "0",
-  modestbranding: "1",
-  playsinline: "1",
-  disablekb: "1",
-  iv_load_policy: "3",
-  fs: "0",
-  enablejsapi: "1",
-});
-const videoSrc = `https://www.youtube-nocookie.com/embed/${YT_ID}?${YT_PARAMS.toString()}`;
+import heroVideo from "../assets/hero-manny-final.mp4?url";
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -34,15 +17,17 @@ const videoSrc = `https://www.youtube-nocookie.com/embed/${YT_ID}?${YT_PARAMS.to
       decoding="async"
       class="hero__poster"
     />
-    <iframe
-      id="hero-yt"
+    <video
+      id="hero-video"
       class="hero__video"
-      src={videoSrc}
-      title="Manny Aero — operations video"
-      frameborder="0"
-      allow="autoplay; encrypted-media; picture-in-picture"
-      allowfullscreen
-      tabindex="-1"></iframe>
+      src={heroVideo}
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      tabindex="-1"
+      aria-hidden="true"></video>
     <div class="hero__overlay"></div>
   </div>
 
@@ -66,54 +51,21 @@ const videoSrc = `https://www.youtube-nocookie.com/embed/${YT_ID}?${YT_PARAMS.to
 
 <script is:inline>
   (function () {
-    var iframe = document.getElementById("hero-yt");
-    if (!iframe) return;
+    var video = document.getElementById("hero-video");
+    var poster = document.querySelector(".hero__poster");
+    if (!video || !poster) return;
 
     var revealed = false;
     function reveal() {
       if (revealed) return;
       revealed = true;
-      iframe.classList.add("is-ready");
+      poster.classList.add("is-gone");
     }
 
-    // Load YT IFrame API once
-    if (!window.__ytApiLoaded) {
-      window.__ytApiLoaded = true;
-      var tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      tag.async = true;
-      document.head.appendChild(tag);
-    }
+    video.addEventListener("playing", reveal, { once: true });
+    if (!video.paused && video.readyState >= 2) reveal();
 
-    function initPlayer() {
-      try {
-        new window.YT.Player(iframe, {
-          events: {
-            onStateChange: function (e) {
-              if (e.data === window.YT.PlayerState.PLAYING) reveal();
-            },
-            onReady: function () {
-              // Some browsers muted-autoplay without firing PLAYING immediately
-              setTimeout(reveal, 600);
-            },
-          },
-        });
-      } catch (err) {
-        reveal();
-      }
-    }
-
-    if (window.YT && window.YT.Player) {
-      initPlayer();
-    } else {
-      var prev = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = function () {
-        if (typeof prev === "function") prev();
-        initPlayer();
-      };
-    }
-
-    // Fallback: if nothing has revealed the video in 2.5s, show it anyway
+    // CSS fallback at 4 s covers cases where playing never fires
     setTimeout(reveal, 2500);
   })();
 </script>
@@ -145,37 +97,39 @@ const videoSrc = `https://www.youtube-nocookie.com/embed/${YT_ID}?${YT_PARAMS.to
     object-fit: cover;
     object-position: center;
     filter: grayscale(1) brightness(0.9);
-    z-index: 0;
+    z-index: 2;
+    transition: opacity 0.8s var(--ease-out);
+    /* CSS fallback: fade out after 4 s even if JS is deferred */
+    animation: posterHide 0.8s var(--ease-out) 4s forwards;
   }
 
-  /* Cover behaviour for 16:9 YouTube iframe inside fullscreen hero */
+  .hero__poster.is-gone {
+    opacity: 0;
+    animation: none;
+    pointer-events: none;
+  }
+
+  @keyframes posterHide {
+    to { opacity: 0; }
+  }
+
   .hero__video {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 177.77vh;       /* 100vh * 16 / 9 */
-    height: 56.25vw;       /* 100vw * 9 / 16 */
-    min-width: 100%;
-    min-height: 100%;
-    transform: translate(-50%, -50%);
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
     pointer-events: none;
     border: 0;
     filter: grayscale(1) brightness(0.9);
     z-index: 1;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.6s var(--ease-out);
-  }
-
-  .hero__video.is-ready {
-    opacity: 1;
-    visibility: visible;
   }
 
   .hero__overlay {
     position: absolute;
     inset: 0;
-    z-index: 2;
+    z-index: 3;
     background: linear-gradient(
       180deg,
       rgba(0, 0, 0, 0.35) 0%,
@@ -268,6 +222,13 @@ const videoSrc = `https://www.youtube-nocookie.com/embed/${YT_ID}?${YT_PARAMS.to
     }
     .hero__logo img {
       height: 64px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__poster {
+      animation: none;
+      transition: none;
     }
   }
 </style>
