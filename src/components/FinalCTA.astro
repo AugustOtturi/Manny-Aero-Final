@@ -1,159 +1,376 @@
 ---
 import GlassButton from "./ui/GlassButton.astro";
 import { EVENT_LOGOS } from "../data/events";
+import { AIRPORTS } from "../data/airports";
 
 // Duplicate the list for seamless marquee loop
 const marqueeItems = [...EVENT_LOGOS, ...EVENT_LOGOS];
+
+// Deduplicate airports by their (CODE) token — pick the first occurrence of each airport
+const seenCodes = new Set<string>();
+const airportOptions: { value: string; label: string }[] = [];
+for (const loc of AIRPORTS) {
+  const match = loc.nombre.match(/\(([A-Z]{3,4})\)/);
+  if (!match) continue;
+  const code = match[1];
+  if (seenCodes.has(code)) continue;
+  seenCodes.add(code);
+  const cleanName = loc.nombre.replace(/\s*—.*$/, "").trim();
+  airportOptions.push({ value: code, label: cleanName });
+}
+airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 ---
 
 <section class="final section" id="contact" aria-labelledby="final-title">
   <div class="container">
-    <div class="final__grid">
-      <!-- LEFT COLUMN -->
-      <div class="final__left reveal">
-        <h2 id="final-title" class="final__title">
-          Contact Manny to seamlessly secure your parking &amp; landing
-          approvals for Mexico's premier events, with expert
-          <span class="accent">coordination and personalized service.</span>
-        </h2>
+    <div class="final__intro reveal">
+      <p class="final__eyebrow">Events · Parking · Landing</p>
+      <h2 id="final-title" class="final__title">
+        Your premier events, <br />
+        <span class="accent">delivered by experts.</span>
+      </h2>
+      <p class="final__lead">
+        Parking, landing and coordination across Mexico's biggest stages —
+        handled seamlessly, personally.
+      </p>
 
-        <div class="final__cta">
-          <GlassButton href="#form" variant="outline">Explore More</GlassButton>
-        </div>
-
-        <div class="marquee" aria-label="Events we support">
-          <div class="marquee__track">
-            {
-              marqueeItems.map((logo, i) => (
-                <span
-                  class="marquee__item"
-                  aria-hidden={i >= EVENT_LOGOS.length ? "true" : "false"}
-                >
-                  {logo.short}
-                </span>
-              ))
-            }
-          </div>
-        </div>
+      <div class="final__cta">
+        <GlassButton href="#form">
+          <span class="final__cta-dot" aria-hidden="true"></span>
+          Explore More
+        </GlassButton>
       </div>
+    </div>
+  </div>
 
-      <!-- RIGHT COLUMN — FORM -->
-      <div class="final__right reveal">
-        <div class="form-card">
-          <h3 class="form-card__title">Ready for take off?</h3>
-          <p class="form-card__desc">
-            Manny's client service lines are available 24/7, offering immediate,
-            personalized attention to every request, delivering a seamless and
-            elevated service experience at any hour.
-          </p>
-
-          <form
-            id="form"
-            class="form"
-            action="#"
-            method="post"
-            novalidate
-            onsubmit="event.preventDefault(); return false;"
+  <div class="marquee reveal" aria-label="Events we support">
+    <div class="marquee__track">
+      {
+        marqueeItems.map((logo, i) => (
+          <span
+            class="marquee__item"
+            aria-hidden={i >= EVENT_LOGOS.length ? "true" : "false"}
           >
-            <div class="form__row">
-              <label class="field">
-                <span>First name</span>
-                <input type="text" name="firstName" required autocomplete="given-name" />
-              </label>
-              <label class="field">
-                <span>Last name</span>
-                <input type="text" name="lastName" required autocomplete="family-name" />
-              </label>
-            </div>
+            {logo.short}
+          </span>
+        ))
+      }
+    </div>
+  </div>
 
-            <div class="form__row">
-              <label class="field">
-                <span>Email</span>
-                <input type="email" name="email" required autocomplete="email" />
-              </label>
-              <label class="field">
-                <span>Phone</span>
-                <input type="tel" name="phone" autocomplete="tel" />
-              </label>
-            </div>
+  <div class="container">
+    <div class="final__form reveal">
+      <header class="form-header">
+        <h3 class="form-header__title">Ready for take off?</h3>
+        <p class="form-header__lead">24/7 — we're already on it.</p>
 
-            <label class="field">
-              <span>Company</span>
-              <input type="text" name="company" autocomplete="organization" />
-            </label>
+        <ul class="form-header__points">
+          <li><span class="form-header__dot" aria-hidden="true"></span>Immediate response, any hour</li>
+          <li><span class="form-header__dot" aria-hidden="true"></span>Personalized attention, every request</li>
+          <li><span class="form-header__dot" aria-hidden="true"></span>Seamless coordination, end to end</li>
+        </ul>
+      </header>
 
-            <label class="field">
-              <span>Message</span>
-              <textarea name="message" rows="5" required></textarea>
-            </label>
+      <div class="form-card">
 
-            <div class="form__actions">
-              <button class="form__submit" type="submit">
-                Send Message
-                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <path
-                    d="M3 9H15M15 9L10 4M15 9L10 14"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </button>
-            </div>
-          </form>
-        </div>
+        <form
+          id="form"
+          class="form"
+          action="#"
+          method="post"
+          novalidate
+        >
+          <label class="field">
+            <span>Name</span>
+            <input type="text" name="name" required autocomplete="name" />
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input type="email" name="email" required autocomplete="email" />
+          </label>
+
+          <label class="field">
+            <span>Phone</span>
+            <input type="tel" name="phone" autocomplete="tel" />
+          </label>
+
+          <label class="field">
+            <span>Company</span>
+            <input type="text" name="company" autocomplete="organization" />
+          </label>
+
+          <div class="flights" data-flights>
+            <button type="button" class="flights__add" data-flights-add>
+              <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path
+                  d="M9 3V15M3 9H15"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+              Add Flight Information
+            </button>
+
+            <p class="flights__hint">
+              Optional — share flight details so we can prepare everything in advance.
+            </p>
+
+            <div class="flights__list" data-flights-list></div>
+          </div>
+
+          <label class="field">
+            <span>Leave us a message</span>
+            <textarea name="message" rows="5" required></textarea>
+          </label>
+
+          <div class="form__actions">
+            <button class="form__submit" type="submit">
+              Send Message
+              <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                <path
+                  d="M3 9H15M15 9L10 4M15 9L10 14"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <p class="form__status" data-form-status aria-live="polite"></p>
+        </form>
       </div>
     </div>
   </div>
 </section>
 
-<style>
-  .final__grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 64px;
-    align-items: start;
+<template id="flight-template">
+  <details class="flight" open>
+    <summary class="flight__header">
+      <span class="flight__chevron" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M3 5L6 8L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+      <span class="flight__title" data-flight-title>Flight 1</span>
+      <button type="button" class="flight__remove" aria-label="Remove flight" data-flight-remove>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+      </button>
+    </summary>
+
+    <div class="flight__body">
+      <label class="field">
+        <span>PAX</span>
+        <input type="number" min="0" inputmode="numeric" data-key="PAX" placeholder="Number of passengers" />
+      </label>
+
+      <label class="field">
+        <span>Crew</span>
+        <input type="number" min="0" inputmode="numeric" data-key="CREW" placeholder="Number of crew members" />
+      </label>
+
+      <label class="field">
+        <span>Aircraft type</span>
+        <input type="text" data-key="AIRCRAFT TYPE" placeholder="Enter the aircraft type" />
+      </label>
+
+      <label class="field">
+        <span>Tail number</span>
+        <input type="text" data-key="TAIL NUMBER" placeholder="Enter the tail number" />
+      </label>
+
+      <label class="field">
+        <span>Arrival date</span>
+        <input type="date" data-key="ARRIVAL DATE" />
+      </label>
+
+      <label class="field">
+        <span>Arrival time (UTC / Zulu)</span>
+        <input type="text" data-key="ARRIVAL TIME" placeholder="e.g. 14:30Z" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]Z?$" />
+      </label>
+
+      <label class="field">
+        <span>Departure date</span>
+        <input type="date" data-key="DEPARTURE DATE" />
+      </label>
+
+      <label class="field">
+        <span>Departure time (UTC / Zulu)</span>
+        <input type="text" data-key="DEPARTURE TIME" placeholder="e.g. 18:45Z" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]Z?$" />
+      </label>
+
+      <label class="field field--select">
+        <span>Airport</span>
+        <select data-key="AIRPORT">
+          <option value="">Select an airport…</option>
+        </select>
+      </label>
+    </div>
+  </details>
+</template>
+
+<script define:vars={{ airportOptions }}>
+  const form = document.getElementById("form");
+  const list = form.querySelector("[data-flights-list]");
+  const addBtn = form.querySelector("[data-flights-add]");
+  const status = form.querySelector("[data-form-status]");
+  const template = document.getElementById("flight-template");
+
+  function reindex() {
+    list.querySelectorAll(".flight").forEach((flight, i) => {
+      const title = flight.querySelector("[data-flight-title]");
+      if (title) title.textContent = `Flight ${i + 1}`;
+    });
   }
 
-  /* LEFT */
-  .final__left {
-    overflow: hidden; /* contain marquee */
-    min-width: 0;     /* fix grid overflow */
+  function addFlight() {
+    const node = template.content.cloneNode(true);
+
+    // Populate airport select with options
+    const select = node.querySelector('select[data-key="AIRPORT"]');
+    for (const opt of airportOptions) {
+      const o = document.createElement("option");
+      o.value = opt.value;
+      o.textContent = `${opt.label} (${opt.value})`;
+      select.appendChild(o);
+    }
+
+    // Collapse all other flights when adding a new one
+    list.querySelectorAll(".flight").forEach((f) => {
+      f.open = false;
+    });
+
+    list.appendChild(node);
+    reindex();
+  }
+
+  addBtn.addEventListener("click", addFlight);
+
+  list.addEventListener("click", (e) => {
+    const removeBtn = e.target.closest("[data-flight-remove]");
+    if (removeBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      removeBtn.closest(".flight")?.remove();
+      reindex();
+    }
+  });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+
+    const fd = new FormData(form);
+    const flights = [];
+    list.querySelectorAll(".flight").forEach((flight) => {
+      const entry = {};
+      flight.querySelectorAll("[data-key]").forEach((input) => {
+        entry[input.dataset.key] = input.value.trim();
+      });
+      flights.push(entry);
+    });
+
+    const data = {
+      name: (fd.get("name") || "").toString().trim(),
+      email: (fd.get("email") || "").toString().trim(),
+      phone: (fd.get("phone") || "").toString().trim(),
+      company: (fd.get("company") || "").toString().trim(),
+      message: (fd.get("message") || "").toString().trim(),
+      flights,
+    };
+
+    console.log("Form submitted:", data);
+    status.textContent = `Thanks! Your message${flights.length ? ` and ${flights.length} flight${flights.length === 1 ? "" : "s"}` : ""} has been captured.`;
+    status.dataset.state = "success";
+  });
+</script>
+
+<style>
+  /* ── Intro (title + CTA), centered ── */
+  .final__intro {
+    max-width: 880px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .final__eyebrow {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 16px;
   }
 
   .final__title {
-    font-size: clamp(20px, 2.2vw, 30px);
-    font-weight: 800;
-    line-height: 1.25;
-    letter-spacing: -0.01em;
+    font-size: clamp(32px, 4.2vw, 60px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
     text-transform: uppercase;
     color: var(--color-text);
-    margin-bottom: 28px;
+    margin: 0 0 20px;
     overflow-wrap: break-word;
     word-break: break-word;
   }
 
-  .final__cta {
-    margin-bottom: 48px;
+  .final__lead {
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+    max-width: 620px;
+    margin: 0 auto 32px;
   }
 
+  .final__cta {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0;
+  }
+
+  .final__cta-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 185, 0, 0.25);
+    animation: finalCtaPulse 2s var(--ease-in-out) infinite;
+  }
+
+  @keyframes finalCtaPulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 3px rgba(255, 185, 0, 0.25);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(255, 185, 0, 0);
+    }
+  }
+
+  /* ── Marquee: full-width, edge-to-edge ── */
   .marquee {
     position: relative;
-    width: 100%;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-block: clamp(48px, 6vw, 80px);
     overflow: hidden;
     mask-image: linear-gradient(
       90deg,
       transparent 0%,
-      black 10%,
-      black 90%,
+      black 8%,
+      black 92%,
       transparent 100%
     );
     -webkit-mask-image: linear-gradient(
       90deg,
       transparent 0%,
-      black 10%,
-      black 90%,
+      black 8%,
+      black 92%,
       transparent 100%
     );
   }
@@ -163,7 +380,7 @@ const marqueeItems = [...EVENT_LOGOS, ...EVENT_LOGOS];
     gap: 48px;
     align-items: center;
     width: max-content;
-    animation: marquee 30s linear infinite;
+    animation: marquee 40s linear infinite;
   }
 
   .marquee__item {
@@ -207,72 +424,144 @@ const marqueeItems = [...EVENT_LOGOS, ...EVENT_LOGOS];
     }
   }
 
-  /* RIGHT — FORM CARD */
-  .form-card {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: clamp(28px, 4vw, 48px);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    box-shadow: var(--shadow-card);
+  /* ── Form card: centered, wider, single column (cascade) ── */
+  .final__form {
+    max-width: 920px;
+    margin: 0 auto;
   }
 
-  .form-card__title {
+  /* ── Form header (outside the card) ── */
+  .form-header {
+    margin-bottom: 24px;
+  }
+
+  .form-header__title {
     font-size: clamp(30px, 3.4vw, 44px);
     font-weight: 900;
     line-height: 1;
     letter-spacing: -0.02em;
     color: var(--color-accent);
     text-transform: uppercase;
-    margin-bottom: 18px;
+    margin: 0 0 14px;
   }
 
-  .form-card__desc {
+  .form-header__lead {
+    font-size: var(--fs-lead);
+    line-height: 1.3;
+    color: var(--color-text);
+    margin: 0 0 18px;
+    font-weight: 600;
+  }
+
+  .form-header__points {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-header__points li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-size: var(--fs-label);
-    line-height: 1.55;
-    color: var(--color-text-muted);
-    margin-bottom: 32px;
-    max-width: 480px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.4;
+  }
+
+  .form-header__dot {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 185, 0, 0.2);
+  }
+
+  /* ── Form card: continuous with the page gradient, subtle highlight ── */
+  .form-card {
+    position: relative;
+    background:
+      linear-gradient(
+        150deg,
+        rgba(110, 110, 118, 0.42) 0%,
+        rgba(60, 60, 68, 0.48) 55%,
+        rgba(38, 38, 44, 0.55) 100%
+      );
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-lg);
+    padding: clamp(28px, 4vw, 48px);
+    -webkit-backdrop-filter: blur(14px) saturate(1.25);
+    backdrop-filter: blur(14px) saturate(1.25);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      0 30px 80px rgba(0, 0, 0, 0.4),
+      0 8px 24px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+  }
+
+  /* Soft top-left sheen to lift the card */
+  .form-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        circle at 15% 0%,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 55%
+      );
+    border-radius: inherit;
+  }
+
+  .form-card > * {
+    position: relative;
+    z-index: 1;
   }
 
   .form {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-  }
-
-  .form__row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 16px;
   }
 
   .field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
 
   .field > span {
     font-size: 11px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--color-text-dim);
+    color: rgba(255, 255, 255, 0.75);
     font-weight: 600;
   }
 
   .field input,
-  .field textarea {
+  .field textarea,
+  .field select {
     padding: 14px 18px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #f5f5f7;
+    border: 1px solid transparent;
     border-radius: var(--radius-pill);
-    color: var(--color-text);
+    color: #1a1a1f;
     font-size: var(--fs-label);
     font-family: var(--font-sans);
     transition: border-color 0.25s var(--ease-out),
-      background-color 0.25s var(--ease-out);
+      background-color 0.25s var(--ease-out),
+      box-shadow 0.25s var(--ease-out);
+    width: 100%;
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: #8b8b95;
   }
 
   .field textarea {
@@ -282,15 +571,177 @@ const marqueeItems = [...EVENT_LOGOS, ...EVENT_LOGOS];
     line-height: 1.5;
   }
 
-  .field input:focus,
-  .field textarea:focus {
-    outline: none;
-    border-color: var(--color-accent);
-    background: rgba(255, 255, 255, 0.08);
+  .field select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1.5L6 6.5L11 1.5' stroke='%238b8b95' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-color: #f5f5f7;
+    background-repeat: no-repeat;
+    background-position: right 18px center;
+    padding-right: 44px;
+    cursor: pointer;
   }
 
+  .field select option {
+    background: #f5f5f7;
+    color: #1a1a1f;
+  }
+
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255, 185, 0, 0.25);
+  }
+
+  /* ── Flights repeater ── */
+  .flights {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .flights__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .flights__list:empty {
+    display: none;
+  }
+
+  .flights__add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 22px;
+    background: rgba(255, 185, 0, 0.08);
+    color: var(--color-accent);
+    border: 1px dashed rgba(255, 185, 0, 0.45);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.25s var(--ease-out),
+      border-color 0.25s var(--ease-out);
+    align-self: flex-start;
+  }
+
+  .flights__add:hover {
+    background: rgba(255, 185, 0, 0.16);
+    border-color: var(--color-accent);
+  }
+
+  .flights__hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+
+  /* ── Single flight (accordion) ── */
+  .flight {
+    background:
+      linear-gradient(
+        330deg,
+        rgba(30, 30, 36, 0.55) 0%,
+        rgba(18, 18, 24, 0.6) 100%
+      );
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .flight[open] {
+    border-color: rgba(255, 185, 0, 0.35);
+    background:
+      linear-gradient(
+        330deg,
+        rgba(40, 40, 48, 0.55) 0%,
+        rgba(24, 24, 30, 0.6) 100%
+      );
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .flight__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    transition: background-color 0.2s var(--ease-out);
+  }
+
+  .flight__header::-webkit-details-marker {
+    display: none;
+  }
+
+  .flight__header:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .flight__chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.6);
+    transition: transform 0.25s var(--ease-out), color 0.25s var(--ease-out);
+  }
+
+  .flight[open] .flight__chevron {
+    transform: rotate(180deg);
+    color: var(--color-accent);
+  }
+
+  .flight__title {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text);
+  }
+
+  .flight__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: background-color 0.2s var(--ease-out),
+      color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+  }
+
+  .flight__remove:hover {
+    background: rgba(232, 64, 64, 0.18);
+    border-color: rgba(232, 64, 64, 0.55);
+    color: #ff8a8a;
+  }
+
+  .flight__body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 18px 18px;
+  }
+
+  /* ── Submit ── */
   .form__actions {
-    margin-top: 10px;
+    margin-top: 14px;
   }
 
   .form__submit {
@@ -316,31 +767,26 @@ const marqueeItems = [...EVENT_LOGOS, ...EVENT_LOGOS];
     transform: translateY(-1px);
   }
 
-  @media (max-width: 1440px) {
-    .final__grid {
-      gap: 48px;
-    }
-    .final__cta {
-      margin-bottom: 36px;
-    }
-    .marquee__track {
-      gap: 32px;
-    }
+  .form__status {
+    margin: 10px 0 0;
+    font-size: var(--fs-label);
+    color: var(--color-text-muted);
+    min-height: 1em;
   }
 
-  @media (max-width: 1024px) {
-    .final__grid {
-      grid-template-columns: 1fr;
-      gap: 40px;
-    }
-    .final__left {
-      overflow: hidden;
+  .form__status[data-state="success"] {
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 1440px) {
+    .marquee__track {
+      gap: 36px;
     }
   }
 
   @media (max-width: 768px) {
     .final__title {
-      font-size: clamp(18px, 4.5vw, 26px);
+      margin-bottom: 24px;
     }
     .marquee__item {
       min-width: 90px;
@@ -349,16 +795,16 @@ const marqueeItems = [...EVENT_LOGOS, ...EVENT_LOGOS];
       font-size: 12px;
     }
     .marquee__track {
-      gap: 12px;
+      gap: 20px;
     }
   }
 
-  @media (max-width: 640px) {
-    .form__row {
-      grid-template-columns: 1fr;
-    }
+  @media (max-width: 480px) {
     .form-card {
       padding: 24px 20px;
+    }
+    .flights__add {
+      width: 100%;
     }
   }
 </style>

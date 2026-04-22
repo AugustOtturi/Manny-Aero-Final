@@ -24,7 +24,7 @@
   --pin-orange: #f37b3a;
 
   /* Global page gradient — continuous top→bottom grey */
-  --bg-top: #c0c0c0;
+  --bg-top: #ffffff;
   --bg-bottom: #424040;
   --bg-gradient: linear-gradient(
     180deg,
@@ -33,7 +33,7 @@
   );
 
   /* Noise overlay */
-  --noise-opacity: 0.5;
+  --noise-opacity: 0.6;
 
   /* Blobs — anchored at Y positions in page (not viewport-fixed) */
   --blob-1-color: rgba(255, 255, 255, 0.22);
