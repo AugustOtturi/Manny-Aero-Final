@@ -100,7 +100,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
             <input type="text" name="company" autocomplete="organization" />
           </label>
 
-          <div class="flights" data-flights>
+          <div class="flights field--full" data-flights>
             <button type="button" class="flights__add" data-flights-add>
               <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                 <path
@@ -120,12 +120,12 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
             <div class="flights__list" data-flights-list></div>
           </div>
 
-          <label class="field">
+          <label class="field field--full">
             <span>Leave us a message</span>
             <textarea name="message" rows="5" required></textarea>
           </label>
 
-          <div class="form__actions">
+          <div class="form__actions field--full">
             <button class="form__submit" type="submit">
               Send Message
               <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -140,7 +140,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
             </button>
           </div>
 
-          <p class="form__status" data-form-status aria-live="polite"></p>
+          <p class="form__status field--full" data-form-status aria-live="polite"></p>
         </form>
       </div>
     </div>
@@ -204,7 +204,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
         <input type="text" data-key="DEPARTURE TIME" placeholder="e.g. 18:45Z" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]Z?$" />
       </label>
 
-      <label class="field field--select">
+      <label class="field field--select field--full">
         <span>Airport</span>
         <select data-key="AIRPORT">
           <option value="">Select an airport…</option>
@@ -524,15 +524,24 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
   }
 
   .form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 20px;
   }
 
   .field {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 0;
+  }
+
+  .field--full,
+  .form > .field--full,
+  .form > .form__actions,
+  .form > .form__status,
+  .form > .flights {
+    grid-column: 1 / -1;
   }
 
   .field > span {
@@ -733,10 +742,14 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
   }
 
   .flight__body {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 18px;
     padding: 4px 18px 18px;
+  }
+
+  .flight__body > .field--full {
+    grid-column: 1 / -1;
   }
 
   /* ── Submit ── */
@@ -796,6 +809,13 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     }
     .marquee__track {
       gap: 20px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .form,
+    .flight__body {
+      grid-template-columns: 1fr;
     }
   }
 
