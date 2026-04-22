@@ -85,48 +85,50 @@ const categoryEntries = Object.entries(CATEGORIES) as [
 </section>
 
 <script>
-  import "leaflet/dist/leaflet.css";
-  import L from "leaflet";
   import { AIRPORTS, CATEGORIES } from "../data/airports";
 
   type Airport = (typeof AIRPORTS)[number];
   type CatKey = "1" | "2" | "3" | "4";
 
-  function buildIcon(color: string, size = 20) {
-    const h = Math.round(size * 1.35);
-    return L.divIcon({
-      className: "map-pin",
-      html: `<svg width="${size}" height="${h}" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 0C5.4 0 0 5.4 0 12c0 8 12 20 12 20s12-12 12-20c0-6.6-5.4-12-12-12z" fill="${color}" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"/>
-        <circle cx="12" cy="12" r="4.2" fill="#ffffff" fill-opacity="0.92"/>
-      </svg>`,
-      iconSize: [size, h],
-      iconAnchor: [size / 2, h],
-      popupAnchor: [0, -h + 6],
-    });
-  }
-
-  function buildPopupHtml(a: Airport) {
-    const cat = CATEGORIES[String(a.categoria) as CatKey];
-    return `
-      <div class="map-popup">
-        <span class="map-popup__tag" style="--tag:${cat.color}">${cat.short}</span>
-        <h3 class="map-popup__title">${a.nombre}</h3>
-        <p class="map-popup__info">${a.info}</p>
-        <a class="map-popup__btn" href="${a.pdf}" target="_blank" rel="noopener" download>
-          Download Now
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-            <path d="M6 1v7m0 0l-3-3m3 3l3-3M2 10h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
-      </div>
-    `;
-  }
-
   async function initMap() {
     const container = document.getElementById("map-container");
     if (!container || container.dataset.mapReady === "true") return;
     container.dataset.mapReady = "true";
+
+    // Dynamic import — Leaflet + its CSS only download now, when the map is near viewport
+    await import("leaflet/dist/leaflet.css");
+    const L = (await import("leaflet")).default;
+
+    function buildIcon(color: string, size = 20) {
+      const h = Math.round(size * 1.35);
+      return L.divIcon({
+        className: "map-pin",
+        html: `<svg width="${size}" height="${h}" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 0C5.4 0 0 5.4 0 12c0 8 12 20 12 20s12-12 12-20c0-6.6-5.4-12-12-12z" fill="${color}" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"/>
+          <circle cx="12" cy="12" r="4.2" fill="#ffffff" fill-opacity="0.92"/>
+        </svg>`,
+        iconSize: [size, h],
+        iconAnchor: [size / 2, h],
+        popupAnchor: [0, -h + 6],
+      });
+    }
+
+    function buildPopupHtml(a: Airport) {
+      const cat = CATEGORIES[String(a.categoria) as CatKey];
+      return `
+        <div class="map-popup">
+          <span class="map-popup__tag" style="--tag:${cat.color}">${cat.short}</span>
+          <h3 class="map-popup__title">${a.nombre}</h3>
+          <p class="map-popup__info">${a.info}</p>
+          <a class="map-popup__btn" href="${a.pdf}" target="_blank" rel="noopener" download>
+            Download Now
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M6 1v7m0 0l-3-3m3 3l3-3M2 10h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      `;
+    }
 
     const mobileQuery = window.matchMedia("(max-width: 860px)");
     const isMobile = mobileQuery.matches;
@@ -303,10 +305,35 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     requestAnimationFrame(() => map.invalidateSize());
   }
 
+  // Lazy init — only load Leaflet + GeoJSON when the map is near the viewport.
+  // Uses IntersectionObserver with a 600px rootMargin so the map is ready by the
+  // time the user scrolls to it.
+  function observeMap() {
+    const container = document.getElementById("map-container");
+    if (!container) return;
+
+    if (!("IntersectionObserver" in window)) {
+      // Fallback: init immediately on browsers without IO support
+      initMap();
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          io.disconnect();
+          initMap();
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    io.observe(container);
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initMap);
+    document.addEventListener("DOMContentLoaded", observeMap);
   } else {
-    initMap();
+    observeMap();
   }
 </script>
 
