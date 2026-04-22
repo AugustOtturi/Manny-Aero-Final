@@ -1,12 +1,25 @@
 ---
+import { Image } from "astro:assets";
 import GlassButton from "./ui/GlassButton.astro";
+import featureImg from "../assets/photos/subhero-feature.jpg";
+import photo1 from "../assets/photos/subhero-1.jpg";
+import photo2 from "../assets/photos/subhero-2.jpg";
+import photo3 from "../assets/photos/subhero-3.jpg";
 ---
 
 <section class="subhero section" id="about" aria-labelledby="subhero-title">
   <div class="container">
     <div class="subhero__grid">
       <article class="subhero__feature reveal">
-        <div class="subhero__feature-img" aria-hidden="true"></div>
+        <Image
+          src={featureImg}
+          alt=""
+          widths={[640, 960, 1280, 1600]}
+          sizes="(max-width: 1024px) 100vw, 60vw"
+          loading="lazy"
+          decoding="async"
+          class="subhero__feature-img"
+        />
         <div class="subhero__feature-overlay" aria-hidden="true"></div>
         <div class="subhero__feature-content">
           <p class="subhero__years">
@@ -25,14 +38,38 @@ import GlassButton from "./ui/GlassButton.astro";
       </article>
 
       <div class="subhero__stack">
-        <div class="subhero__photo reveal" aria-label="Manny agents on tarmac">
-          <div class="subhero__photo-bg subhero__photo-bg--1"></div>
+        <div class="subhero__photo reveal">
+          <Image
+            src={photo1}
+            alt="Manny agents on tarmac"
+            widths={[400, 640, 1000]}
+            sizes="(max-width: 1024px) 33vw, 25vw"
+            loading="lazy"
+            decoding="async"
+            class="subhero__photo-bg"
+          />
         </div>
-        <div class="subhero__photo reveal" aria-label="Technician working on landing gear">
-          <div class="subhero__photo-bg subhero__photo-bg--2"></div>
+        <div class="subhero__photo reveal">
+          <Image
+            src={photo2}
+            alt="Technician working on landing gear"
+            widths={[400, 640, 1000]}
+            sizes="(max-width: 1024px) 33vw, 25vw"
+            loading="lazy"
+            decoding="async"
+            class="subhero__photo-bg"
+          />
         </div>
-        <div class="subhero__photo reveal" aria-label="Operations dispatcher with headset">
-          <div class="subhero__photo-bg subhero__photo-bg--3"></div>
+        <div class="subhero__photo reveal">
+          <Image
+            src={photo3}
+            alt="Operations dispatcher with headset"
+            widths={[400, 640, 1000]}
+            sizes="(max-width: 1024px) 33vw, 25vw"
+            loading="lazy"
+            decoding="async"
+            class="subhero__photo-bg"
+          />
         </div>
       </div>
     </div>
@@ -63,12 +100,11 @@ import GlassButton from "./ui/GlassButton.astro";
   .subhero__feature-img {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
     background-color: #1a1a20;
-    background-image:
-      linear-gradient(135deg, rgba(42, 42, 48, 0.35) 0%, rgba(15, 15, 21, 0.55) 100%),
-      url("https://images.unsplash.com/photo-1569629743817-70d8db6c323b?w=1600&q=80&auto=format&fit=crop");
-    background-size: cover;
-    background-position: center;
     filter: brightness(0.98) saturate(1.05);
     z-index: -2;
   }
@@ -155,33 +191,17 @@ import GlassButton from "./ui/GlassButton.astro";
   .subhero__photo-bg {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
     background-color: #1a1a20;
-    background-size: cover;
-    background-position: center;
     filter: brightness(0.98) saturate(1.05);
     transition: transform 0.6s var(--ease-out);
   }
 
   .subhero__photo:hover .subhero__photo-bg {
     transform: scale(1.04);
-  }
-
-  .subhero__photo-bg--1 {
-    background-image:
-      linear-gradient(120deg, rgba(58, 58, 66, 0.25) 0%, rgba(30, 30, 38, 0.4) 100%),
-      url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1000&q=80&auto=format&fit=crop");
-  }
-
-  .subhero__photo-bg--2 {
-    background-image:
-      linear-gradient(120deg, rgba(46, 46, 54, 0.25) 0%, rgba(24, 24, 30, 0.4) 100%),
-      url("https://images.unsplash.com/photo-1540962351504-03099e0a754b?w=1000&q=80&auto=format&fit=crop");
-  }
-
-  .subhero__photo-bg--3 {
-    background-image:
-      linear-gradient(120deg, rgba(50, 50, 56, 0.25) 0%, rgba(20, 20, 26, 0.4) 100%),
-      url("https://images.unsplash.com/photo-1583416750470-965b2707b355?w=1000&q=80&auto=format&fit=crop");
   }
 
   @media (max-width: 1440px) {
