@@ -35,7 +35,7 @@ const imageMap: Record<string, ImageMetadata> = {
           <a
             href={s.href}
             class={`card card--${s.tone} reveal`}
-            style={`--delay:${i * 80}ms`}
+            style={`--delay:${i * 160}ms`}
           >
             <Image
               src={imageMap[s.slug]}
@@ -127,9 +127,46 @@ const imageMap: Record<string, ImageMetadata> = {
       0 6px 14px rgba(0, 0, 0, 0.35),
       0 1px 2px rgba(0, 0, 0, 0.4),
       inset 0 0 0 1px rgba(255, 255, 255, 0.35);
-    transition: transform 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out);
+    transition:
+      transform 0.5s var(--ease-out),
+      box-shadow 0.5s var(--ease-out);
     isolation: isolate;
-    transition-delay: var(--delay, 0ms);
+  }
+
+  /* Entrance animation — runs once via keyframes so hover transforms stay independent. */
+  .card.reveal {
+    opacity: 0;
+    transform: translateY(36px) scale(0.96);
+    transition: none;
+  }
+
+  .card.reveal.in-view {
+    animation: cardEnter 0.85s var(--ease-out) forwards;
+    animation-delay: var(--delay, 0ms);
+    /* After the animation ends, re-enable hover transitions */
+    transition:
+      transform 0.5s var(--ease-out),
+      box-shadow 0.5s var(--ease-out);
+  }
+
+  @keyframes cardEnter {
+    from {
+      opacity: 0;
+      transform: translateY(36px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card.reveal,
+    .card.reveal.in-view {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
   }
 
   .card:hover {
