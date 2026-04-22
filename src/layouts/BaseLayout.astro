@@ -2,6 +2,8 @@
 import "../styles/global.css";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
+import interHeavy from "@fontsource/inter/files/inter-latin-900-normal.woff2?url";
+import interExtraBold from "@fontsource/inter/files/inter-latin-800-normal.woff2?url";
 
 type ActiveLink = "home" | "about" | "services" | "map" | "blog" | "contact";
 
@@ -90,6 +92,9 @@ const orgJsonLd = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
 
+    <link rel="preload" href={interHeavy} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={interExtraBold} as="font" type="font/woff2" crossorigin />
+
     <script
       type="application/ld+json"
       set:html={JSON.stringify(orgJsonLd)}
@@ -98,21 +103,6 @@ const orgJsonLd = {
     <slot name="head" />
   </head>
   <body data-active-link={activeLink}>
-    <div class="app-loader" id="app-loader" aria-hidden="true">
-      <div class="app-loader__inner">
-        <img
-          src="/logo-manny.svg"
-          alt=""
-          class="app-loader__logo"
-          width="500"
-          height="294"
-        />
-        <div class="app-loader__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-          <div class="app-loader__bar-fill"></div>
-        </div>
-      </div>
-    </div>
-
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
       <filter id="grain">
         <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" />
@@ -134,17 +124,6 @@ const orgJsonLd = {
     </main>
 
     <Footer />
-
-    <script is:inline>
-      document.documentElement.style.overflow = "hidden";
-      window.addEventListener("DOMContentLoaded", () => {
-        setTimeout(() => {
-          const l = document.getElementById("app-loader");
-          if (l) l.classList.add("is-hidden");
-          document.documentElement.style.overflow = "";
-        }, 1200);
-      });
-    </script>
 
     <script>
       // Navbar scroll state + scroll-reveal observer
