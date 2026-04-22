@@ -21,13 +21,6 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       </p>
     </div>
 
-    <div class="map__canvas reveal">
-      <div id="map-container" aria-label="Interactive map of Manny Aero locations across Mexico" role="region"></div>
-      <div class="map__loader" id="map-loader" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
-    </div>
-
     <div class="map__controls reveal">
       <div
         class="map__pills"
@@ -65,6 +58,13 @@ const categoryEntries = Object.entries(CATEGORIES) as [
           ))
         }
       </select>
+    </div>
+
+    <div class="map__canvas reveal">
+      <div id="map-container" aria-label="Interactive map of Manny Aero locations across Mexico" role="region"></div>
+      <div class="map__loader" id="map-loader" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
     </div>
 
     <div class="map__stats reveal">
@@ -130,40 +130,27 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       `;
     }
 
-    const mobileQuery = window.matchMedia("(max-width: 860px)");
-    const isMobile = mobileQuery.matches;
+    const isMobile = window.matchMedia("(max-width: 860px)").matches;
 
     const map = L.map(container, {
       center: [23.4, -102.5],
       zoom: isMobile ? 4 : 5,
       minZoom: 4,
-      maxZoom: isMobile ? 8 : 6,
+      maxZoom: isMobile ? 5 : 6,
       zoomSnap: 0.25,
-      renderer: L.svg({ padding: 2 }),
+      renderer: isMobile
+        ? L.canvas({ padding: 0.5 })
+        : L.svg({ padding: 2 }),
       attributionControl: false,
-      zoomControl: isMobile,
+      zoomControl: false,
       scrollWheelZoom: false,
       doubleClickZoom: false,
-      dragging: isMobile,
-      touchZoom: isMobile,
+      dragging: false,
+      touchZoom: false,
       keyboard: false,
       boxZoom: false,
       inertia: false,
-      tap: isMobile,
-    });
-    if (isMobile && map.zoomControl) {
-      map.zoomControl.setPosition("bottomright");
-    }
-
-    mobileQuery.addEventListener("change", (e) => {
-      if (e.matches) {
-        map.dragging.enable();
-        map.touchZoom.enable();
-      } else {
-        map.dragging.disable();
-        map.touchZoom.disable();
-        map.setView([23.4, -102.5], 5, { animate: false });
-      }
+      tap: false,
     });
 
     // Mexico states GeoJSON as base layer (no tiles — full brand look)
@@ -183,67 +170,98 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         padding: isMobile ? [12, 12] : [4, 4],
         animate: false,
       });
-      if (isMobile) {
-        map.setMaxBounds(bounds.pad(0.2));
-      }
     } catch (e) {
       console.warn("Mexico GeoJSON failed to load", e);
     }
 
     document.getElementById("map-loader")?.classList.add("is-gone");
 
-    // Build markers
-    const markers: { airport: Airport; marker: L.Marker }[] = [];
-    let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+    // Desktop → HTML divIcon (pin shape, hover-open popup, popups escape container).
+    // Mobile  → canvas circleMarker (single canvas paint, no DOM per pin, tap to open).
+    type AnyMarker = L.Marker | L.CircleMarker;
+    const markers: { airport: Airport; marker: AnyMarker }[] = [];
 
-    const scheduleClose = (marker: L.Marker) => {
-      if (hoverTimer) clearTimeout(hoverTimer);
-      hoverTimer = setTimeout(() => marker.closePopup(), 220);
+    // Higher-priority pins added last so they draw on top when they overlap.
+    // On canvas this is literal (draw order); on SVG we still set z-index below.
+    const sortedAirports = [...AIRPORTS].sort((a, b) => {
+      const pa = CATEGORIES[String(a.categoria) as CatKey].priority;
+      const pb = CATEGORIES[String(b.categoria) as CatKey].priority;
+      return pa - pb;
+    });
+
+    const popupOpts = {
+      className: "map-popup-wrapper",
+      maxWidth: 260,
+      minWidth: 200,
+      closeButton: isMobile,
+      offset: [0, -2] as [number, number],
+      autoPan: false,
     };
-    const cancelClose = () => {
-      if (hoverTimer) clearTimeout(hoverTimer);
-      hoverTimer = null;
-    };
 
-    for (const a of AIRPORTS) {
-      const cat = CATEGORIES[String(a.categoria) as CatKey];
-      const marker = L.marker([a.lat, a.lng], {
-        icon: buildIcon(cat.color, 20),
-        riseOnHover: true,
-      })
-        .bindPopup(buildPopupHtml(a), {
-          className: "map-popup-wrapper",
-          maxWidth: 260,
-          minWidth: 200,
-          closeButton: isMobile,
-          offset: [0, -2],
-          autoPan: isMobile,
-          autoPanPadding: [24, 24],
-        })
-        .addTo(map);
+    if (isMobile) {
+      for (const a of sortedAirports) {
+        const cat = CATEGORIES[String(a.categoria) as CatKey];
+        const marker = L.circleMarker([a.lat, a.lng], {
+          radius: 7,
+          color: "#ffffff",
+          weight: 1.5,
+          fillColor: cat.color,
+          fillOpacity: 1,
+          opacity: 1,
+          bubblingMouseEvents: false,
+        }).bindPopup(buildPopupHtml(a), popupOpts).addTo(map);
+        markers.push({ airport: a, marker });
+      }
+    } else {
+      let hoverTimer: ReturnType<typeof setTimeout> | null = null;
+      const scheduleClose = (m: L.Marker) => {
+        if (hoverTimer) clearTimeout(hoverTimer);
+        hoverTimer = setTimeout(() => m.closePopup(), 220);
+      };
+      const cancelClose = () => {
+        if (hoverTimer) clearTimeout(hoverTimer);
+        hoverTimer = null;
+      };
 
-      marker.on("mouseover", () => {
-        cancelClose();
-        marker.openPopup();
-      });
-      marker.on("mouseout", () => scheduleClose(marker));
+      for (const a of sortedAirports) {
+        const cat = CATEGORIES[String(a.categoria) as CatKey];
+        const marker = L.marker([a.lat, a.lng], {
+          icon: buildIcon(cat.color, 20),
+          riseOnHover: true,
+        }).bindPopup(buildPopupHtml(a), popupOpts).addTo(map);
 
-      marker.on("popupopen", (e) => {
-        const el = e.popup.getElement();
-        if (!el) return;
-        el.addEventListener("mouseenter", cancelClose);
-        el.addEventListener("mouseleave", () => scheduleClose(marker));
-      });
+        marker.on("mouseover", () => {
+          cancelClose();
+          marker.openPopup();
+        });
+        marker.on("mouseout", () => scheduleClose(marker));
+        marker.on("popupopen", (e) => {
+          const el = e.popup.getElement();
+          if (!el) return;
+          el.addEventListener("mouseenter", cancelClose);
+          el.addEventListener("mouseleave", () => scheduleClose(marker));
+        });
 
-      markers.push({ airport: a, marker });
+        const el = marker.getElement();
+        if (el) {
+          el.style.zIndex = String(500 + cat.priority * 10);
+        }
+
+        markers.push({ airport: a, marker });
+      }
     }
 
-    // z-index by priority so IS-BAH > Office > FBO > Agent when pins overlap
-    for (const { airport, marker } of markers) {
-      const el = marker.getElement();
-      if (!el) continue;
-      const prio = CATEGORIES[String(airport.categoria) as CatKey].priority;
-      el.style.zIndex = String(500 + prio * 10);
+    function setMarkerVisible(marker: AnyMarker, visible: boolean) {
+      if (marker instanceof L.CircleMarker) {
+        marker.setStyle({
+          opacity: visible ? 1 : 0,
+          fillOpacity: visible ? 1 : 0,
+        });
+        if (!visible && marker.isPopupOpen()) marker.closePopup();
+      } else {
+        const el = marker.getElement();
+        if (el) el.classList.toggle("is-hidden", !visible);
+      }
     }
 
     function applyFilter(filter: string) {
@@ -263,18 +281,11 @@ const categoryEntries = Object.entries(CATEGORIES) as [
           Array.from(byCoord.values()).map((x) => x.id),
         );
         for (const { airport, marker } of markers) {
-          const el = marker.getElement();
-          if (!el) continue;
-          el.classList.toggle("is-hidden", !visible.has(airport.id));
+          setMarkerVisible(marker, visible.has(airport.id));
         }
       } else {
         for (const { airport, marker } of markers) {
-          const el = marker.getElement();
-          if (!el) continue;
-          el.classList.toggle(
-            "is-hidden",
-            String(airport.categoria) !== filter,
-          );
+          setMarkerVisible(marker, String(airport.categoria) === filter);
         }
       }
     }
@@ -345,7 +356,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
   .map__intro {
     text-align: center;
     max-width: 820px;
-    margin: 0 auto 36px;
+    margin: 0 auto 28px;
   }
 
   .map__super {
@@ -380,7 +391,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
   .map__controls {
     display: flex;
     justify-content: center;
-    margin-top: 44px;
+    margin: 0 auto 32px;
   }
 
   .map__pills {
@@ -463,14 +474,12 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     margin: 0 auto;
     aspect-ratio: 16 / 10;
     background: transparent;
-    overflow: hidden;
   }
 
   #map-container {
     position: absolute;
     inset: 0;
     background: transparent;
-    overflow: hidden;
   }
 
   .map__loader {
@@ -569,10 +578,14 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       background: linear-gradient(180deg, #1a1a20 0%, #0f0f14 100%);
       border-radius: var(--radius-lg);
       overflow: hidden;
+      contain: layout paint;
       box-shadow:
         0 20px 48px rgba(0, 0, 0, 0.55),
         0 6px 16px rgba(0, 0, 0, 0.35),
         inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+    #map-container {
+      touch-action: pan-y;
     }
   }
 
@@ -629,15 +642,18 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     outline: none;
   }
 
-  /* Desktop: let popups escape the map container (map is static, nothing else to extend) */
+  /* Desktop: let popups escape the map container so tooltips near the edge
+     (Tijuana, Reynosa, etc.) don't get clipped. The map is static, so allowing
+     overflow has no side effect. */
   #map-container.leaflet-container,
   #map-container .leaflet-popup-pane,
-  #map-container .leaflet-marker-pane {
+  #map-container .leaflet-marker-pane,
+  #map-container .leaflet-map-pane {
     overflow: visible !important;
   }
 
-  /* Mobile/tablet (≤860px): map is interactive and draggable, so we need to clip.
-     Popup clipping is prevented via autoPan on the popup config. */
+  /* Mobile/tablet (≤860px): map canvas is clipped by .map__canvas (rounded card
+     with inner shadow). Popups stay inside — no autoPan because the map is static. */
   @media (max-width: 860px) {
     #map-container.leaflet-container {
       overflow: hidden !important;

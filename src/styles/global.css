@@ -217,11 +217,29 @@ button {
 .reveal {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+  transition:
+    opacity var(--dur-reveal) var(--ease-out),
+    transform var(--dur-reveal) var(--ease-out);
   will-change: opacity, transform;
 }
 
 .reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero entrance — staggered via --enter-delay, gated by html.is-ready */
+.hero-enter {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity var(--dur-reveal) var(--ease-out),
+    transform var(--dur-reveal) var(--ease-out);
+  transition-delay: var(--enter-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+html.is-ready .hero-enter {
   opacity: 1;
   transform: translateY(0);
 }
@@ -237,7 +255,8 @@ button {
     scroll-behavior: auto !important;
   }
 
-  .reveal {
+  .reveal,
+  .hero-enter {
     opacity: 1;
     transform: none;
   }
