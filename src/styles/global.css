@@ -8,6 +8,16 @@
 
 @import "./tokens.css";
 
+/* Aileron Light — body / UI text. Only weight 300 is provided.
+   Bolder weights fall back to Inter via the --font-sans stack. */
+@font-face {
+  font-family: 'Aileron';
+  src: url('../assets/fonts/aileron.light.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {
