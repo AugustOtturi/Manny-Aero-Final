@@ -217,7 +217,7 @@ button {
 .final__title {
   color: var(--color-text);
   text-shadow:
-    0 0 18px rgba(255, 255, 255, 0.35),
+    0 0 18px rgba(255, 255, 255, 0.65),
     0 0 42px rgba(255, 255, 255, 0.18),
     0 2px 18px rgba(0, 0, 0, 0.4);
 }
