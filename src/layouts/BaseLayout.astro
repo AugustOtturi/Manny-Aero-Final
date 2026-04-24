@@ -120,13 +120,18 @@ const orgJsonLd = {
       }
       .app-loader__text {
         font-family: var(--font-display, var(--font-sans), sans-serif);
-        font-size: clamp(36px, 6vw, 56px);
+        font-size: clamp(36px, 6vw, 64px);
         font-weight: 400;
         letter-spacing: -0.01em;
         text-transform: uppercase;
         color: var(--color-accent);
         text-shadow: 0 4px 24px rgba(255, 185, 0, 0.25);
         line-height: 1;
+        text-align: center;
+        margin: 0;
+      }
+      .app-loader__text span {
+        display: block;
       }
       .app-loader__bar {
         position: relative;
@@ -162,7 +167,10 @@ const orgJsonLd = {
   <body data-active-link={activeLink}>
     {isHome && (
       <div class="app-loader" id="app-loader" aria-hidden="true">
-        <span class="app-loader__text">Manny Aero</span>
+        <p class="app-loader__text">
+          <span>With Manny</span>
+          <span>México is yours</span>
+        </p>
         <div class="app-loader__bar"><span></span></div>
       </div>
     )}

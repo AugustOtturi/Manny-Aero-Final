@@ -165,16 +165,41 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       tap: false,
     });
 
-    // Mexico states GeoJSON as base layer (no tiles — full brand look)
+    // Mexico states GeoJSON as base layer (no tiles — full brand look).
+    // Drop tiny coastal fragments (<1% of the main body of each state) so
+    // small offshore islands don't show as "scar"-like marks on the map.
     try {
       const res = await fetch("/map/mexico-states.geojson");
       const geo = await res.json();
+
+      const FRAGMENT_THRESHOLD = 0.01; // keep parts ≥1% of the largest part
+      function ringArea(ring: number[][]) {
+        let s = 0;
+        for (let i = 0; i < ring.length - 1; i++) {
+          s += ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1];
+        }
+        return Math.abs(s / 2);
+      }
+      for (const feature of geo.features) {
+        if (feature.geometry?.type !== "MultiPolygon") continue;
+        const parts = feature.geometry.coordinates as number[][][][];
+        const areas = parts.map((p) => ringArea(p[0]));
+        const max = Math.max(...areas);
+        const kept = parts.filter((_, i) => areas[i] / max >= FRAGMENT_THRESHOLD);
+        feature.geometry.coordinates = kept;
+        if (kept.length === 1) feature.geometry.type = "Polygon" as never;
+        if (feature.geometry.type === "Polygon") {
+          feature.geometry.coordinates = kept[0] as never;
+        }
+      }
+
       const layer = L.geoJSON(geo, {
         style: {
-          color: "rgba(255, 255, 255, 0.22)",
-          weight: 1,
+          color: "rgba(40, 42, 54, 0.55)",
+          weight: 1.1,
           fillColor: "#e9e9ec",
           fillOpacity: 1,
+          lineJoin: "round",
         },
       }).addTo(map);
       const bounds = layer.getBounds();
