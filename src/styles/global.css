@@ -214,7 +214,8 @@ button {
 .subhero__title,
 .services__title,
 .map__title,
-.final__title {
+.final__title,
+.form-header__title {
   color: var(--color-text);
   text-shadow:
     0 0 18px rgba(255, 255, 255, 0.65),

@@ -90,13 +90,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     <div class="final__form reveal">
       <header class="form-header">
         <h3 class="form-header__title">Ready for take off?</h3>
-        <p class="form-header__lead">24/7 — we're already on it.</p>
-
-        <ul class="form-header__points">
-          <li><span class="form-header__dot" aria-hidden="true"></span>Immediate response, any hour</li>
-          <li><span class="form-header__dot" aria-hidden="true"></span>Personalized attention, every request</li>
-          <li><span class="form-header__dot" aria-hidden="true"></span>Seamless coordination, end to end</li>
-        </ul>
+        <p class="form-header__lead">24/7 response — every request handled with precision.</p>
       </header>
 
       <div class="form-card">
@@ -382,7 +376,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     }
   }
 
-  /* ── Marquee: full-width logo carousel on dark panel ── */
+  /* ── Marquee: full-width logo carousel on dark panel (non-interactive) ── */
   .marquee {
     position: relative;
     width: 100vw;
@@ -392,6 +386,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     overflow: hidden;
     background: rgba(10, 10, 15, 0.55);
     border-block: 1px solid var(--color-border);
+    pointer-events: none;
     mask-image: linear-gradient(
       90deg,
       transparent 0%,
@@ -417,10 +412,6 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     will-change: transform;
   }
 
-  .marquee:hover .marquee__track {
-    animation-play-state: paused;
-  }
-
   .marquee__item {
     display: inline-flex;
     align-items: center;
@@ -435,13 +426,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     width: auto;
     max-width: clamp(120px, 14vw, 200px);
     object-fit: contain;
-    opacity: 0.85;
-    transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
-  }
-
-  .marquee__item:hover .marquee__logo {
-    opacity: 1;
-    transform: scale(1.06);
+    opacity: 0.95;
   }
 
   @keyframes marquee {
@@ -480,53 +465,26 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 
   /* ── Form header (outside the card) ── */
   .form-header {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    text-align: center;
   }
 
   .form-header__title {
     font-family: var(--font-display);
-    font-size: clamp(30px, 3.4vw, 44px);
+    font-size: clamp(22px, 2.4vw, 30px);
     font-weight: 400;
-    line-height: 1;
-    letter-spacing: -0.01em;
-    color: var(--color-accent);
+    line-height: 1.05;
+    letter-spacing: 0;
     text-transform: uppercase;
-    margin: 0 0 14px;
+    margin: 0 0 8px;
   }
 
   .form-header__lead {
-    font-size: var(--fs-lead);
-    line-height: 1.3;
-    color: var(--color-text);
-    margin: 0 0 18px;
-    font-weight: 600;
-  }
-
-  .form-header__points {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .form-header__points li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     font-size: var(--fs-label);
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.4;
-  }
-
-  .form-header__dot {
-    flex-shrink: 0;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(255, 185, 0, 0.2);
+    line-height: 1.45;
+    color: var(--color-text-muted);
+    margin: 0;
+    font-weight: 500;
   }
 
   /* ── Form card: continuous with the page gradient, subtle highlight ── */
@@ -541,7 +499,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
       );
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: var(--radius-lg);
-    padding: clamp(28px, 4vw, 48px);
+    padding: clamp(22px, 3vw, 36px);
     -webkit-backdrop-filter: blur(14px) saturate(1.25);
     backdrop-filter: blur(14px) saturate(1.25);
     box-shadow:
@@ -604,12 +562,12 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
   .field input,
   .field textarea,
   .field select {
-    padding: 14px 18px;
+    padding: 10px 14px;
     background: #f5f5f7;
     border: 1px solid transparent;
     border-radius: var(--radius-pill);
     color: #1a1a1f;
-    font-size: var(--fs-label);
+    font-size: 14px;
     font-family: var(--font-sans);
     transition: border-color 0.25s var(--ease-out),
       background-color 0.25s var(--ease-out),
@@ -625,7 +583,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
   .field textarea {
     border-radius: var(--radius);
     resize: vertical;
-    min-height: 120px;
+    min-height: 96px;
     line-height: 1.5;
   }
 
@@ -635,8 +593,8 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1.5L6 6.5L11 1.5' stroke='%238b8b95' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
     background-color: #f5f5f7;
     background-repeat: no-repeat;
-    background-position: right 18px center;
-    padding-right: 44px;
+    background-position: right 14px center;
+    padding-right: 38px;
     cursor: pointer;
   }
 
@@ -676,13 +634,13 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    padding: 14px 22px;
+    gap: 8px;
+    padding: 9px 16px;
     background: rgba(255, 185, 0, 0.08);
     color: var(--color-accent);
     border: 1px dashed rgba(255, 185, 0, 0.45);
     border-radius: var(--radius-pill);
-    font-size: var(--fs-label);
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -810,14 +768,14 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 16px 32px;
+    padding: 12px 26px;
     background: var(--color-accent);
     color: #0a0a0a;
     border-radius: var(--radius-pill);
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    font-size: var(--fs-label);
+    font-size: 13px;
     transition: background-color 0.25s var(--ease-out),
       transform 0.25s var(--ease-out);
     border: none;
