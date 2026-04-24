@@ -104,22 +104,22 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
         >
           <label class="field">
             <span>Name</span>
-            <input type="text" name="name" required autocomplete="name" />
+            <input type="text" name="name" required autocomplete="name" placeholder="Your full name" />
           </label>
 
           <label class="field">
             <span>Email</span>
-            <input type="email" name="email" required autocomplete="email" />
+            <input type="email" name="email" required autocomplete="email" placeholder="you@company.com" />
           </label>
 
           <label class="field">
             <span>Phone</span>
-            <input type="tel" name="phone" autocomplete="tel" />
+            <input type="tel" name="phone" autocomplete="tel" placeholder="+1 555 123 4567" />
           </label>
 
           <label class="field">
             <span>Company</span>
-            <input type="text" name="company" autocomplete="organization" />
+            <input type="text" name="company" autocomplete="organization" placeholder="Your company name" />
           </label>
 
           <div class="flights field--full" data-flights>
@@ -144,7 +144,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 
           <label class="field field--full">
             <span>Leave us a message</span>
-            <textarea name="message" rows="5" required></textarea>
+            <textarea name="message" rows="5" required placeholder="Tell us about your operation — dates, locations, crew size, anything we should know."></textarea>
           </label>
 
           <div class="form__actions field--full">
@@ -577,7 +577,8 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 
   .field input::placeholder,
   .field textarea::placeholder {
-    color: #8b8b95;
+    color: #6e6e78;
+    opacity: 1;
   }
 
   .field textarea {
