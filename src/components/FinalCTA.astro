@@ -89,7 +89,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
   <div class="container">
     <div class="final__form reveal">
       <header class="form-header">
-        <h3 class="form-header__title">Ready for take off?</h3>
+        <h3 class="form-header__title">Ready for <span class="accent">take off?</span></h3>
         <p class="form-header__lead">24/7 response — every request handled with precision.</p>
       </header>
 
@@ -471,12 +471,12 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 
   .form-header__title {
     font-family: var(--font-display);
-    font-size: clamp(28px, 3vw, 40px);
+    font-size: clamp(32px, 4.2vw, 60px);
     font-weight: 400;
     line-height: 1.05;
-    letter-spacing: 0;
+    letter-spacing: -0.01em;
     text-transform: uppercase;
-    margin: 0 0 10px;
+    margin: 0 0 16px;
   }
 
   .form-header__lead {
