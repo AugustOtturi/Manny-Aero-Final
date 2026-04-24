@@ -717,6 +717,16 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     overflow: visible !important;
   }
 
+  /* Leaflet creates a 0×0 .leaflet-proxy element used for zoom animations.
+     Its transform can have a huge translation that — combined with the
+     overflow: visible on .leaflet-map-pane above — extends the document's
+     scrollHeight by thousands of pixels (phantom blank space below the
+     footer). The proxy is invisible and we use animate:false on fitBounds,
+     so hiding it has no visible side effect. */
+  #map-container .leaflet-proxy {
+    display: none !important;
+  }
+
   /* Mobile/tablet (≤1024px): map canvas is clipped by .map__canvas (rounded card
      with inner shadow). Markers open a centered modal instead of Leaflet popups. */
   @media (max-width: 1024px) {
