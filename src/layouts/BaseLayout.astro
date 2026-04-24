@@ -2,8 +2,8 @@
 import "../styles/global.css";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
-import interHeavy from "@fontsource/inter/files/inter-latin-900-normal.woff2?url";
-import interExtraBold from "@fontsource/inter/files/inter-latin-800-normal.woff2?url";
+import bebasNeue from "@fontsource/bebas-neue/files/bebas-neue-latin-400-normal.woff2?url";
+import interBold from "@fontsource/inter/files/inter-latin-700-normal.woff2?url";
 
 type ActiveLink = "home" | "about" | "services" | "map" | "blog" | "contact";
 
@@ -92,8 +92,8 @@ const orgJsonLd = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
 
-    <link rel="preload" href={interHeavy} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={interExtraBold} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={bebasNeue} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={interBold} as="font" type="font/woff2" crossorigin />
 
     <script
       type="application/ld+json"
@@ -119,8 +119,8 @@ const orgJsonLd = {
       .app-loader__text {
         font-family: var(--font-display, var(--font-sans), sans-serif);
         font-size: clamp(36px, 6vw, 56px);
-        font-weight: 900;
-        letter-spacing: -0.02em;
+        font-weight: 400;
+        letter-spacing: -0.01em;
         text-transform: uppercase;
         color: var(--color-accent);
         text-shadow: 0 4px 24px rgba(255, 185, 0, 0.25);
