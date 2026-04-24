@@ -1,10 +1,30 @@
 ---
+import { Image } from "astro:assets";
 import GlassButton from "./ui/GlassButton.astro";
-import { EVENT_LOGOS } from "../data/events";
 import { AIRPORTS } from "../data/airports";
 
+import Logo1 from "../assets/Logo1.png";
+import Logo2 from "../assets/Logo2.png";
+import Logo3 from "../assets/Logo3.png";
+import Logo4 from "../assets/Logo4.png";
+import Logo5 from "../assets/Logo5.png";
+import Logo6 from "../assets/Logo6.png";
+import Logo7 from "../assets/Logo7.png";
+import Logo8 from "../assets/Logo8.png";
+
+const PARTNERS = [
+  { logo: Logo1, name: "FIA World Rally Championship" },
+  { logo: Logo2, name: "World Wide Technology Championship" },
+  { logo: Logo3, name: "Event partner" },
+  { logo: Logo4, name: "Event partner" },
+  { logo: Logo5, name: "Event partner" },
+  { logo: Logo6, name: "Mexico Open at Vidanta" },
+  { logo: Logo7, name: "Event partner" },
+  { logo: Logo8, name: "FIFA World Cup" },
+];
+
 // Duplicate the list for seamless marquee loop
-const marqueeItems = [...EVENT_LOGOS, ...EVENT_LOGOS];
+const marqueeItems = [...PARTNERS, ...PARTNERS];
 
 // Deduplicate airports by their (CODE) token — pick the first occurrence of each airport
 const seenCodes = new Set<string>();
@@ -46,12 +66,20 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
   <div class="marquee reveal" aria-label="Events we support">
     <div class="marquee__track">
       {
-        marqueeItems.map((logo, i) => (
+        marqueeItems.map((item, i) => (
           <span
             class="marquee__item"
-            aria-hidden={i >= EVENT_LOGOS.length ? "true" : "false"}
+            aria-hidden={i >= PARTNERS.length ? "true" : "false"}
           >
-            {logo.short}
+            <Image
+              src={item.logo}
+              alt={i >= PARTNERS.length ? "" : item.name}
+              widths={[120, 200, 280]}
+              sizes="(max-width: 640px) 120px, (max-width: 1024px) 180px, 220px"
+              loading="lazy"
+              decoding="async"
+              class="marquee__logo"
+            />
           </span>
         ))
       }
@@ -354,13 +382,16 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     }
   }
 
-  /* ── Marquee: full-width, edge-to-edge ── */
+  /* ── Marquee: full-width logo carousel on dark panel ── */
   .marquee {
     position: relative;
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-block: clamp(48px, 6vw, 80px);
+    padding-block: clamp(20px, 2.4vw, 32px);
     overflow: hidden;
+    background: rgba(10, 10, 15, 0.55);
+    border-block: 1px solid var(--color-border);
     mask-image: linear-gradient(
       90deg,
       transparent 0%,
@@ -379,36 +410,38 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 
   .marquee__track {
     display: flex;
-    gap: 48px;
+    gap: clamp(36px, 5vw, 72px);
     align-items: center;
     width: max-content;
     animation: marquee 40s linear infinite;
+    will-change: transform;
+  }
+
+  .marquee:hover .marquee__track {
+    animation-play-state: paused;
   }
 
   .marquee__item {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 120px;
-    height: 48px;
-    padding: 0 20px;
-    font-weight: 800;
-    font-size: 14px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
-    background: rgba(255, 255, 255, 0.03);
-    white-space: nowrap;
-    transition: color 0.3s var(--ease-out), border-color 0.3s var(--ease-out),
-      background-color 0.3s var(--ease-out);
+    height: clamp(40px, 5vw, 64px);
+    flex: 0 0 auto;
   }
 
-  .marquee__item:hover {
-    color: var(--color-text);
-    border-color: var(--color-border-strong);
-    background: rgba(255, 255, 255, 0.06);
+  .marquee__logo {
+    display: block;
+    height: 100%;
+    width: auto;
+    max-width: clamp(120px, 14vw, 200px);
+    object-fit: contain;
+    opacity: 0.85;
+    transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+  }
+
+  .marquee__item:hover .marquee__logo {
+    opacity: 1;
+    transform: scale(1.06);
   }
 
   @keyframes marquee {
@@ -417,6 +450,19 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     }
     100% {
       transform: translateX(-50%);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .marquee__item {
+      height: 36px;
+    }
+    .marquee__logo {
+      max-width: 110px;
+    }
+    .marquee__track {
+      gap: 28px;
+      animation-duration: 28s;
     }
   }
 
