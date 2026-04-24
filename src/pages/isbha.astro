@@ -1,0 +1,610 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+import StatsBand from "../components/StatsBand.astro";
+import GlassButton from "../components/ui/GlassButton.astro";
+import { ISBHA_MODULES } from "../data/isbhaModules";
+
+const stats = [
+  { value: "Tier 1", label: "Certification level" },
+  { value: "100%", label: "Audit pass rate" },
+  { value: "Zero", label: "Safety incidents" },
+  { value: "Bi-Annual", label: "Recertification" },
+];
+
+const sidebarItems = [
+  { id: "overview", label: "Overview" },
+  { id: "requirements", label: "Requirements" },
+  { id: "audit", label: "Audit Process" },
+  { id: "compliance", label: "Our Compliance" },
+];
+---
+
+<BaseLayout
+  title="ISBHA Program — Manny Aero"
+  description="International Standard for Business Aircraft Handling (ISBHA) alignment, audit process, and Manny Aero's compliance status."
+  activeLink="services"
+>
+  <PageHero
+    badge="Compliance Program"
+    title="ISBHA Program."
+    subtitle="The International Standard for Business Aircraft Handling establishes global safety and quality benchmarks. We proudly operate in full alignment."
+    accent="Program."
+  />
+
+  <StatsBand stats={stats} />
+
+  <section class="isbha-section">
+    <div class="container page-wrap">
+      <aside class="sidebar">
+        <div class="sidebar-title">Jump to section</div>
+        <nav class="sidebar-nav" aria-label="Page sections">
+          {
+            sidebarItems.map((item, i) => (
+              <a
+                class={`sidebar-link ${i === 0 ? "active" : ""}`}
+                data-target={item.id}
+                href={`#${item.id}`}
+              >
+                <span class="sidebar-dot" />
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </aside>
+
+      <main class="content">
+        <section class="content-section reveal" id="overview">
+          <div class="content-section-label">What is ISBHA</div>
+          <h2 class="content-section-title">
+            A Global Standard for <span class="accent">Ground Handling Excellence</span>
+          </h2>
+          <p class="content-body">
+            ISBHA (International Standard for Business Aircraft Handling) is an internationally
+            recognized audit program developed specifically for the business aviation ground
+            handling sector. It sets operational, safety, and quality benchmarks that ground
+            handlers must meet to receive certification.
+          </p>
+          <p class="content-body">
+            The program was created to bridge the gap between general aviation standards and the
+            more rigorous requirements of commercial aviation, ensuring that business aircraft
+            operators receive a consistent, audited level of service at certified locations
+            worldwide.
+          </p>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="info-card-num">200+</div>
+              <div class="info-card-label">Certified locations globally</div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-num">3yr</div>
+              <div class="info-card-label">Audit cycle</div>
+            </div>
+            <div class="info-card">
+              <div class="info-card-num">48h</div>
+              <div class="info-card-label">Max audit report turnaround</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-section reveal" id="requirements">
+          <div class="content-section-label">Key Requirements</div>
+          <h2 class="content-section-title">
+            Compliance <span class="accent">Areas</span>
+          </h2>
+          <p class="content-body">
+            ISBHA covers six primary compliance domains. Each is audited by an accredited
+            third-party auditor.
+          </p>
+
+          {
+            ISBHA_MODULES.map((mod, i) => (
+              <div class={`req-card ${i === 0 ? "open" : ""}`}>
+                <button class="req-card-header" type="button" aria-expanded={i === 0}>
+                  <span class="req-badge">{mod.badge}</span>
+                  <span class="req-title">{mod.title}</span>
+                  <span class="req-toggle">
+                    <svg viewBox="0 0 24 24">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
+                </button>
+                <div class="req-body">
+                  <ul class="req-list">
+                    {mod.items.map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                  {mod.note && <div class="note-box">{mod.note}</div>}
+                </div>
+              </div>
+            ))
+          }
+        </section>
+
+        <section class="content-section reveal" id="audit">
+          <div class="content-section-label">Audit Process</div>
+          <h2 class="content-section-title">
+            How the <span class="accent">Audit Works</span>
+          </h2>
+          <p class="content-body">
+            ISBHA audits are conducted by accredited third-party auditors approved by the program
+            administrator. The process is designed to be transparent, repeatable, and consistent
+            across all locations.
+          </p>
+          <p class="content-body">
+            The audit cycle is typically 3 years, with an option for voluntary interim audits.
+            Findings are classified as Critical, Major, or Minor, each with defined resolution
+            timelines. Certification is granted only after all Critical and Major findings are
+            resolved.
+          </p>
+          <div class="note-box">
+            Operators planning to use ISBHA-certified handlers can request a copy of the current
+            audit report directly from the handler. Manny Aero makes its certification status
+            available to clients upon request.
+          </div>
+        </section>
+
+        <section class="content-section reveal" id="compliance">
+          <div class="content-section-label">Manny Aero</div>
+          <h2 class="content-section-title">
+            Our <span class="accent">Compliance Status</span>
+          </h2>
+          <p class="content-body">
+            Manny Aero is committed to operating under ISBHA-aligned standards across all
+            locations where the program applies. Our internal quality team conducts regular
+            reviews against ISBHA module requirements, and we actively pursue third-party audit
+            certification as we expand our FBO network.
+          </p>
+          <p class="content-body">
+            For operators requiring proof of compliance documentation, our operations team can
+            provide a current compliance summary, training record excerpts, and safety
+            performance data upon execution of an NDA.
+          </p>
+        </section>
+      </main>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="isbha-cta section">
+    <div class="container">
+      <div class="isbha-cta-inner reveal">
+        <div class="isbha-cta-label">Get in touch</div>
+        <h2 class="isbha-cta-title">
+          Questions about <span class="accent">our compliance?</span>
+        </h2>
+        <p class="isbha-cta-sub">
+          Our regulatory team can walk you through our ISBHA alignment and provide documentation
+          for your audit requirements.
+        </p>
+        <div class="isbha-cta-actions">
+          <GlassButton href="/contact" variant="solid">Contact our team</GlassButton>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const OFFSET = 120;
+  const links = document.querySelectorAll<HTMLAnchorElement>(".sidebar-link");
+  const sections = Array.from(
+    document.querySelectorAll<HTMLElement>(".content-section[id]")
+  );
+
+  function getActiveId(): string | null {
+    if (sections.length === 0) return null;
+    let active = sections[0];
+    for (const s of sections) {
+      if (s.getBoundingClientRect().top <= OFFSET) active = s;
+    }
+    return active.id;
+  }
+
+  function syncSidebar() {
+    const id = getActiveId();
+    links.forEach((l) => {
+      l.classList.toggle("active", l.dataset.target === id);
+    });
+  }
+
+  window.addEventListener("scroll", syncSidebar, { passive: true });
+  syncSidebar();
+
+  links.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const target = link.dataset.target;
+      if (!target) return;
+      const t = document.getElementById(target);
+      if (!t) return;
+      window.scrollTo({
+        top: t.getBoundingClientRect().top + window.scrollY - OFFSET + 16,
+        behavior: "smooth",
+      });
+    });
+  });
+
+  // Accordion
+  document.querySelectorAll<HTMLButtonElement>(".req-card-header").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const card = btn.closest(".req-card");
+      if (!card) return;
+      const willOpen = !card.classList.contains("open");
+      card.classList.toggle("open");
+      btn.setAttribute("aria-expanded", String(willOpen));
+    });
+  });
+</script>
+
+<style>
+  .isbha-section {
+    padding-block: clamp(48px, 8vh, 96px);
+  }
+
+  .page-wrap {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 110px;
+    padding: 20px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .sidebar-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+    border-left: 2px solid transparent;
+    border-radius: 6px;
+  }
+  .sidebar-link:hover {
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .sidebar-link.active {
+    color: var(--color-accent);
+    border-left-color: var(--color-accent);
+    background: rgba(255, 185, 0, 0.08);
+    font-weight: 700;
+  }
+  .sidebar-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+  .sidebar-link.active .sidebar-dot {
+    opacity: 1;
+    background: var(--color-accent);
+  }
+
+  .content {
+    min-width: 0;
+  }
+  .content-section {
+    margin-bottom: 72px;
+  }
+  .content-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .content-section-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .content-section-label::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+
+  .content-section-title {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 3.5vw, 48px);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin: 0 0 24px;
+  }
+
+  .content-body {
+    font-size: var(--fs-body);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-block: 32px;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .info-card {
+    background: var(--color-surface);
+    padding: 28px 26px;
+  }
+  .info-card-num {
+    font-family: var(--font-display);
+    font-size: 42px;
+    font-weight: 400;
+    color: var(--color-accent);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .info-card-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .req-card {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transition: border-color 0.25s var(--ease-out);
+  }
+  .req-card:hover {
+    border-color: var(--color-border-strong);
+  }
+  .req-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 22px 26px;
+    cursor: pointer;
+    transition: background-color 0.2s var(--ease-out);
+    border: none;
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    text-align: left;
+    font-family: var(--font-sans);
+  }
+  .req-card.open .req-card-header {
+    border-bottom-color: var(--color-border);
+  }
+  .req-card-header:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .req-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    background: rgba(255, 185, 0, 0.1);
+    border: 1px solid rgba(255, 185, 0, 0.25);
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    flex-shrink: 0;
+  }
+  .req-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text);
+    flex: 1;
+    line-height: 1.3;
+  }
+  .req-toggle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.25s var(--ease-out);
+  }
+  .req-toggle svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--color-text-muted);
+    fill: none;
+    stroke-width: 2;
+    transition: transform 0.3s var(--ease-out);
+  }
+  .req-card.open .req-toggle {
+    border-color: var(--color-accent);
+  }
+  .req-card.open .req-toggle svg {
+    stroke: var(--color-accent);
+    transform: rotate(180deg);
+  }
+  .req-body {
+    display: none;
+    padding: 24px 26px;
+  }
+  .req-card.open .req-body {
+    display: block;
+  }
+  .req-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0;
+    margin: 0;
+  }
+  .req-list li {
+    display: flex;
+    gap: 14px;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.65;
+  }
+  .req-list li::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 9px;
+  }
+
+  .note-box {
+    padding: 16px 20px;
+    background: rgba(255, 185, 0, 0.07);
+    border-left: 2px solid var(--color-accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin-top: 20px;
+    font-style: italic;
+  }
+
+  /* CTA */
+  .isbha-cta {
+    padding-block: clamp(64px, 10vh, 100px);
+    text-align: center;
+    position: relative;
+  }
+  .isbha-cta-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .isbha-cta-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .isbha-cta-label::before,
+  .isbha-cta-label::after {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+  .isbha-cta-title {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 400;
+    color: var(--color-text);
+    line-height: 1.05;
+    margin: 0 0 18px;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .isbha-cta-sub {
+    font-size: var(--fs-lead);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 32px;
+  }
+  .isbha-cta-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  @media (max-width: 1024px) {
+    .page-wrap {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .sidebar {
+      position: static;
+    }
+    .sidebar-nav {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .sidebar-link {
+      border-left: none;
+      border-bottom: 2px solid transparent;
+      padding: 8px 14px;
+    }
+    .sidebar-link.active {
+      border-left-color: transparent;
+      border-bottom-color: var(--color-accent);
+    }
+    .info-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 640px) {
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+    .req-card-header {
+      padding: 18px 20px;
+      gap: 12px;
+    }
+    .req-body {
+      padding: 20px;
+    }
+  }
+</style>

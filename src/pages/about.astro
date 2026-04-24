@@ -1,0 +1,501 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+import StatsBand from "../components/StatsBand.astro";
+import GlassButton from "../components/ui/GlassButton.astro";
+
+const stats = [
+  { value: "15+", label: "Years in operation" },
+  { value: "60+", label: "Airports covered" },
+  { value: "4,000+", label: "Permits processed" },
+  { value: "24/7", label: "Operations support" },
+];
+
+const timeline = [
+  {
+    year: "2008",
+    event: "Founded in Mexico City",
+    desc: "Manny Aero begins operations at AICM, focused on permit processing and ground coordination for U.S. operators.",
+  },
+  {
+    year: "2012",
+    event: "Regional Expansion",
+    desc: "Coverage extended to Cancún, Los Cabos, and Monterrey. Full VIP ground transportation service launched.",
+  },
+  {
+    year: "2017",
+    event: "Manny's Catering Launched",
+    desc: "Sister brand established to offer in-flight gourmet catering for private aviation throughout Mexico.",
+  },
+  {
+    year: "2024",
+    event: "Tulum International",
+    desc: "Fully operational at Mexico's newest international airport from opening day — 60+ airports now covered.",
+  },
+];
+
+const team = [
+  {
+    name: "Manny Rodríguez",
+    role: "Founder & CEO",
+    bio: "20+ years in Mexican aviation regulation and ground operations. Founded Manny Aero after a decade working with AFAC and major FBO operators across the country.",
+    initials: "MR",
+  },
+  {
+    name: "Claudia Vega",
+    role: "Director of Operations",
+    bio: "Oversees daily ground handling coordination across all 60+ airports. Former AICM ramp supervisor with deep relationships throughout the handler network.",
+    initials: "CV",
+  },
+  {
+    name: "Rafael Morales",
+    role: "Head of Regulatory Affairs",
+    bio: "Specializes in AFAC permit processing, IBP applications, and SENEAM coordination. Manages a portfolio of 200+ active operator relationships.",
+    initials: "RM",
+  },
+];
+
+const values = [
+  {
+    num: "01",
+    title: "Local expertise, global standards",
+    desc: "We operate with the precision and professionalism that international operators expect, backed by relationships and knowledge that only come from 15+ years on the ground in Mexico.",
+  },
+  {
+    num: "02",
+    title: "Discretion above all",
+    desc: "Private aviation demands confidentiality. Our team treats every flight, every passenger, and every request with the same discreet professionalism — without exception.",
+  },
+  {
+    num: "03",
+    title: "Precision at every step",
+    desc: "From permit filing to ramp coordination, we leave nothing to chance. Our operations are built around verification, redundancy, and clear communication — even for last-minute requests.",
+  },
+];
+---
+
+<BaseLayout
+  title="About — Manny Aero"
+  description="Manny Aero has supported aviation operations across Mexico since 2008. Meet the team and learn our story."
+  activeLink="about"
+>
+  <PageHero
+    badge="Our Story"
+    title="Built on the ground in Mexico."
+    subtitle="We started Manny Aero because we knew Mexican aviation from the inside — and we knew operators deserved better."
+    accent="Mexico."
+  />
+
+  <StatsBand stats={stats} />
+
+  <!-- STORY -->
+  <section class="story-section section">
+    <div class="container story-grid">
+      <div class="story-sticky reveal">
+        <div class="section-label">Who we are</div>
+        <h2 class="section-title">
+          Mexico's<br /><span class="accent">aviation partner</span><br />since 2008.
+        </h2>
+      </div>
+      <div class="story-body reveal">
+        <p>
+          Manny Aero was founded in 2008 by a team of aviation professionals who had spent years
+          working within Mexico's regulatory and ground operations environment. We saw first-hand how
+          difficult it was for foreign operators to navigate an opaque system — and we built Manny
+          Aero to change that.
+        </p>
+        <p>
+          From our base in Mexico City, we grew operation by operation, airport by airport, until we
+          had the coverage and the relationships to offer something no one else could: a single
+          trusted partner for everything your aircraft needs in Mexico.
+        </p>
+        <div class="story-pull">
+          "Local knowledge isn't just an advantage in Mexico — it's the only thing that works."
+        </div>
+        <p>
+          Today, Manny Aero supports private operators, corporate flight departments, and charter
+          companies from across North America, Europe, and beyond. We handle ground logistics,
+          regulatory filings, crew services, and concierge support — so your team can focus on the
+          flight.
+        </p>
+        <p>
+          Our sister brand, Manny's Catering, extends that same standard of precision and quality
+          into in-flight dining — curated menus prepared fresh and delivered to the aircraft on
+          schedule, at any of our served locations.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="timeline-section section">
+    <div class="container">
+      <div class="timeline-header reveal">
+        <div class="section-label">Our history</div>
+        <h2 class="section-title">Key <span class="accent">milestones</span></h2>
+      </div>
+      <div class="timeline reveal">
+        {
+          timeline.map((item) => (
+            <div class="timeline-item">
+              <div class="timeline-year">{item.year}</div>
+              <div class="timeline-event">{item.event}</div>
+              <div class="timeline-desc">{item.desc}</div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="team-section section">
+    <div class="container">
+      <div class="team-header reveal">
+        <div class="section-label">The team</div>
+        <h2 class="section-title">People who <span class="accent">know Mexico</span></h2>
+      </div>
+      <div class="team-grid reveal">
+        {
+          team.map((m) => (
+            <article class="team-card">
+              <div class="team-img" aria-hidden="true">
+                <span class="team-img__initials">{m.initials}</span>
+              </div>
+              <div class="team-body">
+                <div class="team-name">{m.name}</div>
+                <div class="team-role">{m.role}</div>
+                <div class="team-bio">{m.bio}</div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- VALUES -->
+  <section class="values-section section">
+    <div class="container">
+      <div class="values-header reveal">
+        <div class="section-label">What drives us</div>
+        <h2 class="section-title">Our <span class="accent">principles</span></h2>
+      </div>
+      <div class="values-grid reveal">
+        {
+          values.map((v) => (
+            <div class="value-item">
+              <div class="value-num">{v.num}</div>
+              <div class="value-title">{v.title}</div>
+              <div class="value-desc">{v.desc}</div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="about-cta section">
+    <div class="container">
+      <div class="about-cta__inner reveal">
+        <div class="section-label about-cta__label">Work with us</div>
+        <h2 class="section-title about-cta__title">
+          Ready to fly <span class="accent">into Mexico?</span>
+        </h2>
+        <p class="about-cta__sub">
+          Send us your flight details and our team will take care of everything from permits to ramp.
+        </p>
+        <div class="about-cta__actions">
+          <GlassButton href="/contact" variant="solid">
+            Contact our team
+          </GlassButton>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section-label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0 0 24px;
+  }
+
+  /* STORY */
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .story-sticky {
+    position: sticky;
+    top: 110px;
+  }
+  .story-body p {
+    font-size: var(--fs-body);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.85;
+    margin-bottom: 22px;
+  }
+  .story-body p:last-child {
+    margin-bottom: 0;
+  }
+  .story-pull {
+    font-size: var(--fs-h3);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--color-text);
+    line-height: 1.4;
+    border-left: 2px solid var(--color-accent);
+    padding-left: 24px;
+    margin: 32px 0;
+  }
+
+  /* TIMELINE */
+  .timeline-header {
+    margin-bottom: 48px;
+  }
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .timeline-item {
+    background: var(--color-surface);
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: background-color 0.25s var(--ease-out);
+  }
+  .timeline-item:hover {
+    background: var(--color-surface-hover);
+  }
+  .timeline-year {
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 400;
+    color: var(--color-accent);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+  .timeline-event {
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.3;
+  }
+  .timeline-desc {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+  }
+
+  /* TEAM */
+  .team-header {
+    margin-bottom: 48px;
+  }
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .team-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transition:
+      transform 0.3s var(--ease-out),
+      border-color 0.3s var(--ease-out);
+  }
+  .team-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-border-strong);
+  }
+  .team-img {
+    height: 220px;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255, 185, 0, 0.12), transparent 60%),
+      linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .team-img__initials {
+    font-family: var(--font-display);
+    font-size: 72px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .team-body {
+    padding: 28px;
+  }
+  .team-name {
+    font-size: var(--fs-h3);
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--color-text);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .team-role {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 14px;
+  }
+  .team-bio {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.75;
+  }
+
+  /* VALUES */
+  .values-header {
+    margin-bottom: 48px;
+  }
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .value-item {
+    background: var(--color-surface);
+    padding: 32px 28px;
+    transition: background-color 0.25s var(--ease-out);
+  }
+  .value-item:hover {
+    background: var(--color-surface-hover);
+  }
+  .value-num {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    color: var(--color-accent);
+    margin-bottom: 16px;
+  }
+  .value-title {
+    font-size: var(--fs-h3);
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--color-text);
+    margin-bottom: 12px;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  .value-desc {
+    font-size: var(--fs-body);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.75;
+  }
+
+  /* CTA */
+  .about-cta__inner {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .about-cta__label {
+    justify-content: center;
+  }
+  .about-cta__label::before,
+  .about-cta__label::after {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+  .about-cta__title {
+    font-size: clamp(32px, 4.2vw, 56px);
+  }
+  .about-cta__sub {
+    font-size: var(--fs-lead);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 32px;
+  }
+  .about-cta__actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  @media (max-width: 1024px) {
+    .story-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .story-sticky {
+      position: static;
+    }
+    .timeline {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .team-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .values-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .timeline {
+      grid-template-columns: 1fr;
+    }
+    .team-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

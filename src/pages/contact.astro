@@ -1,0 +1,703 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+---
+
+<BaseLayout
+  title="Contact — Manny Aero"
+  description="Reach our operations team — available 24/7 for ground handling requests across Mexico."
+  activeLink="contact"
+>
+  <PageHero
+    badge="Get in touch"
+    title="Contact Manny Aero."
+    subtitle="Our operations team is available around the clock to handle your ground support needs across Mexico."
+    accent="Manny Aero."
+  >
+    <div class="hero-avail hero-enter" style="--enter-delay: 360ms">
+      <span class="hero-avail-dot"></span>
+      <span class="hero-avail-text">Operations Online</span>
+      <span class="hero-avail-sep">—</span>
+      <span class="hero-avail-sub">Available 24/7/365</span>
+    </div>
+  </PageHero>
+
+  <section class="contact-section section">
+    <div class="container page-layout">
+      <!-- FORM -->
+      <div class="form-col">
+        <div class="form-intro reveal">
+          <h2 class="form-title">
+            Send us a <span class="accent">flight request</span>
+          </h2>
+          <p class="form-sub">
+            Fill in your details and a member of our operations team will get back to you within 2
+            hours.
+          </p>
+        </div>
+
+        <div class="form-card reveal">
+          <form class="contact-form" id="contactForm" novalidate>
+            <div class="form-divider">Your Information</div>
+            <div class="form-row">
+              <label class="field">
+                <span>First Name</span>
+                <input type="text" name="firstName" placeholder="John" required />
+              </label>
+              <label class="field">
+                <span>Last Name</span>
+                <input type="text" name="lastName" placeholder="Smith" required />
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="john@operator.com" required />
+              </label>
+              <label class="field">
+                <span>Phone / WhatsApp</span>
+                <input type="tel" name="phone" placeholder="+1 555 000 0000" />
+              </label>
+            </div>
+            <label class="field field--full">
+              <span>Company / Operator</span>
+              <input type="text" name="company" placeholder="Aviation Company LLC" />
+            </label>
+
+            <div class="form-divider">Flight Details</div>
+            <div class="form-row">
+              <label class="field">
+                <span>Service Required</span>
+                <select name="service">
+                  <option value="">Select a service…</option>
+                  <option>Ground Handling</option>
+                  <option>Landing / Overflight Permit</option>
+                  <option>Flight Planning &amp; Filing</option>
+                  <option>Jet Fuel Facilitation</option>
+                  <option>VIP Ground Transportation</option>
+                  <option>Gourmet Catering</option>
+                  <option>Crew Accommodation</option>
+                  <option>Full Package</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Aircraft Type</span>
+                <input type="text" name="aircraft" placeholder="e.g. Gulfstream G550" />
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span>Arrival Airport (ICAO)</span>
+                <input type="text" name="airport" placeholder="e.g. MMMX" />
+              </label>
+              <label class="field">
+                <span>Estimated Arrival</span>
+                <input type="datetime-local" name="arrival" />
+              </label>
+            </div>
+            <label class="field field--full">
+              <span>Additional Notes</span>
+              <textarea
+                name="notes"
+                rows="5"
+                placeholder="Any special requirements, passenger count, crew details, or other information…"
+              ></textarea>
+            </label>
+
+            <div class="form-footer field--full">
+              <button type="submit" class="form-submit">
+                Send Request
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path
+                    d="M3 9H15M15 9L10 4M15 9L10 14"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <p class="form-note">
+                We respond within 2 hours.<br />For urgent requests, call us at <a
+                  href="tel:+15551234567">+1 555 123 4567</a>.
+              </p>
+            </div>
+          </form>
+        </div>
+
+        <div class="form-success" id="formSuccess" aria-live="polite">
+          <div class="success-check">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <div class="success-title">Request received</div>
+          <p class="success-desc">
+            Thank you — your flight request has been sent to our operations team. We'll be in touch
+            within 2 hours. For urgent matters, call us directly at +1 555 123 4567.
+          </p>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar reveal">
+        <div class="contact-card">
+          <div class="contact-card-label">Direct Line</div>
+          <div class="contact-card-title">Operations Center</div>
+          <div class="contact-card-body">
+            Available 24 hours a day, 7 days a week, 365 days a year for urgent requests and
+            real-time coordination.
+          </div>
+          <a href="tel:+15551234567" class="contact-card-link">
+            +1 555 123 4567
+            <svg viewBox="0 0 24 24"
+              ><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"
+              ></polyline></svg>
+          </a>
+        </div>
+        <div class="contact-card">
+          <div class="contact-card-label">Email</div>
+          <div class="contact-card-title">Operations</div>
+          <a href="mailto:ops@mannyaero.com" class="contact-card-link">ops@mannyaero.com</a>
+        </div>
+        <div class="contact-card">
+          <div class="contact-card-label">Our Offices</div>
+          <div class="office-list">
+            <div>
+              <div class="office-item-name">Mexico City (HQ)</div>
+              <div class="office-item-addr">
+                Aeropuerto Internacional<br />Benito Juárez, CDMX
+              </div>
+            </div>
+            <div>
+              <div class="office-item-name">Cancún</div>
+              <div class="office-item-addr">
+                Aeropuerto Internacional<br />de Cancún, Q. Roo
+              </div>
+            </div>
+            <div>
+              <div class="office-item-name">Los Cabos</div>
+              <div class="office-item-addr">
+                Aeropuerto Internacional<br />de Los Cabos, BCS
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="map-placeholder" aria-hidden="true">
+          <div class="map-placeholder-label">
+            Mexico Operations<br />60+ airport coverage
+          </div>
+        </div>
+        <div class="response-row">
+          <div class="response-item">
+            <div class="response-num">&lt;2h</div>
+            <div class="response-lbl">Response time</div>
+          </div>
+          <div class="response-item">
+            <div class="response-num">60+</div>
+            <div class="response-lbl">Airports</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.getElementById("contactForm") as HTMLFormElement | null;
+  const success = document.getElementById("formSuccess");
+  const intro = document.querySelector<HTMLElement>(".form-intro");
+  const card = document.querySelector<HTMLElement>(".form-card");
+
+  if (form && success) {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      if (card) card.style.display = "none";
+      if (intro) intro.style.display = "none";
+      success.classList.add("show");
+    });
+  }
+</script>
+
+<style>
+  /* Availability badge under hero title */
+  .hero-avail {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 28px;
+    padding: 10px 18px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  .hero-avail-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #5ed19a;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(94, 209, 154, 0.25);
+    animation: availPulse 2s infinite var(--ease-in-out);
+  }
+  @keyframes availPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(94, 209, 154, 0.25); }
+    50%      { box-shadow: 0 0 0 7px rgba(94, 209, 154, 0); }
+  }
+  .hero-avail-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .hero-avail-sep { color: rgba(255, 255, 255, 0.3); }
+  .hero-avail-sub {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+  }
+
+  /* Layout */
+  .page-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 56px;
+    align-items: start;
+  }
+
+  .form-intro {
+    margin-bottom: 32px;
+  }
+  .form-title {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 400;
+    color: var(--color-text);
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    text-transform: uppercase;
+    margin: 0 0 14px;
+  }
+  .form-sub {
+    font-size: var(--fs-lead);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.55;
+    margin: 0;
+    max-width: 56ch;
+  }
+
+  /* Form card (matches FinalCTA style) */
+  .form-card {
+    position: relative;
+    background: linear-gradient(
+      150deg,
+      rgba(110, 110, 118, 0.42) 0%,
+      rgba(60, 60, 68, 0.48) 55%,
+      rgba(38, 38, 44, 0.55) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-lg);
+    padding: clamp(24px, 3vw, 40px);
+    -webkit-backdrop-filter: blur(14px) saturate(1.25);
+    backdrop-filter: blur(14px) saturate(1.25);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+      0 30px 80px rgba(0, 0, 0, 0.4),
+      0 8px 24px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+  }
+  .form-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      circle at 15% 0%,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 55%
+    );
+    border-radius: inherit;
+  }
+  .form-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .contact-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 20px;
+  }
+  .form-row {
+    display: contents;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .field--full,
+  .form-divider,
+  .form-footer {
+    grid-column: 1 / -1;
+  }
+  .field > span {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 700;
+  }
+  .field input,
+  .field textarea,
+  .field select {
+    padding: 12px 16px;
+    background: #f5f5f7;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    color: #1a1a1f;
+    font-size: 14px;
+    font-family: var(--font-sans);
+    transition:
+      border-color 0.25s var(--ease-out),
+      background-color 0.25s var(--ease-out),
+      box-shadow 0.25s var(--ease-out);
+    width: 100%;
+  }
+  .field textarea {
+    border-radius: var(--radius);
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.5;
+  }
+  .field select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1.5L6 6.5L11 1.5' stroke='%238b8b95' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-color: #f5f5f7;
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: #6e6e78;
+    opacity: 1;
+  }
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(255, 185, 0, 0.25);
+  }
+
+  .form-divider {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .form-divider::before {
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+
+  .form-footer {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .form-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: var(--color-accent);
+    color: #0a0a0a;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    border: none;
+    cursor: pointer;
+    transition:
+      background-color 0.25s var(--ease-out),
+      transform 0.25s var(--ease-out);
+  }
+  .form-submit:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-1px);
+  }
+  .form-submit svg {
+    transition: transform 0.2s var(--ease-out);
+  }
+  .form-submit:hover svg {
+    transform: translateX(3px);
+  }
+  .form-note {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+  .form-note a {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+  .form-note a:hover {
+    color: var(--color-accent-hover);
+  }
+
+  /* Success state */
+  .form-success {
+    display: none;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 56px 40px;
+    text-align: center;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .form-success.show {
+    display: block;
+  }
+  .success-check {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 185, 0, 0.15);
+    border: 1px solid rgba(255, 185, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+  .success-check svg {
+    width: 26px;
+    height: 26px;
+    stroke: var(--color-accent);
+    fill: none;
+    stroke-width: 2;
+  }
+  .success-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: 400;
+    color: var(--color-text);
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .success-desc {
+    font-size: var(--fs-body);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    max-width: 48ch;
+    margin: 0 auto;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: sticky;
+    top: 110px;
+  }
+  .contact-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 24px 26px;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transition: border-color 0.25s var(--ease-out);
+  }
+  .contact-card:hover {
+    border-color: var(--color-border-strong);
+  }
+  .contact-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .contact-card-label::before {
+    content: "";
+    width: 14px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+  .contact-card-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--color-text);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .contact-card-body {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.65;
+  }
+  .contact-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-accent);
+    transition: color 0.18s;
+  }
+  .contact-card-link:hover {
+    color: var(--color-accent-hover);
+  }
+  .contact-card-link svg {
+    width: 12px;
+    height: 12px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    transition: transform 0.2s var(--ease-out);
+  }
+  .contact-card-link:hover svg {
+    transform: translateX(3px);
+  }
+
+  .office-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .office-item-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: 0.02em;
+  }
+  .office-item-addr {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin-top: 2px;
+  }
+
+  .map-placeholder {
+    position: relative;
+    height: 180px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .map-placeholder::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 12px,
+      rgba(255, 255, 255, 0.04) 12px,
+      rgba(255, 255, 255, 0.04) 13px
+    );
+  }
+  .map-placeholder-label {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .response-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .response-item {
+    background: var(--color-surface);
+    padding: 18px 22px;
+  }
+  .response-num {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 400;
+    color: var(--color-accent);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .response-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-top: 6px;
+  }
+
+  @media (max-width: 1024px) {
+    .page-layout {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .sidebar {
+      position: static;
+    }
+  }
+  @media (max-width: 640px) {
+    .contact-form {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

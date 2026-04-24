@@ -9,10 +9,10 @@ const { activeLink = "home" } = Astro.props;
 
 const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean }[] = [
   { key: "home",     label: "Home",     href: "/" },
-  { key: "about",    label: "About",    href: "#about" },
-  { key: "services", label: "Services", href: "#services", dropdown: true },
-  { key: "map",      label: "Map",      href: "#map" },
-  { key: "news",     label: "News",     href: "#news" },
+  { key: "about",    label: "About",    href: "/about" },
+  { key: "services", label: "Services", href: "/services", dropdown: true },
+  { key: "map",      label: "Map",      href: "/#map" },
+  { key: "news",     label: "News",     href: "/#news" },
 ];
 ---
 
@@ -30,11 +30,11 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
             </svg>
           </button>
           <div class="nav__dropdown" role="menu">
-            <a href="/services"              class="nav__dd-item nav__dd-item--full" role="menuitem">All Services</a>
-            <a href="/services/permits"      class="nav__dd-item" role="menuitem">Permits &amp; Authorization</a>
-            <a href="/services/isbah"        class="nav__dd-item nav__dd-item--divider" role="menuitem">IS-BAH</a>
-            <a href="/services/catering"     class="nav__dd-item" role="menuitem">Manny's Catering</a>
-            <a href="/services/chauffeur"    class="nav__dd-item" role="menuitem">Majola Chauffeur</a>
+            <a href="/services"                    class="nav__dd-item nav__dd-item--full" role="menuitem">All Services</a>
+            <a href="/permits-and-authorizations"  class="nav__dd-item" role="menuitem">Permits &amp; Authorization</a>
+            <a href="/isbha"                       class="nav__dd-item nav__dd-item--divider" role="menuitem">IS-BAH</a>
+            <a href="/services/catering"           class="nav__dd-item" role="menuitem">Manny's Catering</a>
+            <a href="/services/chauffeur"          class="nav__dd-item" role="menuitem">Majola Chauffeur</a>
           </div>
         </div>
       ) : (
@@ -43,7 +43,7 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
         </a>
       )
     ))}
-    <a href="#contact" class={`nav__item nav__item--cta ${activeLink === "contact" ? "is-active" : ""}`}>
+    <a href="/contact" class={`nav__item nav__item--cta ${activeLink === "contact" ? "is-active" : ""}`}>
       Contact
     </a>
   </nav>
@@ -70,7 +70,7 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
 
     <ul class="flyout__links">
       <li><a href="/"         class="flyout__link">Home</a></li>
-      <li><a href="#about"    class="flyout__link">About</a></li>
+      <li><a href="/about"    class="flyout__link">About</a></li>
       <li class="flyout__group">
         <button type="button" class="flyout__link flyout__link--toggle" id="flyout-services-toggle" aria-expanded="false">
           Services
@@ -79,16 +79,16 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
           </svg>
         </button>
         <ul class="flyout__sub" id="flyout-services-sub">
-          <li><a href="/services"           class="flyout__sublink flyout__sublink--all">All Services</a></li>
-          <li><a href="/services/permits"   class="flyout__sublink">Permits &amp; Authorization</a></li>
-          <li><a href="/services/isbah"     class="flyout__sublink flyout__sublink--divider">IS-BAH</a></li>
-          <li><a href="/services/catering"  class="flyout__sublink">Manny's Catering</a></li>
-          <li><a href="/services/chauffeur" class="flyout__sublink">Majola Chauffeur</a></li>
+          <li><a href="/services"                    class="flyout__sublink flyout__sublink--all">All Services</a></li>
+          <li><a href="/permits-and-authorizations"  class="flyout__sublink">Permits &amp; Authorization</a></li>
+          <li><a href="/isbha"                       class="flyout__sublink flyout__sublink--divider">IS-BAH</a></li>
+          <li><a href="/services/catering"           class="flyout__sublink">Manny's Catering</a></li>
+          <li><a href="/services/chauffeur"          class="flyout__sublink">Majola Chauffeur</a></li>
         </ul>
       </li>
-      <li><a href="#map"      class="flyout__link">Map</a></li>
-      <li><a href="#news"     class="flyout__link">News</a></li>
-      <li><a href="#contact"  class="flyout__link flyout__link--cta">Contact</a></li>
+      <li><a href="/#map"     class="flyout__link">Map</a></li>
+      <li><a href="/#news"    class="flyout__link">News</a></li>
+      <li><a href="/contact"  class="flyout__link flyout__link--cta">Contact</a></li>
     </ul>
   </nav>
 </div>

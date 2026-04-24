@@ -24,7 +24,7 @@
   --pin-orange: #f37b3a;
 
   /* Global page gradient — continuous top→bottom grey */
-  --bg-top: #ffffff;
+  --bg-top: #b9b9b9;
   --bg-bottom: #424040;
   --bg-gradient: linear-gradient(
     180deg,

@@ -1,0 +1,720 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+import StatsBand from "../components/StatsBand.astro";
+import { SERVICES } from "../data/servicesDetail";
+
+const stats = [
+  { value: "60+", label: "FBO Network" },
+  { value: "99%", label: "On-time Dispatch" },
+  { value: "24", label: "Dedicated Agents" },
+  { value: "10M+", label: "Gallons Fueled" },
+];
+---
+
+<BaseLayout
+  title="Services — Manny Aero"
+  description="Comprehensive ground handling, permits, fueling, catering and VIP services across Mexico."
+  activeLink="services"
+>
+  <PageHero
+    badge="What we do"
+    title="Unmatched Support & Logistics."
+    subtitle="We provide comprehensive ground support, handling every detail so you can focus on the flight."
+    accent="Logistics."
+  />
+
+  <StatsBand stats={stats} />
+
+  <section class="services-section section">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-label">Our services</div>
+        <h2 class="section-title">
+          Comprehensive <span class="accent">Ground Support</span><br />Across Mexico
+        </h2>
+      </div>
+
+      <div class="services-layout reveal">
+        <nav class="services-nav" id="desktopNav" aria-label="Service categories">
+          {
+            SERVICES.map((s, i) => (
+              <button
+                class={`nav-item ${i === 0 ? "active" : ""}`}
+                data-index={i}
+                type="button"
+                aria-label={s.name}
+              >
+                <span class="nav-item-text">{s.name}</span>
+                <span class="nav-arrow">
+                  <svg viewBox="0 0 24 24">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </span>
+              </button>
+            ))
+          }
+        </nav>
+        <div class="services-content" id="desktopContent">
+          {
+            SERVICES.map((s, i) => (
+              <div class={`content-panel ${i === 0 ? "active" : ""}`} data-index={i}>
+                <div class="panel-body">
+                  <div class="panel-tag">{s.tag}</div>
+                  <h3 class="panel-title" set:html={s.title.replace("\n", "<br>")} />
+                  <p class="panel-desc">{s.desc}</p>
+                  <div class="panel-features">
+                    {s.features.map((f) => (
+                      <div class="panel-feature">{f}</div>
+                    ))}
+                  </div>
+                  <a href="/contact" class="panel-cta">
+                    Request this service
+                    <svg viewBox="0 0 24 24">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </a>
+                </div>
+                <div class="panel-image">
+                  <img src={s.image} alt={s.name} loading="lazy" />
+                  <div class="panel-image-overlay" />
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="mobile-list reveal" id="mobileList">
+        {
+          SERVICES.map((s, i) => (
+            <button class="mobile-item" data-index={i} type="button">
+              <span class="mobile-item-name">{s.name}</span>
+              <svg
+                class="mobile-item-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL (mobile) -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-sheet" id="modalSheet">
+      <div class="modal-handle"></div>
+      <button class="modal-close" id="modalClose" aria-label="Close" type="button">
+        <svg viewBox="0 0 24 24"
+          ><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"
+          ></line></svg>
+      </button>
+      <div class="modal-image">
+        <img id="modalImg" src="" alt="" />
+        <div class="modal-image-overlay"></div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tag" id="modalTag"></div>
+        <h3 class="modal-title" id="modalTitle"></h3>
+        <p class="modal-desc" id="modalDesc"></p>
+        <div class="modal-features" id="modalFeatures"></div>
+        <a href="/contact" class="modal-cta">
+          Request this service
+          <svg viewBox="0 0 24 24"
+            ><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"
+            ></polyline></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { SERVICES } from "../data/servicesDetail";
+
+  // Desktop tabs
+  const navItems = document.querySelectorAll<HTMLElement>(".nav-item");
+  const panels = document.querySelectorAll<HTMLElement>(".content-panel");
+
+  navItems.forEach((el) => {
+    el.addEventListener("click", () => {
+      const idx = el.dataset.index;
+      if (idx === undefined) return;
+      navItems.forEach((n) => n.classList.remove("active"));
+      panels.forEach((p) => p.classList.remove("active"));
+      el.classList.add("active");
+      document.querySelector(`.content-panel[data-index="${idx}"]`)?.classList.add("active");
+    });
+  });
+
+  // Mobile modal
+  const overlay = document.getElementById("modalOverlay");
+  const sheet = document.getElementById("modalSheet");
+  const modalImg = document.getElementById("modalImg") as HTMLImageElement | null;
+  const modalTag = document.getElementById("modalTag");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalDesc = document.getElementById("modalDesc");
+  const modalFeatures = document.getElementById("modalFeatures");
+  const modalClose = document.getElementById("modalClose");
+
+  function openModal(idx: number) {
+    const s = SERVICES[idx];
+    if (
+      !s ||
+      !overlay ||
+      !sheet ||
+      !modalImg ||
+      !modalTag ||
+      !modalTitle ||
+      !modalDesc ||
+      !modalFeatures
+    )
+      return;
+    modalImg.src = s.image;
+    modalImg.alt = s.name;
+    modalTag.textContent = s.tag;
+    modalTitle.innerHTML = s.title.replace("\n", "<br>");
+    modalDesc.textContent = s.desc;
+    modalFeatures.innerHTML = s.features
+      .map((f) => `<div class="modal-feature">${f}</div>`)
+      .join("");
+    const body = sheet.querySelector<HTMLElement>(".modal-body");
+    if (body) body.scrollTop = 0;
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    if (!overlay) return;
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  document.querySelectorAll<HTMLElement>(".mobile-item").forEach((mi) => {
+    mi.addEventListener("click", () => {
+      const idx = Number(mi.dataset.index);
+      if (!Number.isNaN(idx)) openModal(idx);
+    });
+  });
+
+  modalClose?.addEventListener("click", closeModal);
+  overlay?.addEventListener("click", closeModal);
+  sheet?.addEventListener("click", (e) => e.stopPropagation());
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  // Swipe-down close
+  let touchStartY = 0;
+  sheet?.addEventListener(
+    "touchstart",
+    (e) => {
+      touchStartY = e.touches[0].clientY;
+    },
+    { passive: true }
+  );
+  sheet?.addEventListener(
+    "touchend",
+    (e) => {
+      const body = sheet.querySelector<HTMLElement>(".modal-body");
+      if (!body) return;
+      const swipedDown = e.changedTouches[0].clientY - touchStartY > 80;
+      if (swipedDown && body.scrollTop === 0) closeModal();
+    },
+    { passive: true }
+  );
+</script>
+
+<style>
+  .section-label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .section-header {
+    margin-bottom: 56px;
+  }
+
+  /* Desktop layout */
+  .services-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .services-nav {
+    border-right: 1px solid var(--color-border);
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 28px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    border-left: 2px solid transparent;
+    transition: all 0.25s var(--ease-out);
+    gap: 12px;
+    text-align: left;
+    font-family: var(--font-sans);
+  }
+  .nav-item:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .nav-item-text {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    transition: color 0.25s var(--ease-out);
+    flex: 1;
+  }
+  .nav-arrow {
+    width: 16px;
+    height: 16px;
+    opacity: 0;
+    transition: opacity 0.25s var(--ease-out);
+    flex-shrink: 0;
+  }
+  .nav-arrow svg {
+    width: 16px;
+    height: 16px;
+    stroke: var(--color-accent);
+    fill: none;
+    stroke-width: 1.5;
+  }
+  .nav-item:hover .nav-item-text {
+    color: var(--color-text);
+  }
+  .nav-item.active {
+    border-left-color: var(--color-accent);
+    background: rgba(255, 185, 0, 0.06);
+  }
+  .nav-item.active .nav-item-text {
+    color: var(--color-accent);
+  }
+  .nav-item.active .nav-arrow {
+    opacity: 1;
+  }
+
+  .services-content {
+    position: relative;
+    min-height: 560px;
+  }
+  .content-panel {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s var(--ease-out);
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+  .content-panel.active {
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+  }
+
+  .panel-body {
+    padding: 40px 40px 32px;
+  }
+  .panel-tag {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-tag::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 3vw, 44px);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin: 0 0 24px;
+  }
+  .panel-desc {
+    font-size: var(--fs-body);
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--color-text-muted);
+    max-width: 52ch;
+    margin: 0 0 28px;
+  }
+  .panel-features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .panel-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+  .panel-feature::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 9px;
+  }
+  .panel-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    border: 1px solid rgba(255, 185, 0, 0.35);
+    padding: 13px 26px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+    align-self: flex-start;
+    width: fit-content;
+  }
+  .panel-cta:hover {
+    background: rgba(255, 185, 0, 0.1);
+    border-color: var(--color-accent);
+  }
+  .panel-cta svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    transition: transform 0.2s var(--ease-out);
+  }
+  .panel-cta:hover svg {
+    transform: translateX(3px);
+  }
+
+  .panel-image {
+    height: 220px;
+    overflow: hidden;
+    position: relative;
+  }
+  .panel-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.6) brightness(0.55) saturate(0.85);
+    transition: transform 0.6s var(--ease-out);
+  }
+  .content-panel.active .panel-image img {
+    transform: scale(1.02);
+  }
+  .panel-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(10, 10, 15, 0.55) 0%,
+      rgba(10, 10, 15, 0) 45%
+    );
+  }
+
+  /* Mobile list */
+  .mobile-list {
+    display: none;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  .mobile-item {
+    border: none;
+    background: transparent;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background-color 0.2s var(--ease-out);
+    text-align: left;
+    font-family: var(--font-sans);
+  }
+  .mobile-item:last-child {
+    border-bottom: none;
+  }
+  .mobile-item:active {
+    background: rgba(255, 185, 0, 0.08);
+  }
+  .mobile-item-name {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text);
+  }
+  .mobile-item-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  /* Mobile modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.7);
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 12px;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open {
+    display: flex;
+  }
+  .modal-sheet {
+    background: rgba(18, 18, 24, 0.96);
+    border: 1px solid var(--color-border-strong);
+    border-radius: 20px 20px 16px 16px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 82vh;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(110%);
+    transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+    position: relative;
+    box-shadow: 0 -4px 40px rgba(0, 0, 0, 0.6);
+    margin-bottom: 20px;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+  }
+  .modal-overlay.open .modal-sheet {
+    transform: translateY(0);
+  }
+  .modal-handle {
+    width: 44px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 2px;
+    margin: 12px auto 0;
+    flex-shrink: 0;
+  }
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    color: var(--color-text-muted);
+    z-index: 10;
+    transition: all 0.2s var(--ease-out);
+  }
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--color-text);
+  }
+  .modal-close svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+  }
+  .modal-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-top: 10px;
+    position: relative;
+  }
+  .modal-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.6) brightness(0.6) saturate(0.85);
+  }
+  .modal-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(18, 18, 24, 0) 60%,
+      rgba(18, 18, 24, 0.85) 100%
+    );
+  }
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 28px;
+  }
+  .modal-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal-tag::before {
+    content: "";
+    width: 16px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin: 0 0 16px;
+  }
+  .modal-desc {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+    margin: 0 0 24px;
+  }
+  .modal-features {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .modal-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+  }
+  .modal-feature::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  .modal-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    border: 1px solid rgba(255, 185, 0, 0.4);
+    padding: 16px 24px;
+    border-radius: var(--radius-pill);
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+  }
+  .modal-cta:hover,
+  .modal-cta:active {
+    background: rgba(255, 185, 0, 0.1);
+    border-color: var(--color-accent);
+  }
+  .modal-cta svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+  }
+
+  @media (max-width: 1024px) {
+    .services-layout {
+      display: none;
+    }
+    .mobile-list {
+      display: flex;
+    }
+  }
+</style>

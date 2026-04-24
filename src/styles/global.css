@@ -215,7 +215,19 @@ button {
 .services__title,
 .map__title,
 .final__title,
-.form-header__title {
+.form-header__title,
+.page-hero__title,
+.section-title,
+.story-sticky .section-title,
+.timeline-header .section-title,
+.team-header .section-title,
+.values-header .section-title,
+.content-section-title,
+.isbha-cta-title,
+.form-title,
+.downloads-title,
+.panel-title,
+.modal-title {
   color: var(--color-text);
   text-shadow:
     0 0 18px rgba(255, 255, 255, 0.65),

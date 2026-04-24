@@ -24,6 +24,8 @@ const {
 const canonicalURL = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImageURL = new URL(ogImage, Astro.site).toString();
 
+const isHome = activeLink === "home";
+
 const orgJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -158,13 +160,20 @@ const orgJsonLd = {
     <slot name="head" />
   </head>
   <body data-active-link={activeLink}>
-    <div class="app-loader" id="app-loader" aria-hidden="true">
-      <span class="app-loader__text">Manny Aero</span>
-      <div class="app-loader__bar"><span></span></div>
-    </div>
+    {isHome && (
+      <div class="app-loader" id="app-loader" aria-hidden="true">
+        <span class="app-loader__text">Manny Aero</span>
+        <div class="app-loader__bar"><span></span></div>
+      </div>
+    )}
 
-    <script is:inline>
+    <script is:inline define:vars={{ isHome }}>
       (function () {
+        if (!isHome) {
+          document.documentElement.classList.add("is-ready");
+          return;
+        }
+
         var loader = document.getElementById("app-loader");
         var start = performance.now();
         var MIN_SHOW = 1100;

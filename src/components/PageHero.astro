@@ -1,0 +1,79 @@
+---
+import GlassPill from "./ui/GlassPill.astro";
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  accent?: string;
+}
+
+const { title, subtitle, badge, accent } = Astro.props;
+
+const titleHtml = accent && title.includes(accent)
+  ? title.replace(accent, `<span class="accent">${accent}</span>`)
+  : title;
+---
+
+<section class="page-hero" aria-labelledby="page-hero-title">
+  <div class="container">
+    {badge && (
+      <div class="page-hero__badge hero-enter" style="--enter-delay: 0ms">
+        <GlassPill>{badge}</GlassPill>
+      </div>
+    )}
+    <h1
+      id="page-hero-title"
+      class="page-hero__title hero-enter"
+      style="--enter-delay: 120ms"
+      set:html={titleHtml}
+    />
+    {subtitle && (
+      <p class="page-hero__subtitle hero-enter" style="--enter-delay: 240ms">
+        {subtitle}
+      </p>
+    )}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    padding-top: clamp(140px, 18vh, 200px);
+    padding-bottom: clamp(48px, 6vh, 72px);
+  }
+
+  .page-hero__badge {
+    margin-bottom: 24px;
+  }
+
+  .page-hero__title {
+    font-family: var(--font-display);
+    font-size: clamp(44px, 6vw, 80px);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin: 0 0 24px;
+    max-width: 18ch;
+  }
+
+  .page-hero__subtitle {
+    font-size: var(--fs-lead);
+    line-height: 1.55;
+    color: var(--color-text-muted);
+    margin: 0;
+    max-width: 60ch;
+    font-weight: 400;
+  }
+
+  @media (max-width: 768px) {
+    .page-hero {
+      padding-top: 120px;
+    }
+    .page-hero__subtitle {
+      font-size: var(--fs-body);
+    }
+  }
+</style>
