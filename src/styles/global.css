@@ -207,38 +207,19 @@ button {
 }
 
 /* ---------------------------------------------------------
- * Polished shine for white display titles
- * Subtle white→silver gradient + soft halo + dark legibility shadow
+ * Soft white glow for display titles
+ * Pure white letters + subtle white halo + dark legibility shadow
  * --------------------------------------------------------- */
 .hero__title,
 .subhero__title,
 .services__title,
 .map__title,
 .final__title {
-  background: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #ffffff 45%,
-    #d4d4d4 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  filter:
-    drop-shadow(0 0 22px rgba(255, 255, 255, 0.18))
-    drop-shadow(0 2px 16px rgba(0, 0, 0, 0.35));
-}
-
-/* Keep yellow accent spans inside titles unaffected by the gradient fill */
-.hero__title .accent,
-.subhero__title .accent,
-.services__title .accent,
-.map__title .accent,
-.final__title .accent {
-  background: none;
-  -webkit-text-fill-color: var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-text);
+  text-shadow:
+    0 0 18px rgba(255, 255, 255, 0.35),
+    0 0 42px rgba(255, 255, 255, 0.18),
+    0 2px 18px rgba(0, 0, 0, 0.4);
 }
 
 .muted {
