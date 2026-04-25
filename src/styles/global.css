@@ -132,7 +132,11 @@ body {
   --blob-y: var(--blob-3-y);
 }
 
-/* Noise — fixed grain overlay via SVG feTurbulence filter */
+/* Noise — fixed grain overlay, tiled SVG approach.
+   The SVG uses stitchTiles="stitch" so the 200×200 tile is seamless.
+   Applied as background-image instead of filter: the browser rasterizes
+   once at 200×200 and tiles — orders of magnitude cheaper than running
+   feTurbulence over the full viewport on every paint. Works on mobile. */
 .bg-noise {
   position: fixed;
   top: 0;
@@ -142,14 +146,20 @@ body {
   z-index: 1;
   pointer-events: none;
   opacity: var(--noise-opacity);
-  filter: url(#grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
 }
 
 /* Disable decorative bg on mobile — expensive on GPU, barely visible on small screens */
 @media (max-width: 768px) {
-  .bg-blobs,
-  .bg-noise {
+  /* Blobs stay off — backdrop-filter blur on large gradients is still heavy */
+  .bg-blobs {
     display: none;
+  }
+  /* Noise stays on — tile approach is GPU-friendly, rasterizes 200×200 once */
+  .bg-noise {
+    opacity: 0.45; /* slightly lower than desktop (0.6) — grain reads stronger on small screens */
   }
 
   /* Clamp all glass blur effects on mobile — heavy on GPU rasterization */
