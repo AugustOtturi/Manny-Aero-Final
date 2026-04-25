@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import bebasNeue from "@fontsource/bebas-neue/files/bebas-neue-latin-400-normal.woff2?url";
 import interBold from "@fontsource/inter/files/inter-latin-700-normal.woff2?url";
-import aileronLight from "../assets/fonts/aileron.light.otf?url";
+import aileronRegular from "../assets/fonts/aileron.regular.otf?url";
 
 type ActiveLink = "home" | "about" | "services" | "map" | "blog" | "contact";
 
@@ -97,7 +97,7 @@ const orgJsonLd = {
 
     <link rel="preload" href={bebasNeue} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={interBold} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={aileronLight} as="font" type="font/otf" crossorigin />
+    <link rel="preload" href={aileronRegular} as="font" type="font/otf" crossorigin />
 
     <script
       type="application/ld+json"

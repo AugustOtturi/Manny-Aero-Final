@@ -104,7 +104,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
         >
           <label class="field">
             <span>Name</span>
-            <input type="text" name="name" required autocomplete="name" placeholder="Your full name" />
+            <input type="text" name="name" required autocomplete="name" placeholder="John Smith" />
           </label>
 
           <label class="field">
@@ -119,7 +119,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 
           <label class="field">
             <span>Company</span>
-            <input type="text" name="company" autocomplete="organization" placeholder="Your company name" />
+            <input type="text" name="company" autocomplete="organization" placeholder="Aviation Company LLC" />
           </label>
 
           <div class="flights field--full" data-flights>
@@ -144,7 +144,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 
           <label class="field field--full">
             <span>Leave us a message</span>
-            <textarea name="message" rows="5" required placeholder="Tell us about your operation — dates, locations, crew size, anything we should know."></textarea>
+            <textarea name="message" rows="5" required placeholder="e.g. 4 PAX arriving MMTO on Apr 28 at 14:30Z — need ground handling and catering for crew of 2."></textarea>
           </label>
 
           <div class="form__actions field--full">
@@ -188,22 +188,22 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     <div class="flight__body">
       <label class="field">
         <span>PAX</span>
-        <input type="number" min="0" inputmode="numeric" data-key="PAX" placeholder="Number of passengers" />
+        <input type="number" min="0" inputmode="numeric" data-key="PAX" placeholder="e.g. 4" />
       </label>
 
       <label class="field">
         <span>Crew</span>
-        <input type="number" min="0" inputmode="numeric" data-key="CREW" placeholder="Number of crew members" />
+        <input type="number" min="0" inputmode="numeric" data-key="CREW" placeholder="e.g. 2" />
       </label>
 
       <label class="field">
         <span>Aircraft type</span>
-        <input type="text" data-key="AIRCRAFT TYPE" placeholder="Enter the aircraft type" />
+        <input type="text" data-key="AIRCRAFT TYPE" placeholder="e.g. Gulfstream G550" />
       </label>
 
       <label class="field">
         <span>Tail number</span>
-        <input type="text" data-key="TAIL NUMBER" placeholder="Enter the tail number" />
+        <input type="text" data-key="TAIL NUMBER" placeholder="e.g. N12345" />
       </label>
 
       <label class="field">
