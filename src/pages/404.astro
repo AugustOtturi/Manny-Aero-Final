@@ -76,12 +76,13 @@ import GlassButton from "../components/ui/GlassButton.astro";
 <style>
   .notfound {
     position: relative;
-    min-height: calc(100svh - 0px);
+    min-height: 100svh;
+    max-height: 100svh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-block: clamp(80px, 12vh, 140px);
-    padding-top: clamp(120px, 14vh, 180px);
+    padding: clamp(96px, 12vh, 130px) var(--pad-x) clamp(36px, 5vh, 60px);
+    overflow: hidden;
   }
 
   .notfound__inner {
@@ -90,12 +91,28 @@ import GlassButton from "../components/ui/GlassButton.astro";
     align-items: center;
     text-align: center;
     max-width: 760px;
+    gap: clamp(8px, 1.4vh, 14px);
   }
 
   .notfound__lottie {
-    width: clamp(220px, 32vw, 360px);
-    height: clamp(220px, 32vw, 360px);
-    margin-bottom: 8px;
+    /* Cap by both width AND viewport height so it never pushes the
+       rest of the content past 100svh on short displays. */
+    width: min(clamp(320px, 48vw, 560px), 46vh);
+    height: min(clamp(320px, 48vw, 560px), 46vh);
+    margin-bottom: clamp(4px, 0.6vh, 10px);
+    /* Tint the Lottie to brand yellow (#ffb900-ish). The paper plane is
+       a dark-blue silhouette; brightness(0)+invert(1) flattens it to
+       white, then sepia+saturate+hue-rotate shifts it to gold. */
+    filter:
+      brightness(0)
+      saturate(100%)
+      invert(72%)
+      sepia(91%)
+      saturate(1320%)
+      hue-rotate(2deg)
+      brightness(106%)
+      contrast(105%)
+      drop-shadow(0 0 28px rgba(255, 185, 0, 0.45));
   }
 
   .notfound__lottie lottie-player {
@@ -105,12 +122,12 @@ import GlassButton from "../components/ui/GlassButton.astro";
 
   .notfound__code {
     font-family: var(--font-display);
-    font-size: clamp(72px, 12vw, 140px);
+    font-size: clamp(56px, 9vw, 108px);
     font-weight: 400;
     letter-spacing: -0.02em;
     line-height: 0.9;
     color: var(--color-accent);
-    margin: 0 0 12px;
+    margin: 0;
     text-shadow:
       0 0 24px rgba(255, 185, 0, 0.45),
       0 0 60px rgba(255, 185, 0, 0.2);
@@ -118,13 +135,13 @@ import GlassButton from "../components/ui/GlassButton.astro";
 
   .notfound__title {
     font-family: var(--font-display);
-    font-size: clamp(32px, 4.6vw, 64px);
+    font-size: clamp(28px, 3.8vw, 52px);
     font-weight: 400;
     letter-spacing: -0.01em;
     line-height: 1.05;
     text-transform: uppercase;
     color: var(--color-text);
-    margin: 0 0 18px;
+    margin: 0;
   }
 
   .notfound__title .accent {
@@ -132,11 +149,11 @@ import GlassButton from "../components/ui/GlassButton.astro";
   }
 
   .notfound__lead {
-    font-size: var(--fs-lead);
-    line-height: 1.55;
+    font-size: clamp(15px, 1.4vw, 18px);
+    line-height: 1.5;
     color: var(--color-text);
     max-width: 520px;
-    margin: 0 0 36px;
+    margin: 0 0 clamp(8px, 1.6vh, 16px);
   }
 
   .notfound__cta {
@@ -147,6 +164,9 @@ import GlassButton from "../components/ui/GlassButton.astro";
   }
 
   @media (max-width: 640px) {
+    .notfound {
+      padding-top: clamp(84px, 11vh, 110px);
+    }
     .notfound__cta {
       flex-direction: column;
       width: 100%;
@@ -156,8 +176,16 @@ import GlassButton from "../components/ui/GlassButton.astro";
       width: 100%;
       justify-content: center;
     }
-    .notfound__lead {
-      margin-bottom: 28px;
+  }
+
+  @media (max-height: 720px) {
+    /* Short viewports: shrink the Lottie further so the CTAs stay in view */
+    .notfound__lottie {
+      width: min(clamp(220px, 32vw, 360px), 30vh);
+      height: min(clamp(220px, 32vw, 360px), 30vh);
+    }
+    .notfound__code {
+      font-size: clamp(56px, 9vw, 96px);
     }
   }
 </style>
