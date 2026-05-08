@@ -5,25 +5,11 @@ import GlassButton from "../components/ui/GlassButton.astro";
 
 <BaseLayout title="404 — Page not found | Manny Aero" activeLink="home">
   <Fragment slot="head">
-    <script
-      src="https://unpkg.com/@lottiefiles/lottie-player@2.0.8/dist/lottie-player.js"
-      defer
-    ></script>
     <meta name="robots" content="noindex" />
   </Fragment>
 
   <section class="notfound" aria-labelledby="notfound-title">
     <div class="container notfound__inner">
-      <div class="notfound__lottie reveal" aria-hidden="true">
-        <lottie-player
-          src="https://assets3.lottiefiles.com/packages/lf20_x62chJ.json"
-          background="transparent"
-          speed="1"
-          loop
-          autoplay
-        ></lottie-player>
-      </div>
-
       <p class="notfound__code reveal">404</p>
       <h1 id="notfound-title" class="notfound__title reveal">
         Lost in the <span class="accent">airspace</span>?
@@ -89,48 +75,24 @@ import GlassButton from "../components/ui/GlassButton.astro";
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
     max-width: 760px;
-    gap: clamp(8px, 1.4vh, 14px);
-  }
-
-  .notfound__lottie {
-    /* Cap by both width AND viewport height so it never pushes the
-       rest of the content past 100svh on short displays. */
-    width: min(clamp(320px, 48vw, 560px), 46vh);
-    height: min(clamp(320px, 48vw, 560px), 46vh);
-    margin-bottom: clamp(4px, 0.6vh, 10px);
-    /* Tint the Lottie to brand yellow (#ffb900-ish). The paper plane is
-       a dark-blue silhouette; brightness(0)+invert(1) flattens it to
-       white, then sepia+saturate+hue-rotate shifts it to gold. */
-    filter:
-      brightness(0)
-      saturate(100%)
-      invert(72%)
-      sepia(91%)
-      saturate(1320%)
-      hue-rotate(2deg)
-      brightness(106%)
-      contrast(105%)
-      drop-shadow(0 0 28px rgba(255, 185, 0, 0.45));
-  }
-
-  .notfound__lottie lottie-player {
     width: 100%;
-    height: 100%;
+    gap: clamp(14px, 2.4vh, 28px);
   }
 
   .notfound__code {
     font-family: var(--font-display);
-    font-size: clamp(56px, 9vw, 108px);
+    font-size: clamp(140px, 22vw, 280px);
     font-weight: 400;
-    letter-spacing: -0.02em;
-    line-height: 0.9;
+    letter-spacing: -0.03em;
+    line-height: 0.85;
     color: var(--color-accent);
     margin: 0;
     text-shadow:
-      0 0 24px rgba(255, 185, 0, 0.45),
-      0 0 60px rgba(255, 185, 0, 0.2);
+      0 0 36px rgba(255, 185, 0, 0.5),
+      0 0 90px rgba(255, 185, 0, 0.22);
   }
 
   .notfound__title {
@@ -179,13 +141,9 @@ import GlassButton from "../components/ui/GlassButton.astro";
   }
 
   @media (max-height: 720px) {
-    /* Short viewports: shrink the Lottie further so the CTAs stay in view */
-    .notfound__lottie {
-      width: min(clamp(220px, 32vw, 360px), 30vh);
-      height: min(clamp(220px, 32vw, 360px), 30vh);
-    }
+    /* Short viewports: shrink the 404 so the CTAs stay in view */
     .notfound__code {
-      font-size: clamp(56px, 9vw, 96px);
+      font-size: clamp(110px, 18vw, 200px);
     }
   }
 </style>
