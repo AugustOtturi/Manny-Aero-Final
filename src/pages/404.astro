@@ -1,0 +1,163 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GlassButton from "../components/ui/GlassButton.astro";
+---
+
+<BaseLayout title="404 — Page not found | Manny Aero" activeLink="home">
+  <Fragment slot="head">
+    <script
+      src="https://unpkg.com/@lottiefiles/lottie-player@2.0.8/dist/lottie-player.js"
+      defer
+    ></script>
+    <meta name="robots" content="noindex" />
+  </Fragment>
+
+  <section class="notfound" aria-labelledby="notfound-title">
+    <div class="container notfound__inner">
+      <div class="notfound__lottie reveal" aria-hidden="true">
+        <lottie-player
+          src="https://assets3.lottiefiles.com/packages/lf20_x62chJ.json"
+          background="transparent"
+          speed="1"
+          loop
+          autoplay
+        ></lottie-player>
+      </div>
+
+      <p class="notfound__code reveal">404</p>
+      <h1 id="notfound-title" class="notfound__title reveal">
+        Lost in the <span class="accent">airspace</span>?
+      </h1>
+      <p class="notfound__lead reveal">
+        The page you were looking for couldn't be found — but our ops team is
+        always reachable, 24/7.
+      </p>
+
+      <div class="notfound__cta reveal">
+        <GlassButton href="/" variant="glass">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 18 18"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M15 9H3M3 9L8 4M3 9L8 14"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+          Back to Home
+        </GlassButton>
+        <GlassButton href="/contact" variant="solid">
+          Contact Us
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 18 18"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M3 9H15M15 9L10 4M15 9L10 14"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </GlassButton>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    position: relative;
+    min-height: calc(100svh - 0px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: clamp(80px, 12vh, 140px);
+    padding-top: clamp(120px, 14vh, 180px);
+  }
+
+  .notfound__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 760px;
+  }
+
+  .notfound__lottie {
+    width: clamp(220px, 32vw, 360px);
+    height: clamp(220px, 32vw, 360px);
+    margin-bottom: 8px;
+  }
+
+  .notfound__lottie lottie-player {
+    width: 100%;
+    height: 100%;
+  }
+
+  .notfound__code {
+    font-family: var(--font-display);
+    font-size: clamp(72px, 12vw, 140px);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+    color: var(--color-accent);
+    margin: 0 0 12px;
+    text-shadow:
+      0 0 24px rgba(255, 185, 0, 0.45),
+      0 0 60px rgba(255, 185, 0, 0.2);
+  }
+
+  .notfound__title {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4.6vw, 64px);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin: 0 0 18px;
+  }
+
+  .notfound__title .accent {
+    color: var(--color-accent);
+  }
+
+  .notfound__lead {
+    font-size: var(--fs-lead);
+    line-height: 1.55;
+    color: var(--color-text);
+    max-width: 520px;
+    margin: 0 0 36px;
+  }
+
+  .notfound__cta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  @media (max-width: 640px) {
+    .notfound__cta {
+      flex-direction: column;
+      width: 100%;
+      max-width: 320px;
+    }
+    .notfound__cta :global(.gbtn) {
+      width: 100%;
+      justify-content: center;
+    }
+    .notfound__lead {
+      margin-bottom: 28px;
+    }
+  }
+</style>

@@ -276,7 +276,8 @@ button {
 .form-title,
 .downloads-title,
 .panel-title,
-.modal-title {
+.modal-title,
+.notfound__title {
   color: var(--color-text);
   text-shadow:
     0 0 18px rgba(255, 255, 255, 0.65),
