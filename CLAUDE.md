@@ -57,6 +57,7 @@ src/
     MapSection.astro, FinalCTA.astro, Navbar.astro, Footer.astro
     PageHero.astro             # internal-page hero (badge + title + subtitle, no video/photo)
     StatsBand.astro            # 4-up stats strip (glass cards)
+    FloatingContact.astro      # OPS 24/7 yellow-glass module, fixed right side, persistent on every page
     ui/GlassButton.astro, ui/GlassPill.astro
   data/
     airports.ts                # 80+ airports for the map
@@ -102,12 +103,34 @@ src/
 - Anchor links (`/#map`, `/#news`) prefix with `/` so they work from any page (route + scroll).
 - Services dropdown lists All Services, Permits & Authorization, IS-BAH (real routes), plus Manny's Catering and Majola Chauffeur (placeholders that 404 — those pages are not built yet).
 
+### Hero logo positioning
+
+- Logo lives inside `.hero__logo-wrap` (absolute, top:20px, full width) which is also a `.container` and **explicitly capped at `max-width: 1100px`** to match `.hero__inner`. Without that cap the logo would inherit the default container max (1400px) and end up at a different X column than the title.
+
+### CTAs — unified pattern
+
+All primary CTAs share the same hover language: white inset top/bottom border at rest, **−2px lift** on hover, **yellow border + amber glow** on hover. Geometry is shared at `.gbtn` (`14px 28px` / `15px` / `weight 600`):
+- `.gbtn` (3 variants: glass, outline, solid) — used by Hero, SubHero, FinalCTA marquee, etc.
+- `.form__submit` — reuses the same metrics manually so the form CTA matches.
+- `.nav__item--cta` (Contact in navbar) — keeps its smaller pill size for the navbar layout but shares the hover language.
+
+### Floating OPS 24/7 module
+
+- `<FloatingContact />` mounts in `BaseLayout.astro` so it appears on every page.
+- Fixed `right: 18px; top: 38%` (offset above center so it doesn't sit dead-center). `z-index: 80` (above navbar 50, below mobile flyout 100).
+- **Yellow-tinted glass** (`rgba(255, 185, 0, 0.32)` background, 1.5px gold border, white inset). Distinct from the navbar's neutral glass on purpose — it's the brand-colored "always available" channel.
+- Hidden during the loader via `html:not(.is-ready) .float-ops { opacity: 0 }`.
+- Mobile: smaller padding/icons (28-30px circles), still visible. Don't hide on mobile — the client wants it persistent.
+- Email/phone links are placeholders (`href="#"`) — wire them when the client provides numbers.
+
 ## Visual system (tokens.css)
 
 - `--color-accent: #ffb900` (yellow — used for accents, dots, hover states)
 - `--color-text: #ffffff`
-- `--font-display`: Bebas Neue, `--font-sans`: Inter
-- `--bg-gradient`: light gray (`#b9b9b9`) → dark gray (`#424040`) vertical, applied site-wide (index and internal pages share it).
+- `--color-text-muted: #ffffff` — **pure white**, not a transparent muted variant. The client wanted all subtitles/leads/descriptions in pure white instead of `rgba(255,255,255,0.7)`. Hierarchy comes from font size and weight, not opacity. Don't reintroduce alpha here without a new design decision.
+- `--color-text-dim: rgba(255, 255, 255, 0.55)` — the only "muted" tier left, for low-priority hint text (e.g. flight repeater hints).
+- `--font-display`: Bebas Neue, `--font-sans`: Aileron (with Inter fallback)
+- `--bg-gradient`: light gray (`#b9b9b9`) → dark gray (`#424040`) vertical, applied site-wide (index and internal pages share it). Stretched to full body height (`background-size: 100% 100%`) so the visual pace differs between long/short pages — known limitation, the client is aware.
 - Glass tokens: `--color-surface` (white 6%), `--color-surface-hover` (10%), `--color-border` (12%), `--color-border-strong` (18%).
 - Decorative `.bg-blobs` and `.bg-noise` layers — disabled on mobile in `global.css` for GPU cost.
 
@@ -121,6 +144,9 @@ src/
 - **Adding `font-display: swap`** comes free with `@fontsource` — don't override it.
 - **Don't use Google Fonts CDN.** Self-host via `@fontsource/<font>` so the `.htaccess` 1y immutable cache rule applies and there are zero third-party requests.
 - **Don't extend `services.ts` with rich fields** — it's used by `ServiceCards.astro` on the index and only needs `slug`, `title`, `href`, `tone`. Rich data (tag, desc, features, image) lives in `servicesDetail.ts` for the `/services` page.
+- **Don't relocate the map filter pills inside the canvas.** Tried as a fix for the navbar overlap on scroll, the client rejected it. Pills stay above the map.
+- **Don't switch the body gradient to `background-attachment: fixed`** to "unify" page heights. Tried, the client rejected it. The current stretch-per-page behavior is intentional.
+- **Don't add a 3-side / asymmetric white inset border to cards.** Tried (left+top+bottom only, 2px white) so the cards felt outlined, the client rejected it. The cards keep the original full-perimeter `inset 0 0 0 1px rgba(255,255,255,0.35)` ring.
 
 ## Deploy / hosting specifics
 

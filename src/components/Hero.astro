@@ -31,9 +31,11 @@ import heroVideo from "../assets/hero-manny-final.mp4?url";
     <div class="hero__overlay"></div>
   </div>
 
-  <a href="/" class="hero__logo hero-enter" style="--enter-delay: 360ms" aria-label="Manny Aero — Home">
-    <img src="/logo-manny.svg" alt="Manny Aero" width="500" height="294" />
-  </a>
+  <div class="hero__logo-wrap container" aria-hidden="false">
+    <a href="/" class="hero__logo hero-enter" style="--enter-delay: 360ms" aria-label="Manny Aero — Home">
+      <img src="/logo-manny.svg" alt="Manny Aero" width="500" height="294" />
+    </a>
+  </div>
 
   <div class="hero__inner container">
     <p class="hero__super hero-enter" style="--enter-delay: 0ms">With Manny, Mexico is yours!</p>
@@ -142,19 +144,26 @@ import heroVideo from "../assets/hero-manny-final.mp4?url";
     );
   }
 
-  .hero__logo {
+  .hero__logo-wrap {
     position: absolute;
-    top: 32px;
-    left: var(--pad-x);
+    top: 20px;
+    left: 0;
+    right: 0;
     z-index: 10;
+    pointer-events: none;
+    max-width: 1100px;
+  }
+
+  .hero__logo {
     display: inline-flex;
     align-items: center;
     line-height: 0;
+    pointer-events: auto;
   }
 
   .hero__logo img {
     display: block;
-    height: 100px;
+    height: 76px;
     width: auto;
     filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.5));
   }
@@ -169,7 +178,7 @@ import heroVideo from "../assets/hero-manny-final.mp4?url";
     font-family: var(--font-display);
     font-size: clamp(18px, 1.6vw, 24px);
     font-weight: 400;
-    letter-spacing: 0.28em;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: var(--color-text);
     margin-bottom: 28px;
@@ -223,11 +232,11 @@ import heroVideo from "../assets/hero-manny-final.mp4?url";
     .hero__title {
       margin-bottom: 32px;
     }
-    .hero__logo {
-      top: 24px;
+    .hero__logo-wrap {
+      top: 14px;
     }
     .hero__logo img {
-      height: 64px;
+      height: 52px;
     }
   }
 
