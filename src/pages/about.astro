@@ -1,89 +1,94 @@
 ---
+import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import StatsBand from "../components/StatsBand.astro";
 import GlassButton from "../components/ui/GlassButton.astro";
+import manuelImg from "../assets/photos/manuelceo.webp";
+import mariaImg from "../assets/photos/mariajosemannyscatering.webp";
+import emilioImg from "../assets/photos/emiliogerente.webp";
 
 const stats = [
-  { value: "15+", label: "Years in operation" },
-  { value: "60+", label: "Airports covered" },
+  { value: "25+", label: "Years in operation" },
+  { value: "70+", label: "Airports covered" },
   { value: "4,000+", label: "Permits processed" },
   { value: "24/7", label: "Operations support" },
 ];
 
 const timeline = [
   {
-    year: "2008",
-    event: "Founded in Mexico City",
-    desc: "Manny Aero begins operations at AICM, focused on permit processing and ground coordination for U.S. operators.",
+    year: "1997",
+    event: "Founded in Toluca, Mexico",
+    desc: "Manny Aviation Services was founded with a vision to deliver world-class ground handling and aviation support services throughout the country.",
   },
   {
-    year: "2012",
-    event: "Regional Expansion",
-    desc: "Coverage extended to Cancún, Los Cabos, and Monterrey. Full VIP ground transportation service launched.",
+    year: "2011–2013",
+    event: "Best FBO Mexican Handler",
+    desc: "Honored three consecutive years as “Best FBO Mexican Handler”, reinforcing Manny's reputation as a trusted aviation partner in Mexico.",
   },
   {
-    year: "2017",
-    event: "Manny's Catering Launched",
-    desc: "Sister brand established to offer in-flight gourmet catering for private aviation throughout Mexico.",
+    year: "2016",
+    event: "IS-BAH Certified",
+    desc: "After more than two years of preparation, Manny became the first ground-support coordination company in Mexico to obtain IS-BAH safety certification.",
   },
   {
-    year: "2024",
-    event: "Tulum International",
-    desc: "Fully operational at Mexico's newest international airport from opening day — 60+ airports now covered.",
+    year: "2026",
+    event: "10 Years of IS-BAH",
+    desc: "Manny proudly celebrates a decade of IS-BAH certification, reaffirming its commitment to the highest international standards of safety and operational excellence.",
   },
 ];
 
 const team = [
   {
-    name: "Manny Rodríguez",
-    role: "Founder & CEO",
-    bio: "20+ years in Mexican aviation regulation and ground operations. Founded Manny Aero after a decade working with AFAC and major FBO operators across the country.",
-    initials: "MR",
+    name: "Manuel RomeroVargas",
+    role: "CEO",
+    bio: "Aviation industry leader with more than 30 years of experience in business aviation, recognized for driving operational excellence, safety, and world-class aviation support services throughout Mexico.",
+    img: manuelImg,
+    link: "/founder",
   },
   {
-    name: "Claudia Vega",
-    role: "Director of Operations",
-    bio: "Oversees daily ground handling coordination across all 60+ airports. Former AICM ramp supervisor with deep relationships throughout the handler network.",
-    initials: "CV",
+    name: "María Lardizábal",
+    role: "Head Chef & Executive",
+    bio: "Culinary leader behind Manny's Catering, creating premium in-flight dining experiences with exceptional quality, creativity, and attention to detail tailored for private and corporate aviation.",
+    img: mariaImg,
   },
   {
-    name: "Rafael Morales",
-    role: "Head of Regulatory Affairs",
-    bio: "Specializes in AFAC permit processing, IBP applications, and SENEAM coordination. Manages a portfolio of 200+ active operator relationships.",
-    initials: "RM",
+    name: "Emilio Padilla",
+    role: "Operations Manager",
+    bio: "Dedicated aviation operations professional passionate about ensuring every Manny client receives exceptional service while their travel needs are handled efficiently, safely, and seamlessly across Mexico.",
+    img: emilioImg,
   },
 ];
 
 const values = [
   {
     num: "01",
-    title: "Local expertise, global standards",
-    desc: "We operate with the precision and professionalism that international operators expect, backed by relationships and knowledge that only come from 15+ years on the ground in Mexico.",
+    title: "Service That Goes Beyond Expectations",
+    desc: "At Manny, every operation is managed with dedication, professionalism, and genuine care. Our team is committed to delivering seamless support and creating an experience defined by trust, efficiency, and excellence.",
   },
   {
     num: "02",
-    title: "Discretion above all",
-    desc: "Private aviation demands confidentiality. Our team treats every flight, every passenger, and every request with the same discreet professionalism — without exception.",
+    title: "Local Knowledge Matters",
+    desc: "Mexico is complex — our experience, relationships, and on-the-ground expertise allow us to navigate it with speed, precision, and confidence.",
   },
   {
     num: "03",
-    title: "Precision at every step",
-    desc: "From permit filing to ramp coordination, we leave nothing to chance. Our operations are built around verification, redundancy, and clear communication — even for last-minute requests.",
+    title: "Safety Drives Everything",
+    desc: "As the first ground-support coordination company in Mexico to obtain IS-BAH certification, safety is embedded into every decision, process, and operation we manage.",
   },
 ];
 ---
 
 <BaseLayout
   title="About — Manny Aero"
-  description="Manny Aero has supported aviation operations across Mexico since 2008. Meet the team and learn our story."
+  description="Since 1997, Manny has delivered world-class ground handling, permits, and aviation support across Mexico. Meet the team behind every operation."
   activeLink="about"
 >
   <PageHero
     badge="Our Story"
-    title="Built on the ground in Mexico."
-    subtitle="We started Manny Aero because we knew Mexican aviation from the inside — and we knew operators deserved better."
-    accent="Mexico."
+    title="Precision. Trust. Excellence Across Mexico."
+    subtitle="Delivering seamless aviation support with unmatched operational expertise, proactive coordination, and world-class service — anytime, anywhere in Mexico."
+    accent="Excellence Across Mexico."
   />
 
   <StatsBand stats={stats} />
@@ -94,34 +99,28 @@ const values = [
       <div class="story-sticky reveal">
         <div class="section-label">Who we are</div>
         <h2 class="section-title">
-          Mexico's<br /><span class="accent">aviation partner</span><br />since 2008.
+          Mexico's Premier<br /><span class="accent">Ground Support</span><br />Partner Since 1997.
         </h2>
       </div>
       <div class="story-body reveal">
         <p>
-          Manny Aero was founded in 2008 by a team of aviation professionals who had spent years
-          working within Mexico's regulatory and ground operations environment. We saw first-hand how
-          difficult it was for foreign operators to navigate an opaque system — and we built Manny
-          Aero to change that.
+          For more than 25 years, Manny has built its reputation on trust, operational excellence,
+          and personalized attention. Since 1997, we have supported business and private aviation
+          throughout Mexico with a commitment to safety, quality, and seamless execution at every
+          stage of the operation.
         </p>
         <p>
-          From our base in Mexico City, we grew operation by operation, airport by airport, until we
-          had the coverage and the relationships to offer something no one else could: a single
-          trusted partner for everything your aircraft needs in Mexico.
+          What began as a vision to provide unparalleled ground handling coordination has evolved
+          into one of Mexico's most trusted aviation support companies. Today, our experienced team
+          continues to deliver world-class solutions with professionalism, proactive communication,
+          and an unwavering dedication to international standards.
         </p>
         <div class="story-pull">
-          "Local knowledge isn't just an advantage in Mexico — it's the only thing that works."
+          "Exceptional service is not just what we do — it is who we are."
         </div>
         <p>
-          Today, Manny Aero supports private operators, corporate flight departments, and charter
-          companies from across North America, Europe, and beyond. We handle ground logistics,
-          regulatory filings, crew services, and concierge support — so your team can focus on the
-          flight.
-        </p>
-        <p>
-          Our sister brand, Manny's Catering, extends that same standard of precision and quality
-          into in-flight dining — curated menus prepared fresh and delivered to the aircraft on
-          schedule, at any of our served locations.
+          At Manny, every client, partner, and crew member is treated with the highest level of
+          care and attention — because exceptional service is not just what we do, it is who we are.
         </p>
       </div>
     </div>
@@ -153,19 +152,22 @@ const values = [
     <div class="container">
       <div class="team-header reveal">
         <div class="section-label">The team</div>
-        <h2 class="section-title">People who <span class="accent">know Mexico</span></h2>
+        <h2 class="section-title">The Experts Behind Every <span class="accent">Operation in Mexico</span></h2>
       </div>
       <div class="team-grid reveal">
         {
           team.map((m) => (
             <article class="team-card">
-              <div class="team-img" aria-hidden="true">
-                <span class="team-img__initials">{m.initials}</span>
+              <div class="team-img">
+                <Image src={m.img} alt={m.name} width={480} height={280} class="team-photo" />
               </div>
               <div class="team-body">
                 <div class="team-name">{m.name}</div>
                 <div class="team-role">{m.role}</div>
                 <div class="team-bio">{m.bio}</div>
+                {m.link && (
+                  <a href={m.link} class="team-founder-link">Meet our founder →</a>
+                )}
               </div>
             </article>
           ))
@@ -349,23 +351,17 @@ const values = [
     border-color: var(--color-border-strong);
   }
   .team-img {
-    height: 220px;
-    background:
-      radial-gradient(circle at 30% 30%, rgba(255, 185, 0, 0.12), transparent 60%),
-      linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 280px;
     position: relative;
     border-bottom: 1px solid var(--color-border);
+    overflow: hidden;
   }
-  .team-img__initials {
-    font-family: var(--font-display);
-    font-size: 72px;
-    font-weight: 400;
-    color: rgba(255, 255, 255, 0.35);
-    letter-spacing: -0.02em;
-    line-height: 1;
+  .team-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
   }
   .team-body {
     padding: 28px;
@@ -392,6 +388,20 @@ const values = [
     font-weight: 400;
     color: var(--color-text-muted);
     line-height: 1.75;
+  }
+  .team-founder-link {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .team-founder-link:hover {
+    opacity: 0.75;
   }
 
   /* VALUES */

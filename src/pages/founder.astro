@@ -1,0 +1,212 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+import GlassButton from "../components/ui/GlassButton.astro";
+import founderImg from "../assets/photos/ourfounder.webp";
+---
+
+<BaseLayout
+  title="Our Founder — Manny Aero"
+  description="The story of Manuel (Manny Sr.) RomeroVargas — the visionary who built one of Mexico's most trusted aviation companies over more than 50 years."
+  activeLink="about"
+>
+  <PageHero
+    badge="Our Founder"
+    title="Manuel (Manny Sr.) RomeroVargas"
+    subtitle="A life dedicated to aviation excellence in Mexico — from the tarmac to the boardroom, for over fifty years."
+    accent="RomeroVargas"
+  />
+
+  <!-- FOUNDER CONTENT -->
+  <section class="founder-section section">
+    <div class="container founder-grid">
+
+      <div class="founder-photo reveal">
+        <Image
+          src={founderImg}
+          alt="Manuel (Manny Sr.) RomeroVargas, founder of Manny Aero"
+          widths={[480, 800, 1200]}
+          sizes="(max-width: 1024px) 100vw, 45vw"
+          loading="eager"
+          class="founder-img"
+        />
+      </div>
+
+      <div class="founder-body reveal">
+        <p>
+          Manuel RomeroVargas Gomez de Parada ("Manny") was born in Mexico City in 1941. As a
+          child he was fascinated with cars and became interested in automotive mechanics. In 1959,
+          while working at an inflight catering business <em>Casa Ponce de Leon</em> owned by his
+          uncle Fernando Gomez de Parada. Manny developed a passion for aviation.
+        </p>
+        <p>
+          During this time, Manny began to represent Universal Airlines, ONA, Charter Standard
+          Airways and also coordinated and supervised ground support services to charter and cargo
+          companies such as Air Lift International and Zantop. John Vaughan, General Manager of
+          British Airways Mexico appointed Manny as Station Manager in Mexico City responsible for
+          traffic and BA flight operations from London Heathrow to the International Mexico City
+          Airport. These operations included Super VC-10s and Boeing 707-320s.
+        </p>
+        <p>
+          When working for British Airways, Manny met Tom G. Evans, founder and president of
+          Universal Weather and Aviation, Inc. Mr. Evans recognized the potential business and
+          corporate aviation market in Mexico and invited Manny to represent his company in this
+          city. Together, Tom and Manny founded Universal Aviation Services Company (UASCO). After
+          a period of restructuring, Manny founded Manny Aviation Services (Manny Aero) in
+          December 1997. Manny put his philosophy into practice providing exceptional services and
+          attention to even the smallest of details. His philosophy paid off.
+        </p>
+        <p>
+          In 2012, after celebrating fifteen years of Manny Aviation Services, he received
+          numerous well deserved accolades including <em>Professional Pilot</em> magazine PRASE
+          awards for as the "Best FBO in Mexico" (2002, 2004); "Best ground handling company in
+          Mexico" (2005, 2006, 2007); "Best FBO Mexican Handler" (2011, 2012, 2013).
+        </p>
+        <p>
+          Manny dedicated his life to serving others and with over fifty years of experience in
+          the aviation industry, his company has assisted some of the world's leading companies,
+          Presidents, Prime Ministers and Royals from around the world.
+        </p>
+        <p class="founder-tribute">
+          At the peak of career, sadly Manny passed away on December 23rd, 2014 at 73 years young.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="founder-cta section">
+    <div class="container">
+      <div class="founder-cta__inner reveal">
+        <div class="section-label founder-cta__label">Continue exploring</div>
+        <h2 class="section-title founder-cta__title">
+          The company he <span class="accent">built for you</span>
+        </h2>
+        <p class="founder-cta__sub">
+          Today, Manny Aero continues his mission — delivering world-class aviation support across
+          Mexico with the same dedication and precision he instilled from day one.
+        </p>
+        <div class="founder-cta__actions">
+          <GlassButton href="/about" variant="solid">About</GlassButton>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section-label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0 0 24px;
+  }
+
+  /* LAYOUT */
+  .founder-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .founder-photo {
+    position: sticky;
+    top: 110px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.5),
+      0 8px 16px rgba(0, 0, 0, 0.3),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .founder-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  .founder-body p {
+    font-size: var(--fs-body);
+    color: var(--color-text-muted);
+    line-height: 1.85;
+    margin-bottom: 22px;
+  }
+  .founder-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .founder-tribute {
+    border-left: 2px solid var(--color-accent);
+    padding-left: 20px;
+    font-style: italic;
+  }
+
+  /* CTA */
+  .founder-cta__inner {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .founder-cta__label {
+    justify-content: center;
+  }
+  .founder-cta__label::before,
+  .founder-cta__label::after {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+  .founder-cta__title {
+    font-size: clamp(32px, 4.2vw, 56px);
+  }
+  .founder-cta__sub {
+    font-size: var(--fs-lead);
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 32px;
+  }
+  .founder-cta__actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 1024px) {
+    .founder-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .founder-photo {
+      position: static;
+      max-width: 520px;
+    }
+  }
+</style>
