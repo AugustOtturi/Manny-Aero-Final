@@ -1,14 +1,24 @@
 ---
+import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import StatsBand from "../components/StatsBand.astro";
 import { SERVICES } from "../data/servicesDetail";
+import groundHandlingImg from "../assets/photos/GROUND_HANDLING.webp";
+import groundSupportImg from "../assets/photos/Ground Support Equipment.webp";
+import vipImg from "../assets/photos/VIP CONCIERGE.webp";
+
+const imageMap: Record<string, ImageMetadata> = {
+  "ground-handling-fbo": groundHandlingImg,
+  "ground-support-equipment": groundSupportImg,
+  "concierge-vip": vipImg,
+};
 
 const stats = [
-  { value: "60+", label: "FBO Network" },
-  { value: "99%", label: "On-time Dispatch" },
-  { value: "24", label: "Dedicated Agents" },
-  { value: "10M+", label: "Gallons Fueled" },
+  { value: "15+", label: "Strategic FBO Network" },
+  { value: "100%", label: "On-Time Dispatch" },
+  { value: "60+", label: "Dedicated Handling Dispatch Professionals" },
+  { value: "96.7%", label: "Client Satisfaction Rate" },
 ];
 ---
 
@@ -18,10 +28,10 @@ const stats = [
   activeLink="services"
 >
   <PageHero
-    badge="What we do"
-    title="Unmatched Support & Logistics."
-    subtitle="We provide comprehensive ground support, handling every detail so you can focus on the flight."
-    accent="Logistics."
+    badge="Ground Handling"
+    title="World-Class Support & Coordination."
+    subtitle="Ground support that works seamlessly behind every successful flight."
+    accent="Coordination."
   />
 
   <StatsBand stats={stats} />
@@ -78,7 +88,14 @@ const stats = [
                   </a>
                 </div>
                 <div class="panel-image">
-                  <img src={s.image} alt={s.name} loading="lazy" />
+                  <Image
+                    src={imageMap[s.id]}
+                    alt={s.name}
+                    widths={[800, 1200, 1600]}
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    loading="lazy"
+                    class="panel-img"
+                  />
                   <div class="panel-image-overlay" />
                 </div>
               </div>
