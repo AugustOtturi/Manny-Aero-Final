@@ -1,0 +1,205 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
+import { NEWS } from "../../data/news";
+
+import ibacImg from "../../assets/photos/NOTICIA IBAC.webp";
+import fifaImg from "../../assets/photos/FIFA.webp";
+import nbaaImg from "../../assets/photos/NBAA-BACE.webp";
+
+const imageMap = {
+  ibac: ibacImg,
+  fifa: fifaImg,
+  nbaa: nbaaImg,
+};
+---
+
+<BaseLayout
+  title="News — Manny Aero"
+  description="Stay up to date with Manny's latest announcements, industry milestones, and upcoming events."
+  activeLink="news"
+>
+  <PageHero
+    badge="News"
+    title="Latest News & Updates."
+    subtitle="Stay up to date with Manny's latest announcements, industry milestones, and events."
+    accent="Updates."
+  />
+
+  <section class="news-section section">
+    <div class="container">
+      <div class="news-grid reveal">
+        {
+          NEWS.map((article) => (
+            <a href={`/news/${article.slug}`} class="news-card">
+              <div class="news-card__img">
+                <Image
+                  src={imageMap[article.imageKey]}
+                  alt={article.title}
+                  widths={[480, 800, 1200]}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  loading="lazy"
+                  class="news-card__photo"
+                />
+                <div class="news-card__overlay" aria-hidden="true" />
+                <span class="news-card__category">{article.category}</span>
+              </div>
+              <div class="news-card__body">
+                <div class="news-card__date">{article.date}</div>
+                <h2 class="news-card__title">{article.title}</h2>
+                <p class="news-card__excerpt">{article.excerpt}</p>
+                <span class="news-card__cta">
+                  Read article
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <polyline points="12 5 19 12 12 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .news-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .news-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    text-decoration: none;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    transition:
+      transform 0.3s var(--ease-out),
+      border-color 0.3s var(--ease-out);
+  }
+
+  .news-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-border-strong);
+  }
+
+  .news-card__img {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+  }
+
+  .news-card__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .news-card:hover .news-card__photo {
+    transform: scale(1.04);
+  }
+
+  .news-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.45) 100%);
+    pointer-events: none;
+  }
+
+  .news-card__category {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 185, 0, 0.35);
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .news-card__body {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .news-card__date {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .news-card__title {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 2vw, 26px);
+    font-weight: 400;
+    color: var(--color-text);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .news-card__excerpt {
+    font-size: 15px;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin: 0;
+    flex: 1;
+  }
+
+  .news-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-top: 8px;
+    transition: gap 0.2s var(--ease-out);
+  }
+
+  .news-card:hover .news-card__cta {
+    gap: 12px;
+  }
+
+  .news-card__cta svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  @media (max-width: 1024px) {
+    .news-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .news-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

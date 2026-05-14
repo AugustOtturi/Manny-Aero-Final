@@ -1,0 +1,121 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHero from "../../components/PageHero.astro";
+import GlassButton from "../../components/ui/GlassButton.astro";
+import { NEWS } from "../../data/news";
+
+import ibacImg from "../../assets/photos/NOTICIA IBAC.webp";
+import fifaImg from "../../assets/photos/FIFA.webp";
+import nbaaImg from "../../assets/photos/NBAA-BACE.webp";
+
+export function getStaticPaths() {
+  return NEWS.map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+
+const imageMap = {
+  ibac: ibacImg,
+  fifa: fifaImg,
+  nbaa: nbaaImg,
+};
+---
+
+<BaseLayout
+  title={`${article.title} — Manny Aero`}
+  description={article.excerpt}
+  activeLink="news"
+>
+  <PageHero
+    badge={article.category}
+    title={article.title}
+    subtitle={article.date}
+    accent=""
+  />
+
+  <!-- Feature image -->
+  <div class="article-photo-band">
+    <div class="container">
+      <div class="article-photo-wrap reveal">
+        <Image
+          src={imageMap[article.imageKey]}
+          alt={article.title}
+          widths={[800, 1200, 1600]}
+          sizes="(max-width: 1024px) 100vw, 1200px"
+          loading="eager"
+          class="article-photo"
+        />
+        <div class="article-photo-overlay" aria-hidden="true" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Article body -->
+  <section class="article-section section">
+    <div class="container">
+      <div class="article-body reveal">
+        {article.body.map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+      </div>
+      <div class="article-back reveal">
+        <GlassButton href="/news" variant="outline">← Back to News</GlassButton>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Feature image */
+  .article-photo-band {
+    padding-block: clamp(24px, 4vh, 48px);
+  }
+
+  .article-photo-wrap {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.5),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  }
+
+  .article-photo {
+    width: 100%;
+    height: clamp(280px, 40vw, 520px);
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .article-photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.35) 100%);
+    pointer-events: none;
+  }
+
+  /* Body text */
+  .article-body {
+    max-width: 780px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .article-body p {
+    font-size: var(--fs-lead);
+    color: var(--color-text-muted);
+    line-height: 1.85;
+  }
+
+  .article-back {
+    max-width: 780px;
+    margin: 48px auto 0;
+  }
+</style>
