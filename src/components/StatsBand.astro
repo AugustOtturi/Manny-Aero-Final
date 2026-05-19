@@ -13,7 +13,7 @@ const { stats } = Astro.props;
 
 <section class="stats-band" aria-label="Key statistics">
   <div class="container">
-    <div class="stats-band__grid reveal">
+    <div class="stats-band__grid stagger stagger--fade">
       {stats.map((s) => (
         <div class="stats-band__item">
           <div class="stats-band__value">{s.value}</div>
@@ -47,11 +47,14 @@ const { stats } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    transition: background-color 0.25s var(--ease-out);
+    transition:
+      background-color 0.25s var(--ease-out),
+      box-shadow 0.25s var(--ease-out);
   }
 
   .stats-band__item:hover {
     background: var(--color-surface-hover);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
   }
 
   .stats-band__value {
@@ -89,3 +92,57 @@ const { stats } = Astro.props;
     }
   }
 </style>
+
+<script>
+  // Counter animation — numeric values count up from 0 when the band enters view.
+  // Handles "25+", "4,000+", "24/7", etc. Non-numeric values (e.g. "24/7") parse
+  // correctly: "24" counts up, "/7" remains as suffix.
+  function animateCounter(el: HTMLElement, duration = 1600): void {
+    const original = el.textContent?.trim() ?? '';
+    const match = original.match(/^([\d,]+)(.*)$/);
+    if (!match) return;
+
+    const numStr = match[1].replace(/,/g, '');
+    const target = parseInt(numStr, 10);
+    if (isNaN(target) || target === 0) return;
+
+    const suffix = match[2] ?? '';
+    const useCommas = match[1].includes(',');
+    const start = performance.now();
+
+    const easeOut = (t: number): number => 1 - Math.pow(1 - t, 3);
+
+    const tick = (now: number): void => {
+      const t = Math.min((now - start) / duration, 1);
+      const value = Math.round(easeOut(t) * target);
+      el.textContent = (useCommas ? value.toLocaleString('en-US') : String(value)) + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+      else el.textContent = original; // restore exact original on finish
+    };
+
+    el.textContent = '0' + suffix;
+    requestAnimationFrame(tick);
+  }
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReducedMotion && 'IntersectionObserver' in window) {
+    const counterObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target
+              .querySelectorAll<HTMLElement>('.stats-band__value')
+              .forEach((el) => animateCounter(el));
+            counterObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+
+    document
+      .querySelectorAll<HTMLElement>('.stats-band__grid')
+      .forEach((el) => counterObserver.observe(el));
+  }
+</script>

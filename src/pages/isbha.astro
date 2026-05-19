@@ -14,20 +14,22 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
   <!-- HERO SPLIT -->
   <section class="isbah-hero">
     <div class="container">
-      <div class="isbah-hero__grid reveal">
+      <div class="isbah-hero__grid">
         <div class="isbah-hero__content">
-          <GlassPill class="isbah-hero__badge">Audit Services</GlassPill>
-          <h1 class="isbah-hero__title">
+          <div class="hero-enter" style="--enter-delay: 0ms">
+            <GlassPill class="isbah-hero__badge">Audit Services</GlassPill>
+          </div>
+          <h1 class="isbah-hero__title hero-enter" style="--enter-delay: 120ms">
             IS-BAH &amp; <span class="accent">IS-BAO</span> Audit Services
           </h1>
-          <p class="isbah-hero__sub">Safety First. Excellence Always.</p>
-          <p class="isbah-hero__body">
+          <p class="isbah-hero__sub hero-enter" style="--enter-delay: 240ms">Safety First. Excellence Always.</p>
+          <p class="isbah-hero__body hero-enter" style="--enter-delay: 360ms">
             With Manny, aviation safety is more than a standard — it's the foundation of every
             operation. We help organizations achieve internationally recognized compliance through
             expert guidance, operational excellence, and a strong safety culture.
           </p>
         </div>
-        <div class="isbah-hero__photo-wrap">
+        <div class="isbah-hero__photo-wrap hero-enter" style="--enter-delay: 80ms">
           <Image
             src={auditImg}
             alt="IS-BAH & IS-BAO Audit Services — Manny Aero"
@@ -51,7 +53,7 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
           International Safety Standards for <span class="accent">Ground Handling Operations</span>
         </h2>
       </div>
-      <div class="audit-grid reveal">
+      <div class="audit-grid stagger">
         <div class="audit-body">
           <p>
             We help Ground Handling Service Providers Worldwide, FBOs, and Business Aircraft
@@ -100,7 +102,7 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
           The Global Standard for <span class="accent">Business Aviation Operations</span>
         </h2>
       </div>
-      <div class="audit-grid reveal">
+      <div class="audit-grid stagger">
         <div class="audit-body">
           <p>
             We support operators in achieving IS-BAO compliance with tailored consulting,

@@ -278,9 +278,9 @@ const orgJsonLd = {
           },
           { rootMargin: "0px 0px -4% 0px", threshold: 0.04 }
         );
-        document.querySelectorAll<HTMLElement>(".reveal").forEach((el) => io.observe(el));
+        document.querySelectorAll<HTMLElement>(".reveal, .stagger").forEach((el) => io.observe(el));
       } else {
-        document.querySelectorAll<HTMLElement>(".reveal").forEach((el) =>
+        document.querySelectorAll<HTMLElement>(".reveal, .stagger").forEach((el) =>
           el.classList.add("in-view")
         );
       }

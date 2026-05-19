@@ -104,6 +104,20 @@
     transform: translateY(-2px);
   }
 
+  /* Subtle pulse — draws attention without being intrusive */
+  @keyframes ops-pulse {
+    0%, 100% { transform: translateY(-50%) scale(1); }
+    50%       { transform: translateY(-50%) scale(1.04); }
+  }
+
+  html.is-ready .float-ops {
+    animation: ops-pulse 3.5s ease-in-out infinite;
+  }
+
+  html.is-ready .float-ops:hover {
+    animation-play-state: paused;
+  }
+
   /* Hide while the loader is up so it doesn't peek over a black overlay */
   html:not(.is-ready) .float-ops {
     opacity: 0;

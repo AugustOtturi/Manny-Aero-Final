@@ -323,6 +323,57 @@ button {
   transform: translateY(0);
 }
 
+/* ── STAGGER REVEAL ──
+   Add class .stagger to any grid/list whose direct children should
+   animate in one-by-one. Children start invisible; the IntersectionObserver
+   in BaseLayout adds .in-view to the container, which triggers the keyframe. */
+.stagger > * {
+  opacity: 0;
+}
+
+@keyframes stagger-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.stagger.in-view > *:nth-child(1) { animation: stagger-fade-up 0.55s var(--ease-out) 0ms   both; }
+.stagger.in-view > *:nth-child(2) { animation: stagger-fade-up 0.55s var(--ease-out) 90ms  both; }
+.stagger.in-view > *:nth-child(3) { animation: stagger-fade-up 0.55s var(--ease-out) 180ms both; }
+.stagger.in-view > *:nth-child(4) { animation: stagger-fade-up 0.55s var(--ease-out) 270ms both; }
+.stagger.in-view > *:nth-child(n+5) { animation: stagger-fade-up 0.55s var(--ease-out) 360ms both; }
+
+/* ── STAGGER FADE (overflow-hidden containers) ──
+   Same timing, but opacity-only — no translateY that would be clipped. */
+@keyframes stagger-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.stagger--fade.in-view > *:nth-child(1)    { animation: stagger-fade 0.5s var(--ease-out) 0ms   both; }
+.stagger--fade.in-view > *:nth-child(2)    { animation: stagger-fade 0.5s var(--ease-out) 90ms  both; }
+.stagger--fade.in-view > *:nth-child(3)    { animation: stagger-fade 0.5s var(--ease-out) 180ms both; }
+.stagger--fade.in-view > *:nth-child(4)    { animation: stagger-fade 0.5s var(--ease-out) 270ms both; }
+.stagger--fade.in-view > *:nth-child(n+5)  { animation: stagger-fade 0.5s var(--ease-out) 360ms both; }
+
+/* ── SECTION LABEL LINE GROW ──
+   The ::before line on .section-label scales from 0 → full-width
+   when its ancestor .reveal container enters the viewport.
+   Width is set per-page (22px); we only animate transform — no conflict. */
+.reveal .section-label::before {
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.5s var(--ease-out) 0.2s;
+}
+.reveal.in-view .section-label::before {
+  transform: scaleX(1);
+}
+
 /* Hero entrance — staggered via --enter-delay, gated by html.is-ready */
 .hero-enter {
   opacity: 0;
@@ -351,7 +402,8 @@ html.is-ready .hero-enter {
   }
 
   .reveal,
-  .hero-enter {
+  .hero-enter,
+  .stagger > * {
     opacity: 1;
     transform: none;
   }
