@@ -1,0 +1,334 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+import GlassButton from "../components/ui/GlassButton.astro";
+import salmonImg from "../assets/photos/salmon.webp";
+import omeleteImg from "../assets/photos/ommelete.webp";
+---
+
+<BaseLayout
+  title="Manny's Catering — Premium In-Flight Catering Across Mexico"
+  description="Luxury in-flight catering and cabin services for private and corporate aviation throughout Mexico. Tailored menus, gourmet cuisine, and 24/7 coordination."
+  activeLink="services"
+>
+  <PageHero
+    badge="In-Flight Catering"
+    title="Manny's Catering"
+    subtitle="Premium culinary experiences tailored to every flight"
+    accent="Catering"
+  />
+
+  <!-- PHOTO BAND 1 -->
+  <div class="photo-band reveal">
+    <div class="container">
+      <div class="photo-wrap">
+        <Image
+          src={salmonImg}
+          alt="Manny's Catering — Premium in-flight cuisine"
+          widths={[800, 1200, 1600]}
+          sizes="(max-width: 1024px) 100vw, 1200px"
+          loading="eager"
+          class="band-photo"
+        />
+        <div class="band-overlay" aria-hidden="true" />
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <section class="catering-content section">
+    <div class="container">
+      <div class="catering-header reveal">
+        <div class="section-label">Our Services</div>
+        <h2 class="section-title">
+          In-Flight Catering &amp; Cabin Services <span class="accent">Across Mexico</span>
+        </h2>
+      </div>
+      <div class="catering-grid reveal">
+        <div class="catering-body">
+          <p class="catering-lead">
+            Luxury catering solutions designed to meet the highest standards of comfort,
+            presentation, and personalization.
+          </p>
+          <p>
+            Manny's Catering provides tailored in-flight catering and cabin support solutions
+            for private and corporate aviation throughout Mexico.
+          </p>
+          <p>
+            Based in Toluca and serving the center of the country, we coordinate catering
+            services nationwide with a focus on quality, efficiency, presentation, and seamless
+            execution. From carefully curated gourmet menus to personalized requests for crew
+            and passengers, every detail is managed with precision and care.
+          </p>
+          <p>
+            Designed to support the standards of modern business aviation, Manny's Catering
+            delivers a refined onboard experience backed by reliable coordination and
+            personalized service.
+          </p>
+        </div>
+        <div class="catering-card">
+          <div class="list-title">What We Offer</div>
+          <ul class="catering-list">
+            <li>Customized menus for all dietary restrictions and preferences</li>
+            <li>Fresh gourmet cuisine prepared with premium ingredients</li>
+            <li>In-flight catering coordination across Mexico</li>
+            <li>Laundry and dishwashing services</li>
+            <li>Floral arrangements for your cabin</li>
+            <li>Access to more than 300 international newspapers</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHOTO BAND 2 -->
+  <div class="photo-band photo-band--sm reveal">
+    <div class="container">
+      <div class="photo-wrap">
+        <Image
+          src={omeleteImg}
+          alt="Gourmet in-flight catering by Manny's Catering"
+          widths={[800, 1200, 1600]}
+          sizes="(max-width: 1024px) 100vw, 1200px"
+          loading="lazy"
+          class="band-photo band-photo--sm"
+        />
+        <div class="band-overlay" aria-hidden="true" />
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <section class="catering-cta section">
+    <div class="container">
+      <div class="catering-cta-inner reveal">
+        <div class="catering-cta-label">Available 24/7</div>
+        <h2 class="catering-cta-title">
+          Coordinate Your Catering <span class="accent">Request Today</span>
+        </h2>
+        <p class="catering-cta-sub">
+          Available 24/7 to support your flight operations with precision, care, and
+          personalized service across Mexico.
+        </p>
+        <div class="catering-cta-actions">
+          <GlassButton href="/contact" variant="solid">Contact our team</GlassButton>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ── PHOTO BANDS ── */
+  .photo-band {
+    padding-block: clamp(24px, 4vh, 48px);
+  }
+
+  .photo-band--sm {
+    padding-block: clamp(16px, 3vh, 32px);
+  }
+
+  .photo-wrap {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.5),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  }
+
+  .band-photo {
+    width: 100%;
+    height: clamp(280px, 40vw, 520px);
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .band-photo--sm {
+    height: clamp(200px, 28vw, 360px);
+  }
+
+  .band-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 100%);
+    pointer-events: none;
+  }
+
+  /* ── CONTENT ── */
+  .section-label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 3.5vw, 48px);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin: 0 0 40px;
+  }
+
+  .catering-header {
+    margin-bottom: 48px;
+  }
+
+  .catering-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+
+  .catering-body p {
+    font-size: var(--fs-body);
+    color: var(--color-text-muted);
+    line-height: 1.85;
+    margin-bottom: 22px;
+  }
+
+  .catering-lead {
+    font-size: var(--fs-lead) !important;
+    font-style: italic;
+    margin-bottom: 28px !important;
+  }
+
+  /* ── SERVICES CARD ── */
+  .catering-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 110px;
+  }
+
+  .list-title {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 20px;
+  }
+
+  .catering-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .catering-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: var(--fs-body);
+    color: var(--color-text-muted);
+    line-height: 1.6;
+  }
+
+  .catering-list li::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+
+  /* ── CTA ── */
+  .catering-cta {
+    text-align: center;
+  }
+
+  .catering-cta-inner {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .catering-cta-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .catering-cta-label::before,
+  .catering-cta-label::after {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+
+  .catering-cta-title {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 400;
+    color: var(--color-text);
+    line-height: 1.05;
+    margin: 0 0 18px;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .catering-cta-sub {
+    font-size: var(--fs-lead);
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin: 0 0 32px;
+  }
+
+  .catering-cta-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .catering-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .catering-card {
+      position: static;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .catering-card {
+      padding: 24px 20px;
+    }
+  }
+</style>

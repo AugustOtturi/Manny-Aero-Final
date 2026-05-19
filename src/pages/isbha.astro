@@ -1,8 +1,8 @@
 ---
 import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import PageHero from "../components/PageHero.astro";
 import GlassButton from "../components/ui/GlassButton.astro";
+import GlassPill from "../components/ui/GlassPill.astro";
 import auditImg from "../assets/photos/isbaoisbah.jpg";
 ---
 
@@ -11,43 +11,39 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
   description="Manny helps organizations achieve IS-BAH and IS-BAO compliance through expert consulting, SMS implementation, and audit preparation across Mexico."
   activeLink="services"
 >
-  <PageHero
-    badge="Audit Services"
-    title="IS-BAH & IS-BAO Audit Services"
-    subtitle="Safety First. Excellence Always."
-    accent="IS-BAO"
-  />
-
-  <!-- INTRO -->
-  <section class="intro-section section">
+  <!-- HERO SPLIT -->
+  <section class="isbah-hero">
     <div class="container">
-      <p class="intro-body reveal">
-        With Manny, aviation safety is more than a standard — it's the foundation of every
-        operation. We help organizations achieve internationally recognized compliance through
-        expert guidance, operational excellence, and a strong safety culture.
-      </p>
+      <div class="isbah-hero__grid reveal">
+        <div class="isbah-hero__content">
+          <GlassPill class="isbah-hero__badge">Audit Services</GlassPill>
+          <h1 class="isbah-hero__title">
+            IS-BAH &amp; <span class="accent">IS-BAO</span> Audit Services
+          </h1>
+          <p class="isbah-hero__sub">Safety First. Excellence Always.</p>
+          <p class="isbah-hero__body">
+            With Manny, aviation safety is more than a standard — it's the foundation of every
+            operation. We help organizations achieve internationally recognized compliance through
+            expert guidance, operational excellence, and a strong safety culture.
+          </p>
+        </div>
+        <div class="isbah-hero__photo-wrap">
+          <Image
+            src={auditImg}
+            alt="IS-BAH & IS-BAO Audit Services — Manny Aero"
+            widths={[800, 1200, 1600]}
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            loading="eager"
+            class="isbah-hero__photo"
+          />
+          <div class="isbah-hero__overlay" aria-hidden="true" />
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- PHOTO -->
-  <div class="photo-band reveal">
-    <div class="container">
-      <div class="photo-wrap">
-        <Image
-          src={auditImg}
-          alt="IS-BAH & IS-BAO Audit Services — Manny Aero"
-          widths={[800, 1200, 1600]}
-          sizes="(max-width: 1024px) 100vw, 1200px"
-          loading="eager"
-          class="audit-photo"
-        />
-        <div class="photo-overlay" aria-hidden="true"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- IS-BAH -->
-  <section class="audit-section section" id="isbah">
+  <section class="audit-section section section--tight-top" id="isbah">
     <div class="container">
       <div class="audit-header reveal">
         <div class="section-label">IS-BAH Audits</div>
@@ -162,6 +158,81 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
 </BaseLayout>
 
 <style>
+  /* ── HERO SPLIT ── */
+  .isbah-hero {
+    padding-top: clamp(100px, 14vh, 160px);
+    padding-bottom: clamp(16px, 2vh, 24px);
+  }
+
+  .isbah-hero__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  .isbah-hero__content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .isbah-hero__title {
+    font-family: var(--font-display);
+    font-size: clamp(38px, 4.5vw, 62px);
+    font-weight: 400;
+    color: var(--color-text);
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .isbah-hero__sub {
+    font-size: var(--fs-lead);
+    color: var(--color-text-muted);
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .isbah-hero__body {
+    font-size: var(--fs-body);
+    color: var(--color-text-muted);
+    line-height: 1.85;
+    margin: 0;
+  }
+
+  .isbah-hero__photo-wrap {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.5),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  }
+
+  .isbah-hero__photo {
+    width: 100%;
+    height: clamp(380px, 48vw, 560px);
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .isbah-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.38) 100%);
+    pointer-events: none;
+  }
+
+  /* ── TIGHT TOP (first section after hero) ── */
+  .section--tight-top {
+    padding-top: clamp(24px, 3vh, 40px);
+  }
+
+  /* ── SECTION LABEL ── */
   .section-label {
     font-size: var(--fs-label);
     font-weight: 700;
@@ -191,45 +262,7 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
     margin: 0 0 40px;
   }
 
-  /* INTRO */
-  .intro-body {
-    font-size: var(--fs-lead);
-    color: var(--color-text-muted);
-    line-height: 1.75;
-    max-width: 860px;
-  }
-
-  /* PHOTO */
-  .photo-band {
-    padding-block: clamp(24px, 4vh, 48px);
-  }
-  .photo-wrap {
-    position: relative;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow:
-      0 24px 48px rgba(0, 0, 0, 0.5),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-  }
-  .audit-photo {
-    width: 100%;
-    height: clamp(280px, 40vw, 520px);
-    object-fit: cover;
-    object-position: center;
-    display: block;
-  }
-  .photo-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.1) 0%,
-      rgba(0, 0, 0, 0.35) 100%
-    );
-    pointer-events: none;
-  }
-
-  /* AUDIT SECTIONS */
+  /* ── AUDIT SECTIONS ── */
   .audit-header {
     margin-bottom: 48px;
   }
@@ -289,7 +322,7 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
     margin-top: 8px;
   }
 
-  /* WHY CARD */
+  /* ── WHY CARD ── */
   .why-card {
     background: var(--color-surface);
     border: 1px solid var(--color-border-strong);
@@ -302,7 +335,7 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
     top: 110px;
   }
 
-  /* DIVIDER */
+  /* ── DIVIDER ── */
   .section-divider {
     height: 1px;
     background: var(--color-border);
@@ -311,7 +344,7 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
     width: calc(100% - 48px);
   }
 
-  /* CTA */
+  /* ── CTA ── */
   .isbha-cta {
     text-align: center;
   }
@@ -360,7 +393,15 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
     justify-content: center;
   }
 
+  /* ── RESPONSIVE ── */
   @media (max-width: 1024px) {
+    .isbah-hero__grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .isbah-hero__photo-wrap {
+      order: -1;
+    }
     .audit-grid {
       grid-template-columns: 1fr;
       gap: 40px;
