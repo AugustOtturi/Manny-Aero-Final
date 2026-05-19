@@ -9,25 +9,25 @@ export const SERVICES: Service[] = [
   {
     slug: "permits",
     title: "Permits & Authorizations",
-    href: "/services/permits",
+    href: "/permits-and-authorizations",
     tone: "a",
   },
   {
     slug: "ground-handling",
     title: "Ground Handling Across Mexico",
-    href: "/services/ground-handling",
+    href: "/services",
     tone: "b",
   },
   {
     slug: "catering",
     title: "Manny's In-flight Catering",
-    href: "/services/catering",
+    href: "/catering",
     tone: "c",
   },
   {
     slug: "audits",
     title: "IS-BAH & IS-BAO Audits",
-    href: "/services/audits",
+    href: "/isbha",
     tone: "d",
   },
 ];
