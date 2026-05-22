@@ -13,7 +13,7 @@ export const NEWS: NewsArticle[] = [
     slug: "manny-joins-ibac-industry-partner-programme",
     title: "Manny Joins IBAC Industry Partner Programme",
     category: "Industry",
-    date: "2025",
+    date: "Jun 2026",
     excerpt:
       "Manny proudly joins the International Business Aviation Council (IBAC) Industry Partner Programme, becoming the first Mexico-based company to be part of this global initiative.",
     body: [
@@ -26,7 +26,7 @@ export const NEWS: NewsArticle[] = [
     slug: "mexico-fifa-world-cup-2026",
     title: "Mexico Welcomes the World for FIFA World Cup 2026",
     category: "Operations",
-    date: "2026",
+    date: "Jun 2026",
     excerpt:
       "As Mexico prepares to host the FIFA World Cup 2026 alongside the United States and Canada, Manny is ready to support the increased demand for business aviation operations throughout the country.",
     body: [
@@ -39,7 +39,7 @@ export const NEWS: NewsArticle[] = [
     slug: "nbaa-bace-2026",
     title: "See You at NBAA-BACE 2026",
     category: "Events",
-    date: "Oct 2026",
+    date: "Jun 2026",
     excerpt:
       "Manny will be exhibiting at the NBAA Business Aviation Convention & Exhibition (NBAA-BACE) from October 20–22, 2026, in Las Vegas, Nevada.",
     body: [
