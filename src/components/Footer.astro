@@ -1,32 +1,92 @@
 ---
 const socials = [
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/manny-aero" },
+  { label: "LinkedIn",  href: "https://www.linkedin.com/company/manny-aero" },
   { label: "Instagram", href: "https://www.instagram.com/manny.aero" },
-  { label: "Facebook", href: "https://www.facebook.com/manny.aero" },
-  { label: "YouTube", href: "https://www.youtube.com/@manny-aero" },
-  { label: "TikTok", href: "https://www.tiktok.com/@manny.aero" },
+  { label: "Facebook",  href: "https://www.facebook.com/manny.aero" },
+  { label: "YouTube",   href: "https://www.youtube.com/@manny-aero" },
+  { label: "TikTok",    href: "https://www.tiktok.com/@manny.aero" },
+];
+
+const navLinks = [
+  { label: "Home",       href: "/" },
+  { label: "Services",   href: "/services" },
+  { label: "IS-BAH",     href: "/isbha" },
+  { label: "Permits",    href: "/permits-and-authorizations" },
+  { label: "About",      href: "/about" },
+  { label: "News",       href: "/news" },
+  { label: "Contact",    href: "/contact" },
+];
+
+const offices = [
+  { city: "Toluca, México",     addr: "Blvd. Miguel Alemán S/N, C.P. 50226" },
+  { city: "Querétaro, México",  addr: "Carr. 200, KM. 13.5, C.P. 76295" },
+  { city: "Cancún, México",     addr: "Carr. Cancún–Chetumal, Km. 22, C.P. 77569" },
 ];
 ---
 
 <footer class="footer">
-  <div class="footer__inner container">
-    <div class="footer__logo">
-      <img src="/logo-manny.svg" alt="Manny Aero" width="500" height="294" />
-    </div>
+  <!-- TOP GRID -->
+  <div class="footer__top container">
 
-    <div class="footer__legal">
-      <span>MANNY © 2026.</span>
-      <a href="/privacy">PRIVACY NOTICE</a>
-      <a href="/terms">TERMS OF SERVICE</a>
-    </div>
-
-    <div class="footer__contact">
-      <div class="footer__phones">
-        <span>US &amp; CAN <a href="tel:+18775062669">1 877 50 MANNY</a></span>
-        <span>MEX <a href="tel:+527222730981">+52 722 273 0981</a></span>
-      </div>
+    <!-- COL 1: Brand -->
+    <div class="footer__brand">
+      <img src="/logo-manny.svg" alt="Manny Aero" class="footer__logo" width="500" height="294" />
+      <p class="footer__tagline">
+        Ground Handling &amp; FBO Coordination Across Mexico
+      </p>
       <div class="footer__socials">
-        {socials.map((s) => <a href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>)}
+        {socials.map((s) => (
+          <a href={s.href} target="_blank" rel="noopener noreferrer">{s.label}</a>
+        ))}
+      </div>
+    </div>
+
+    <!-- COL 2: Navigation -->
+    <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col-label">Navigation</div>
+      <ul class="footer__nav-list">
+        {navLinks.map((l) => (
+          <li><a href={l.href}>{l.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <!-- COL 3: Contact -->
+    <div class="footer__contact">
+      <div class="footer__col-label">Contact</div>
+      <div class="footer__emails">
+        <a href="mailto:ops@manny.aero">ops@manny.aero</a>
+        <a href="mailto:admon@manny.aero">admon@manny.aero</a>
+        <a href="mailto:info@manny.aero">info@manny.aero</a>
+      </div>
+      <div class="footer__phones">
+        <a href="tel:+527222730981">MEX +52 722 273 0981</a>
+        <a href="tel:+18775062669">US &amp; CAN 1 877 50 MANNY</a>
+      </div>
+    </div>
+
+    <!-- COL 4: Offices -->
+    <div class="footer__offices">
+      <div class="footer__col-label">Offices</div>
+      <div class="footer__offices-list">
+        {offices.map((o) => (
+          <div class="footer__office">
+            <div class="footer__office-city">{o.city}</div>
+            <div class="footer__office-addr">{o.addr}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="footer__bottom">
+    <div class="footer__bottom-inner container">
+      <span class="footer__copyright">MANNY © 2026.</span>
+      <div class="footer__legal">
+        <a href="/privacy">Privacy Notice</a>
+        <a href="/terms">Terms of Service</a>
       </div>
     </div>
   </div>
@@ -36,159 +96,210 @@ const socials = [
   .footer {
     background: var(--color-bg-footer);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-block: 32px;
-    font-size: var(--fs-micro);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
   }
 
-  .footer__inner {
+  /* ── TOP GRID ── */
+  .footer__top {
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 40px;
-    align-items: center;
+    grid-template-columns: 1.6fr 1fr 1.5fr 1.5fr;
+    gap: 48px;
+    align-items: start;
+    padding-block: clamp(48px, 6vw, 80px);
   }
 
+  /* ── COLUMN LABEL ── */
+  .footer__col-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .footer__col-label::before {
+    content: "";
+    width: 14px;
+    height: 1px;
+    background: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  /* ── BRAND ── */
   .footer__logo {
-    display: inline-flex;
-    align-items: center;
-    line-height: 0;
-  }
-
-  .footer__logo img {
-    height: 40px;
+    height: 44px;
     width: auto;
     display: block;
+    margin-bottom: 20px;
   }
 
-  .footer__legal {
+  .footer__tagline {
+    font-size: 13px;
+    color: var(--color-text-dim);
+    line-height: 1.65;
+    margin: 0 0 24px;
+    max-width: 28ch;
+    letter-spacing: 0.02em;
+  }
+
+  .footer__socials {
     display: flex;
-    gap: 20px;
-    color: var(--color-text-dim);
-    justify-self: center;
     flex-wrap: wrap;
+    gap: 8px 14px;
   }
-
-  .footer__legal a {
+  .footer__socials a {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     color: var(--color-text-dim);
-    transition: color 0.25s var(--ease-out);
+    transition: color 0.2s var(--ease-out);
+  }
+  .footer__socials a:hover {
+    color: var(--color-accent);
   }
 
-  .footer__legal a:hover {
+  /* ── NAV ── */
+  .footer__nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .footer__nav-list a {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-dim);
+    transition: color 0.2s var(--ease-out);
+  }
+  .footer__nav-list a:hover {
     color: var(--color-text);
   }
 
-  .footer__contact {
+  /* ── CONTACT ── */
+  .footer__emails {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
+    gap: 7px;
+  }
+  .footer__emails a {
+    font-size: 13px;
+    color: var(--color-text-dim);
+    letter-spacing: 0.02em;
+    transition: color 0.2s var(--ease-out);
+  }
+  .footer__emails a:hover {
+    color: var(--color-text);
   }
 
   .footer__phones {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    color: var(--color-accent);
-    font-weight: 600;
+    gap: 5px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
-
   .footer__phones a {
-    color: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-accent);
+    letter-spacing: 0.04em;
+    transition: color 0.2s var(--ease-out);
   }
-
   .footer__phones a:hover {
     color: var(--color-accent-hover);
   }
 
-  .footer__socials {
+  /* ── OFFICES ── */
+  .footer__offices-list {
     display: flex;
-    gap: 14px;
-    color: var(--color-text-muted);
+    flex-direction: column;
+    gap: 16px;
+  }
+  .footer__office-city {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin-bottom: 3px;
+  }
+  .footer__office-addr {
+    font-size: 12px;
+    color: var(--color-text-dim);
+    line-height: 1.55;
   }
 
-  .footer__socials a {
-    transition: color 0.25s var(--ease-out);
+  /* ── BOTTOM BAR ── */
+  .footer__bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-block: 18px;
+  }
+  .footer__bottom-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .footer__copyright {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-dim);
+  }
+  .footer__legal {
+    display: flex;
+    gap: 20px;
+  }
+  .footer__legal a {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-dim);
+    transition: color 0.2s var(--ease-out);
+  }
+  .footer__legal a:hover {
+    color: var(--color-text);
   }
 
-  .footer__socials a:hover {
-    color: var(--color-accent);
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1200px) {
+    .footer__top {
+      grid-template-columns: 1fr 1fr;
+      gap: 40px 48px;
+    }
   }
 
-  @media (max-width: 1440px) {
-    .footer__inner {
+  @media (max-width: 640px) {
+    .footer__top {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px 24px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .footer__top {
+      grid-template-columns: 1fr;
       gap: 28px;
     }
-  }
-
-  @media (max-width: 1200px) {
-    .footer__inner {
-      grid-template-columns: 1fr 1fr;
-      gap: 24px 32px;
-      align-items: start;
-    }
-    .footer__logo {
-      grid-column: 1 / -1;
-      justify-self: center;
-    }
-    .footer__legal {
-      justify-self: start;
+    .footer__bottom-inner {
       flex-direction: column;
-      gap: 8px;
-    }
-    .footer__contact {
-      align-items: flex-end;
-    }
-  }
-
-  @media (max-width: 720px) {
-    .footer {
-      padding-block: 28px;
-    }
-    .footer__inner {
-      grid-template-columns: 1fr;
-      gap: 24px;
-      text-align: center;
-    }
-    .footer__logo {
-      justify-self: center;
-    }
-    .footer__logo img {
-      height: 36px;
-    }
-    .footer__legal {
-      justify-self: center;
-      flex-direction: row;
-      gap: 16px;
-      justify-content: center;
-    }
-    .footer__contact {
       align-items: center;
       gap: 12px;
-    }
-    .footer__phones {
-      align-items: center;
       text-align: center;
     }
-    .footer__socials {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px 16px;
-    }
-  }
-
-  @media (max-width: 420px) {
-    .footer {
-      font-size: 11px;
-    }
-    .footer__logo img {
-      height: 32px;
-    }
     .footer__legal {
-      gap: 10px 14px;
-    }
-    .footer__phones {
-      font-size: 12px;
+      justify-content: center;
     }
   }
 </style>
