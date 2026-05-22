@@ -1,6 +1,20 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
+import { AIRPORTS } from "../data/airports";
+
+const seenCodes = new Set<string>();
+const airportOptions: { value: string; label: string }[] = [];
+for (const loc of AIRPORTS) {
+  const match = loc.nombre.match(/\(([A-Z]{3,4})\)/);
+  if (!match) continue;
+  const code = match[1];
+  if (seenCodes.has(code)) continue;
+  seenCodes.add(code);
+  const cleanName = loc.nombre.replace(/\s*—.*$/, "").trim();
+  airportOptions.push({ value: code, label: cleanName });
+}
+airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 ---
 
 <BaseLayout
@@ -74,9 +88,8 @@ import PageHero from "../components/PageHero.astro";
                   <option>Flight Planning &amp; Filing</option>
                   <option>Jet Fuel Facilitation</option>
                   <option>VIP Ground Transportation</option>
-                  <option>Gourmet Catering</option>
+                  <option>Gourmet In-flight Catering</option>
                   <option>Crew Accommodation</option>
-                  <option>Full Package</option>
                 </select>
               </label>
               <label class="field">
@@ -84,15 +97,17 @@ import PageHero from "../components/PageHero.astro";
                 <input type="text" name="aircraft" placeholder="e.g. Gulfstream G550" />
               </label>
             </div>
-            <div class="form-row">
-              <label class="field">
-                <span>Arrival Airport (ICAO)</span>
-                <input type="text" name="airport" placeholder="e.g. MMMX" />
-              </label>
-              <label class="field">
-                <span>Estimated Arrival</span>
-                <input type="datetime-local" name="arrival" />
-              </label>
+            <div class="flights" data-flights>
+              <button type="button" class="flights__add" data-flights-add>
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M9 3V15M3 9H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Add Flight Information
+              </button>
+              <p class="flights__hint">
+                Optional — share flight details so we can prepare everything in advance.
+              </p>
+              <div class="flights__list" data-flights-list></div>
             </div>
             <label class="field field--full">
               <span>Additional Notes</span>
@@ -223,7 +238,108 @@ import PageHero from "../components/PageHero.astro";
       </aside>
     </div>
   </section>
+
+<template id="flight-template-contact">
+  <details class="flight" open>
+    <summary class="flight__header">
+      <span class="flight__chevron" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M3 5L6 8L9 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+      <span class="flight__title" data-flight-title>Flight 1</span>
+      <button type="button" class="flight__remove" aria-label="Remove flight" data-flight-remove>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+      </button>
+    </summary>
+    <div class="flight__body">
+      <label class="field">
+        <span>PAX</span>
+        <input type="number" min="0" inputmode="numeric" data-key="PAX" placeholder="e.g. 4" />
+      </label>
+      <label class="field">
+        <span>Crew</span>
+        <input type="number" min="0" inputmode="numeric" data-key="CREW" placeholder="e.g. 2" />
+      </label>
+      <label class="field">
+        <span>Aircraft type</span>
+        <input type="text" data-key="AIRCRAFT TYPE" placeholder="e.g. Gulfstream G550" />
+      </label>
+      <label class="field">
+        <span>Tail number</span>
+        <input type="text" data-key="TAIL NUMBER" placeholder="e.g. N12345" />
+      </label>
+      <label class="field">
+        <span>Arrival date</span>
+        <input type="date" data-key="ARRIVAL DATE" />
+      </label>
+      <label class="field">
+        <span>Arrival time (UTC / Zulu)</span>
+        <input type="text" data-key="ARRIVAL TIME" placeholder="e.g. 14:30Z" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]Z?$" />
+      </label>
+      <label class="field">
+        <span>Departure date</span>
+        <input type="date" data-key="DEPARTURE DATE" />
+      </label>
+      <label class="field">
+        <span>Departure time (UTC / Zulu)</span>
+        <input type="text" data-key="DEPARTURE TIME" placeholder="e.g. 18:45Z" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]Z?$" />
+      </label>
+      <label class="field field--select field--full">
+        <span>Airport</span>
+        <select data-key="AIRPORT">
+          <option value="">Select an airport…</option>
+        </select>
+      </label>
+    </div>
+  </details>
+</template>
 </BaseLayout>
+
+<script define:vars={{ airportOptions }}>
+  const contactForm = document.getElementById("contactForm");
+  const list = contactForm?.querySelector("[data-flights-list]");
+  const addBtn = contactForm?.querySelector("[data-flights-add]");
+  const template = document.getElementById("flight-template-contact");
+
+  function reindex() {
+    list?.querySelectorAll(".flight").forEach((flight, i) => {
+      const title = flight.querySelector("[data-flight-title]");
+      if (title) title.textContent = `Flight ${i + 1}`;
+    });
+  }
+
+  function addFlight() {
+    if (!template || !list) return;
+    const node = template.content.cloneNode(true);
+    const select = node.querySelector('select[data-key="AIRPORT"]');
+    for (const opt of airportOptions) {
+      const o = document.createElement("option");
+      o.value = opt.value;
+      o.textContent = `${opt.label} (${opt.value})`;
+      select.appendChild(o);
+    }
+    list.querySelectorAll(".flight").forEach((f) => { f.open = false; });
+    list.appendChild(node);
+    reindex();
+  }
+
+  if (addBtn) addBtn.addEventListener("click", addFlight);
+
+  if (list) {
+    list.addEventListener("click", (e) => {
+      const removeBtn = e.target.closest("[data-flight-remove]");
+      if (removeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        removeBtn.closest(".flight")?.remove();
+        reindex();
+      }
+    });
+  }
+</script>
 
 <script>
   const form = document.getElementById("contactForm") as HTMLFormElement | null;
@@ -367,7 +483,8 @@ import PageHero from "../components/PageHero.astro";
   }
   .field--full,
   .form-divider,
-  .form-footer {
+  .form-footer,
+  .flights {
     grid-column: 1 / -1;
   }
   .field > span {
@@ -727,6 +844,119 @@ import PageHero from "../components/PageHero.astro";
     text-transform: uppercase;
     color: var(--color-text-muted);
     margin-top: 6px;
+  }
+
+  /* ── Flights repeater ── */
+  .flights {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .flights__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .flights__list:empty {
+    display: none;
+  }
+  .flights__add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 16px;
+    background: rgba(255, 185, 0, 0.08);
+    color: var(--color-accent);
+    border: 1px dashed rgba(255, 185, 0, 0.45);
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+    align-self: flex-start;
+  }
+  .flights__add:hover {
+    background: rgba(255, 185, 0, 0.16);
+    border-color: var(--color-accent);
+  }
+  .flights__hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+  .flight {
+    background: linear-gradient(330deg, rgba(30, 30, 36, 0.55) 0%, rgba(18, 18, 24, 0.6) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .flight[open] {
+    border-color: rgba(255, 185, 0, 0.35);
+    background: linear-gradient(330deg, rgba(40, 40, 48, 0.55) 0%, rgba(24, 24, 30, 0.6) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  .flight__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    transition: background-color 0.2s var(--ease-out);
+  }
+  .flight__header::-webkit-details-marker { display: none; }
+  .flight__header:hover { background: rgba(255, 255, 255, 0.04); }
+  .flight__chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.6);
+    transition: transform 0.25s var(--ease-out), color 0.25s var(--ease-out);
+  }
+  .flight[open] .flight__chevron {
+    transform: rotate(180deg);
+    color: var(--color-accent);
+  }
+  .flight__title {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text);
+  }
+  .flight__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+  }
+  .flight__remove:hover {
+    background: rgba(232, 64, 64, 0.18);
+    border-color: rgba(232, 64, 64, 0.55);
+    color: #ff8a8a;
+  }
+  .flight__body {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 18px;
+    padding: 4px 18px 18px;
+  }
+  .flight__body > .field--full {
+    grid-column: 1 / -1;
   }
 
   @media (max-width: 1024px) {
