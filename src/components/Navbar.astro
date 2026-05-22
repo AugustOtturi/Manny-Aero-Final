@@ -9,9 +9,9 @@ const { activeLink = "home" } = Astro.props;
 
 const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean }[] = [
   { key: "home",     label: "Home",     href: "/" },
-  { key: "about",    label: "About",    href: "/about" },
   { key: "services", label: "Services", href: "/services", dropdown: true },
-  { key: "map",      label: "Map",      href: "/#map" },
+  { key: "map",      label: "Coverage", href: "/#map" },
+  { key: "about",    label: "About",    href: "/about" },
   { key: "news",     label: "News",     href: "/news" },
 ];
 ---
@@ -69,7 +69,6 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
 
     <ul class="flyout__links">
       <li><a href="/"         class="flyout__link">Home</a></li>
-      <li><a href="/about"    class="flyout__link">About</a></li>
       <li class="flyout__group">
         <button type="button" class="flyout__link flyout__link--toggle" id="flyout-services-toggle" aria-expanded="false">
           Services
@@ -84,7 +83,8 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
           <li><a href="/catering"                    class="flyout__sublink">Manny's Catering</a></li>
         </ul>
       </li>
-      <li><a href="/#map"     class="flyout__link">Map</a></li>
+      <li><a href="/#map"     class="flyout__link">Coverage</a></li>
+      <li><a href="/about"    class="flyout__link">About</a></li>
       <li><a href="/news"     class="flyout__link">News</a></li>
       <li><a href="/contact"  class="flyout__link flyout__link--cta">Contact</a></li>
     </ul>
