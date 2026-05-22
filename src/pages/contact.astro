@@ -10,9 +10,9 @@ import PageHero from "../components/PageHero.astro";
 >
   <PageHero
     badge="Get in touch"
-    title="Contact Manny Aero."
-    subtitle="Our operations team is available around the clock to handle your ground support needs across Mexico."
-    accent="Manny Aero."
+    title="Contact Us"
+    subtitle="Supporting your operation 24/7 with seamless coordination across Mexico."
+    accent="Us"
   >
     <div class="hero-avail hero-enter" style="--enter-delay: 360ms">
       <span class="hero-avail-dot"></span>
@@ -28,11 +28,10 @@ import PageHero from "../components/PageHero.astro";
       <div class="form-col">
         <div class="form-intro reveal">
           <h2 class="form-title">
-            Send us a <span class="accent">flight request</span>
+            Let's Coordinate <span class="accent">Your Flight</span>
           </h2>
           <p class="form-sub">
-            Fill in your details and a member of our operations team will get back to you within 2
-            hours.
+            Share your itinerary and our operations team will assist you as soon as possible.
           </p>
         </div>
 
@@ -118,8 +117,9 @@ import PageHero from "../components/PageHero.astro";
                 </svg>
               </button>
               <p class="form-note">
-                We respond within 2 hours.<br />For urgent requests, call us at <a
-                  href="tel:+15551234567">+1 555 123 4567</a>.
+                For urgent requests:<br />
+                US &amp; CAN <a href="tel:+18775062669">1 877 50 MANNY</a><br />
+                MEX <a href="tel:+527222730981">+52 722 273 0981</a>
               </p>
             </div>
           </form>
@@ -131,8 +131,8 @@ import PageHero from "../components/PageHero.astro";
           </div>
           <div class="success-title">Request received</div>
           <p class="success-desc">
-            Thank you — your flight request has been sent to our operations team. We'll be in touch
-            within 2 hours. For urgent matters, call us directly at +1 555 123 4567.
+            Thank you — your flight request has been sent to our operations team. For urgent matters,
+            call us directly: US &amp; CAN 1 877 50 MANNY · MEX +52 722 273 0981.
           </p>
         </div>
       </div>
@@ -141,13 +141,19 @@ import PageHero from "../components/PageHero.astro";
       <aside class="sidebar reveal">
         <div class="contact-card">
           <div class="contact-card-label">Direct Line</div>
-          <div class="contact-card-title">Operations Center</div>
+          <div class="contact-card-title">Operations Control Center</div>
           <div class="contact-card-body">
             Available 24 hours a day, 7 days a week, 365 days a year for urgent requests and
             real-time coordination.
           </div>
-          <a href="tel:+15551234567" class="contact-card-link">
-            +1 555 123 4567
+          <a href="tel:+527222730981" class="contact-card-link">
+            MEX +52 722 273 0981
+            <svg viewBox="0 0 24 24"
+              ><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"
+              ></polyline></svg>
+          </a>
+          <a href="tel:+18775062669" class="contact-card-link">
+            US &amp; CAN 1 877 50 MANNY
             <svg viewBox="0 0 24 24"
               ><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"
               ></polyline></svg>
@@ -155,28 +161,46 @@ import PageHero from "../components/PageHero.astro";
         </div>
         <div class="contact-card">
           <div class="contact-card-label">Email</div>
-          <div class="contact-card-title">Operations</div>
-          <a href="mailto:ops@mannyaero.com" class="contact-card-link">ops@mannyaero.com</a>
+          <div class="email-list">
+            <div class="email-item">
+              <div class="email-item-label">Operations Control Center</div>
+              <a href="mailto:ops@manny.aero" class="contact-card-link">ops@manny.aero
+                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+            <div class="email-item">
+              <div class="email-item-label">Administration &amp; Invoice</div>
+              <a href="mailto:admon@manny.aero" class="contact-card-link">admon@manny.aero
+                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+            <div class="email-item">
+              <div class="email-item-label">General Information</div>
+              <a href="mailto:info@manny.aero" class="contact-card-link">info@manny.aero
+                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+          </div>
         </div>
         <div class="contact-card">
-          <div class="contact-card-label">Our Offices</div>
+          <div class="contact-card-label">Main Offices</div>
           <div class="office-list">
             <div>
-              <div class="office-item-name">Mexico City (HQ)</div>
+              <div class="office-item-name">Toluca, México</div>
               <div class="office-item-addr">
-                Aeropuerto Internacional<br />Benito Juárez, CDMX
+                Boulevard Miguel Alemán S/N San Pedro Totoltepec, Toluca, México. C.P. 50226
               </div>
             </div>
             <div>
-              <div class="office-item-name">Cancún</div>
+              <div class="office-item-name">Querétaro, México</div>
               <div class="office-item-addr">
-                Aeropuerto Internacional<br />de Cancún, Q. Roo
+                Carretera No 200, KM. 13.5 Querétaro-Tequisquiapan, Colón, Querétaro. C.P. 76295
               </div>
             </div>
             <div>
-              <div class="office-item-name">Los Cabos</div>
+              <div class="office-item-name">Cancún, México</div>
               <div class="office-item-addr">
-                Aeropuerto Internacional<br />de Los Cabos, BCS
+                Carretera Cancún–Chetumal, Km. 22. C.P. 77569, Cancún, Quintana Roo
               </div>
             </div>
           </div>
@@ -615,6 +639,25 @@ import PageHero from "../components/PageHero.astro";
     color: var(--color-text-muted);
     line-height: 1.6;
     margin-top: 2px;
+  }
+
+  .email-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 4px;
+  }
+  .email-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .email-item-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
   }
 
   .map-placeholder {
