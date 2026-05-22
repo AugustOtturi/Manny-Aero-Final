@@ -14,9 +14,9 @@ import omeleteImg from "../assets/photos/ommelete.webp";
 >
   <PageHero
     badge="In-Flight Catering"
-    title="Manny's Catering"
-    subtitle="Premium culinary experiences tailored to every flight"
-    accent="Catering"
+    title="Manny's In-flight Catering"
+    subtitle="Premium In-flight Catering Across Mexico"
+    accent="In-flight Catering"
   />
 
   <!-- PHOTO BAND 1 -->
@@ -48,10 +48,6 @@ import omeleteImg from "../assets/photos/ommelete.webp";
       <div class="catering-grid stagger">
         <div class="catering-body">
           <p class="catering-lead">
-            Luxury catering solutions designed to meet the highest standards of comfort,
-            presentation, and personalization.
-          </p>
-          <p>
             Manny's Catering provides tailored in-flight catering and cabin support solutions
             for private and corporate aviation throughout Mexico.
           </p>
@@ -66,6 +62,12 @@ import omeleteImg from "../assets/photos/ommelete.webp";
             delivers a refined onboard experience backed by reliable coordination and
             personalized service.
           </p>
+          <div class="menu-cta">
+            <a href="https://online.fliphtml5.com/hckum/Menu-2026/" target="_blank" rel="noopener noreferrer" class="menu-btn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              View Catering Menu 2026
+            </a>
+          </div>
         </div>
         <div class="catering-card">
           <div class="list-title">What We Offer</div>
@@ -105,11 +107,10 @@ import omeleteImg from "../assets/photos/ommelete.webp";
       <div class="catering-cta-inner reveal">
         <div class="catering-cta-label">Available 24/7</div>
         <h2 class="catering-cta-title">
-          Coordinate Your Catering <span class="accent">Request Today</span>
+          In-Flight Catering, <span class="accent">Expertly Coordinated</span>
         </h2>
         <p class="catering-cta-sub">
-          Available 24/7 to support your flight operations with precision, care, and
-          personalized service across Mexico.
+          24/7 support for customized catering solutions designed around your operation.
         </p>
         <div class="catering-cta-actions">
           <GlassButton href="/contact" variant="solid">Contact our team</GlassButton>
@@ -313,6 +314,40 @@ import omeleteImg from "../assets/photos/ommelete.webp";
   .catering-cta-actions {
     display: flex;
     justify-content: center;
+  }
+
+  /* ── MENU BUTTON ── */
+  .menu-cta {
+    margin-top: 32px;
+  }
+  .menu-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 24px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 185, 0, 0.12);
+    border: 1px solid rgba(255, 185, 0, 0.4);
+    color: var(--color-accent);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.25s var(--ease-out);
+  }
+  .menu-btn:hover {
+    background: rgba(255, 185, 0, 0.2);
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+  .menu-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    flex-shrink: 0;
   }
 
   /* ── RESPONSIVE ── */
