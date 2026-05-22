@@ -1,10 +1,16 @@
+export interface Phase {
+  label: string;
+  items: string[];
+}
+
 export interface PermitSection {
   id: string;
   badge: string;
   title: string;
   open?: boolean;
   noteBefore?: string;
-  items: string[];
+  items?: string[];
+  phases?: Phase[];
   noteAfter?: string;
 }
 
@@ -107,15 +113,43 @@ export const PERMIT_SECTIONS: PermitSection[] = [
     id: "ibp",
     badge: "Blanket",
     title: "Indefinite Blanket Permit (IBP)",
-    items: [
-      "Operator Part 135 certificate and OpSpecs authorizing Mexican operations.",
-      "Pre-registered aircraft fleet list — additions mid-cycle require amendment filing.",
-      "Annual permit fee payment receipt (SHCP / Treasury direct deposit).",
-      "Rolling 12-month insurance coverage that does not lapse during the permit period.",
-      "Monthly flight reporting in the AFAC electronic portal.",
-      "Designated compliance officer responsible for operator filings.",
+    noteBefore: "Blanket permits are the most efficient option for operators flying more than ~12 times per year into Mexico.",
+    phases: [
+      {
+        label: "Security Manual",
+        items: [
+          "Company logo as an electronic file (jpg, pdf or similar) with great resolution or vectorized",
+          "Complete company address",
+          "Information regarding all your aircraft to be added to the permit (weight, three view draw, engine serial numbers, seat configuration, aircraft serial number, year of construction, etc.)",
+          "Company organizational chart (Company Hierarchy Chart)",
+          "Company directory (list of employees with phone numbers and e-mail addresses)",
+          "Picture showing hangar location in home-based airport",
+          "Native security manual or program approved by your aviation authority and its official authorization",
+          "TFSSP approval (US operators only)",
+        ],
+      },
+      {
+        label: "Convalidación / Validation of Native AOC",
+        items: [
+          "Certificates of Registration of all the fleet",
+          "Certificates of Airworthiness of all the fleet",
+          "Noise Certificates of all the fleet",
+          "D085",
+          "Air Carrier Certificate or AOC (depends on the country of origin)",
+          "Complete Ops Specs of all the fleet",
+          "ELT Letter",
+          "MELs of all the aircraft",
+          "Questionnaire duly filled out",
+        ],
+      },
+      {
+        label: "Insurance Registration",
+        items: [
+          "Worldwide insurance policy for commercial use",
+          "Mexican insurance policy for commercial use along with proof of payment",
+        ],
+      },
     ],
-    noteBefore: "Blanket permits are the most efficient option for operators flying more than ~12 times per year into Mexico. Valid 12 months with renewal option.",
     noteAfter: "IBP holders receive priority handling on amendments and in-country incident response.",
   },
   {

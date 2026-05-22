@@ -73,11 +73,36 @@ const sidebarItems = [
                 {s.noteBefore && (
                   <div class="permit-note permit-note-before">{s.noteBefore}</div>
                 )}
-                <ul class="permit-list">
-                  {s.items.map((it) => (
-                    <li>{it}</li>
-                  ))}
-                </ul>
+                {s.phases ? (
+                  <div class="phase-list">
+                    {s.phases.map((phase, i) => (
+                      <div class="phase-section">
+                        <button class="phase-header" type="button" aria-expanded="false">
+                          <span class="phase-num">Phase {i + 1}</span>
+                          <span class="phase-label">{phase.label}</span>
+                          <span class="phase-toggle">
+                            <svg viewBox="0 0 24 24">
+                              <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                          </span>
+                        </button>
+                        <div class="phase-body">
+                          <ul class="permit-list">
+                            {phase.items.map((it) => (
+                              <li>{it}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <ul class="permit-list">
+                    {s.items?.map((it) => (
+                      <li>{it}</li>
+                    ))}
+                  </ul>
+                )}
                 {s.noteAfter && <div class="permit-note">{s.noteAfter}</div>}
               </div>
             </div>
@@ -219,6 +244,17 @@ const sidebarItems = [
 </BaseLayout>
 
 <script>
+  // Phase sub-accordion
+  document.querySelectorAll<HTMLButtonElement>(".phase-header").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const phase = btn.closest(".phase-section");
+      if (!phase) return;
+      const willOpen = !phase.classList.contains("open");
+      phase.classList.toggle("open");
+      btn.setAttribute("aria-expanded", String(willOpen));
+    });
+  });
+
   // Accordion
   document.querySelectorAll<HTMLButtonElement>(".permit-header").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -574,6 +610,85 @@ const sidebarItems = [
   .permit-note-before {
     margin-top: 0;
     margin-bottom: 22px;
+  }
+
+  /* Phase sub-accordions */
+  .phase-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .phase-section {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .phase-header {
+    width: 100%;
+    padding: 14px 18px;
+    border: none;
+    border-bottom: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    text-align: left;
+    transition: background-color 0.2s var(--ease-out);
+  }
+  .phase-header:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .phase-section.open .phase-header {
+    border-bottom-color: var(--color-border);
+  }
+  .phase-num {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    background: rgba(255, 185, 0, 0.1);
+    border: 1px solid rgba(255, 185, 0, 0.25);
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .phase-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    flex: 1;
+    line-height: 1.3;
+  }
+  .phase-toggle {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .phase-toggle svg {
+    width: 13px;
+    height: 13px;
+    stroke: var(--color-text-muted);
+    fill: none;
+    stroke-width: 2;
+    transition: transform 0.3s var(--ease-out);
+  }
+  .phase-section.open .phase-toggle svg {
+    stroke: var(--color-accent);
+    transform: rotate(180deg);
+  }
+  .phase-body {
+    display: none;
+    padding: 18px 20px;
+  }
+  .phase-section.open .phase-body {
+    display: block;
   }
 
   .downloads-wrap {
