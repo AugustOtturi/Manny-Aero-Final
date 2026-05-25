@@ -9,7 +9,7 @@ const { activeLink = "home" } = Astro.props;
 
 const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean }[] = [
   { key: "home",     label: "Home",     href: "/" },
-  { key: "services", label: "Services", href: "/services", dropdown: true },
+  { key: "services", label: "Services", href: "/ground-handling", dropdown: true },
   { key: "map",      label: "Coverage", href: "/#map" },
   { key: "about",    label: "About",    href: "/about" },
   { key: "news",     label: "News",     href: "/news" },
@@ -30,7 +30,7 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
             </svg>
           </button>
           <div class="nav__dropdown" role="menu">
-            <a href="/services"                    class="nav__dd-item" role="menuitem">Ground Handling</a>
+            <a href="/ground-handling"             class="nav__dd-item" role="menuitem">Ground Handling</a>
             <a href="/permits-and-authorizations"  class="nav__dd-item" role="menuitem">Permits &amp; Authorization</a>
             <a href="/isbha"                       class="nav__dd-item" role="menuitem">IS-BAH &amp; IS-BAO</a>
             <a href="/catering"                    class="nav__dd-item" role="menuitem">Manny's In-flight Catering</a>
@@ -77,7 +77,7 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
           </svg>
         </button>
         <ul class="flyout__sub" id="flyout-services-sub">
-          <li><a href="/services"                    class="flyout__sublink">Ground Handling</a></li>
+          <li><a href="/ground-handling"             class="flyout__sublink">Ground Handling</a></li>
           <li><a href="/permits-and-authorizations"  class="flyout__sublink">Permits &amp; Authorization</a></li>
           <li><a href="/isbha"                       class="flyout__sublink">IS-BAH &amp; IS-BAO</a></li>
           <li><a href="/catering"                    class="flyout__sublink">Manny's In-flight Catering</a></li>

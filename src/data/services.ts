@@ -15,7 +15,7 @@ export const SERVICES: Service[] = [
   {
     slug: "ground-handling",
     title: "Ground Handling Across Mexico",
-    href: "/services",
+    href: "/ground-handling",
     tone: "b",
   },
   {
