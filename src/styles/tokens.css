@@ -29,7 +29,7 @@
 
   /* Global page gradient — continuous top→bottom grey */
   --bg-top: #808080;
-  --bg-bottom: #3d3b3b;
+  --bg-bottom: #312f2f;
   --bg-gradient: linear-gradient(
     180deg,
     var(--bg-top) 0%,
