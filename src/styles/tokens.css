@@ -15,7 +15,11 @@
   --color-border-strong: rgba(255, 255, 255, 0.18);
 
   /* Solid background (footer only) */
-  --color-bg-footer: #0a0a0a;
+  --color-bg-footer: #1E1E1E;
+
+  /* Brand orange (catering button, IS-BAH pin) */
+  --color-orange: #f37b3a;
+  --color-orange-hover: #f5924f;
 
   /* Map pins */
   --pin-gold: #ffb900;

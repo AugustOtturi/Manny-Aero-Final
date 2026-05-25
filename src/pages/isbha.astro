@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import GlassButton from "../components/ui/GlassButton.astro";
 import GlassPill from "../components/ui/GlassPill.astro";
+import BackToServices from "../components/BackToServices.astro";
 import auditImg from "../assets/photos/isbaoisbah.jpg";
 ---
 
@@ -11,6 +12,8 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
   description="Manny helps organizations achieve IS-BAH and IS-BAO compliance through expert consulting, SMS implementation, and audit preparation across Mexico."
   activeLink="services"
 >
+  <BackToServices />
+
   <!-- HERO SPLIT -->
   <section class="isbah-hero">
     <div class="container">

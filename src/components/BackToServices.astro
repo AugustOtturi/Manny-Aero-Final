@@ -1,0 +1,49 @@
+---
+// Back-to-services breadcrumb link — shown at the top of each service page.
+// Links to /#services (the 4-card grid on the index). The leading / makes it
+// work from any route (e.g. /isbha, /permits-and-authorizations, /catering).
+---
+
+<div class="back-bar container">
+  <a href="/#services" class="back-link" aria-label="Back to all services">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    All Services
+  </a>
+</div>
+
+<style>
+  .back-bar {
+    padding-top: 28px;
+    padding-bottom: 0;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    transition: color 0.2s var(--ease-out), gap 0.2s var(--ease-out);
+  }
+
+  .back-link svg {
+    transition: transform 0.2s var(--ease-out);
+    flex-shrink: 0;
+  }
+
+  .back-link:hover {
+    color: var(--color-accent);
+    gap: 12px;
+  }
+
+  .back-link:hover svg {
+    transform: translateX(-3px);
+  }
+</style>
