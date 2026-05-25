@@ -7,10 +7,36 @@ import founderImg from "../assets/photos/ourfounder.webp";
 ---
 
 <BaseLayout
-  title="Our Founder — Manny Aero"
-  description="The story of Manuel (Manny Sr.) RomeroVargas — the visionary who built one of Mexico's most trusted aviation companies over more than 50 years."
+  title="Manuel RomeroVargas — Founder of Manny Aero"
+  description="The story of Manuel (Manny Sr.) RomeroVargas — aviation pioneer and founder of Manny Aero, who built Mexico's most trusted ground handling company over more than 50 years."
   activeLink="about"
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Manuel RomeroVargas",
+      "alternateName": "Manny Sr.",
+      "jobTitle": "Founder & Chairman",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "Manny Aero",
+        "url": "https://manny.aero"
+      },
+      "url": "https://manny.aero/founder",
+      "description": "Aviation pioneer and founder of Manny Aero — Mexico's premier aircraft ground handling company. Over 50 years of experience in aviation across Mexico.",
+      "knowsAbout": ["Aircraft Ground Handling", "Aviation Safety", "IS-BAH Certification", "Mexico Aviation Regulations"]
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://manny.aero" },
+        { "@type": "ListItem", "position": 2, "name": "About", "item": "https://manny.aero/about" },
+        { "@type": "ListItem", "position": 3, "name": "Our Founder", "item": "https://manny.aero/founder" }
+      ]
+    })} />
+  </Fragment>
   <PageHero
     badge="Our Founder"
     title="Manuel (Manny Sr.) RomeroVargas"

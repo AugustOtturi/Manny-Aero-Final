@@ -8,10 +8,50 @@ import FinalCTA from "../components/FinalCTA.astro";
 ---
 
 <BaseLayout
-  title="Manny Aero — Seamless aircraft handling across Mexico"
+  title="Aircraft Ground Handling Mexico — Manny Aero"
   description="Manny Aero delivers premium aircraft ground handling, permits & authorizations, in-flight catering, and IS-BAH / IS-BAO audits across Mexico. 24/7 service, 300+ trip providers, 10,000+ operations handled."
   activeLink="home"
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Manny Aero",
+      "url": "https://manny.aero",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://manny.aero/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Aircraft Ground Handling Mexico",
+      "provider": {
+        "@type": "Organization",
+        "name": "Manny Aero",
+        "url": "https://manny.aero"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Mexico"
+      },
+      "description": "Premium aircraft ground handling, permits & authorizations, in-flight catering, IS-BAH/IS-BAO audits, and FBO coordination across Mexico since 1997.",
+      "serviceType": "Aircraft Ground Handling",
+      "availableChannel": {
+        "@type": "ServiceChannel",
+        "serviceUrl": "https://manny.aero/contact",
+        "availableLanguage": ["English", "Spanish"],
+        "hoursAvailable": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+          "opens": "00:00",
+          "closes": "23:59"
+        }
+      }
+    })} />
+  </Fragment>
   <Hero />
   <SubHero />
   <ServiceCards />

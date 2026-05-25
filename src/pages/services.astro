@@ -24,10 +24,68 @@ const stats = [
 ---
 
 <BaseLayout
-  title="Services — Manny Aero"
-  description="Comprehensive ground handling, permits, fueling, catering and VIP services across Mexico."
+  title="Aviation Ground Handling Services Mexico — Manny Aero"
+  description="Ground handling, FBO coordination, aircraft permits, in-flight catering, VIP concierge, and IS-BAH audits across Mexico. IS-BAH certified. 24/7 support since 1997."
   activeLink="services"
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Manny Aero Aviation Services",
+      "url": "https://manny.aero/services",
+      "itemListElement": [
+        {
+          "@type": "ListItem", "position": 1,
+          "item": {
+            "@type": "Service",
+            "name": "Aircraft Ground Handling & FBO Coordination",
+            "provider": { "@type": "Organization", "name": "Manny Aero" },
+            "areaServed": { "@type": "Country", "name": "Mexico" },
+            "url": "https://manny.aero/services"
+          }
+        },
+        {
+          "@type": "ListItem", "position": 2,
+          "item": {
+            "@type": "Service",
+            "name": "Mexico Flight Permits & Authorizations",
+            "provider": { "@type": "Organization", "name": "Manny Aero" },
+            "areaServed": { "@type": "Country", "name": "Mexico" },
+            "url": "https://manny.aero/permits-and-authorizations"
+          }
+        },
+        {
+          "@type": "ListItem", "position": 3,
+          "item": {
+            "@type": "Service",
+            "name": "IS-BAH & IS-BAO Certification Consulting",
+            "provider": { "@type": "Organization", "name": "Manny Aero" },
+            "areaServed": { "@type": "Country", "name": "Mexico" },
+            "url": "https://manny.aero/isbha"
+          }
+        },
+        {
+          "@type": "ListItem", "position": 4,
+          "item": {
+            "@type": "Service",
+            "name": "Premium In-Flight Catering Mexico",
+            "provider": { "@type": "Organization", "name": "Manny Aero" },
+            "areaServed": { "@type": "Country", "name": "Mexico" },
+            "url": "https://manny.aero/catering"
+          }
+        }
+      ]
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://manny.aero" },
+        { "@type": "ListItem", "position": 2, "name": "Services", "item": "https://manny.aero/services" }
+      ]
+    })} />
+  </Fragment>
   <BackToServices />
   <PageHero
     badge="Ground Handling"

@@ -8,10 +8,45 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
 ---
 
 <BaseLayout
-  title="IS-BAH & IS-BAO Audit Services — Manny Aero"
-  description="Manny helps organizations achieve IS-BAH and IS-BAO compliance through expert consulting, SMS implementation, and audit preparation across Mexico."
+  title="IS-BAH & IS-BAO Certification Mexico — Manny Aero"
+  description="Expert IS-BAH and IS-BAO audit consulting for FBOs and flight departments across Mexico. SMS implementation, gap analysis, and full audit preparation by a certified IS-BAH operator."
   activeLink="services"
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "IS-BAH & IS-BAO Certification Consulting Mexico",
+      "provider": {
+        "@type": "Organization",
+        "name": "Manny Aero",
+        "url": "https://manny.aero"
+      },
+      "areaServed": { "@type": "Country", "name": "Mexico" },
+      "description": "IS-BAH and IS-BAO audit consulting for aviation companies in Mexico. Includes SMS design, gap analysis, audit preparation, and staff training by a certified IS-BAH operator since 2016.",
+      "serviceType": "Aviation Safety Consulting",
+      "url": "https://manny.aero/isbha",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "IS-BAH Compliance Services",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "IS-BAH Gap Analysis" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "SMS Design & Documentation" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "IS-BAH Audit Preparation" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "IS-BAO Compliance Consulting" } }
+        ]
+      }
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://manny.aero" },
+        { "@type": "ListItem", "position": 2, "name": "Services", "item": "https://manny.aero/services" },
+        { "@type": "ListItem", "position": 3, "name": "IS-BAH & IS-BAO", "item": "https://manny.aero/isbha" }
+      ]
+    })} />
+  </Fragment>
   <BackToServices />
 
   <!-- HERO SPLIT -->

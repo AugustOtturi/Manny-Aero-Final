@@ -18,10 +18,53 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 ---
 
 <BaseLayout
-  title="Contact — Manny Aero"
-  description="Reach our operations team — available 24/7 for ground handling requests across Mexico."
+  title="Contact Manny Aero — 24/7 Ground Handling Support Mexico"
+  description="Reach Manny Aero's operations team 24/7 for ground handling, permits, and flight coordination across Mexico. US toll-free: +1-877-506-2669 | Mexico: +52-722-273-0981."
   activeLink="contact"
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Manny Aero",
+      "url": "https://manny.aero",
+      "logo": "https://manny.aero/logo-manny.svg",
+      "image": "https://manny.aero/og-default.jpg",
+      "description": "Premium aircraft ground handling, permits, in-flight catering, and FBO coordination across Mexico. IS-BAH certified since 2016.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Toluca",
+        "addressRegion": "Estado de México",
+        "addressCountry": "MX",
+        "postalCode": "50000"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 19.2826,
+        "longitude": -99.5561
+      },
+      "telephone": ["+1-877-506-2669", "+52-722-273-0981"],
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+        "opens": "00:00",
+        "closes": "23:59"
+      },
+      "sameAs": [
+        "https://www.instagram.com/manny_aero/",
+        "https://www.facebook.com/mannyaviation/",
+        "https://www.linkedin.com/company/manny-aviation-services/"
+      ]
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://manny.aero" },
+        { "@type": "ListItem", "position": 2, "name": "Contact", "item": "https://manny.aero/contact" }
+      ]
+    })} />
+  </Fragment>
   <PageHero
     badge="Get in touch"
     title="Contact Us"
