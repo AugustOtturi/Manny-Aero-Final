@@ -200,7 +200,7 @@ export const DOWNLOADS: DownloadItem[] = [
   },
   {
     name: "Questionnaire for Mexico AOC",
-    url: "#",
+    url: "/files/questionnaire-for-mexico-aoc.pdf",
     type: "PDF",
     icon: "star",
   },
