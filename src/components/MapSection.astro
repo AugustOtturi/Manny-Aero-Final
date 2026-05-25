@@ -21,9 +21,25 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       </p>
     </div>
 
-    <div class="map__controls reveal">
+    <!-- Mobile-only select — stays in normal flow, outside the canvas -->
+    <div class="map__mobile-filter">
+      <select
+        class="map__select"
+        aria-label="Filter locations by category"
+      >
+        <option value="all">All categories</option>
+        {
+          categoryEntries.map(([key, cat]) => (
+            <option value={key}>{cat.name}</option>
+          ))
+        }
+      </select>
+    </div>
+
+    <div class="map__canvas reveal">
+      <!-- Desktop floating legend — absolutely positioned inside the canvas -->
       <div
-        class="map__pills"
+        class="map__legend"
         role="group"
         aria-label="Filter locations by category"
       >
@@ -47,20 +63,6 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         }
       </div>
 
-      <select
-        class="map__select"
-        aria-label="Filter locations by category"
-      >
-        <option value="all">All categories</option>
-        {
-          categoryEntries.map(([key, cat]) => (
-            <option value={key}>{cat.name}</option>
-          ))
-        }
-      </select>
-    </div>
-
-    <div class="map__canvas reveal">
       <div id="map-container" aria-label="Interactive map of Manny Aero locations across Mexico" role="region"></div>
       <div class="map__loader" id="map-loader" aria-hidden="true">
         <span></span><span></span><span></span>
@@ -461,21 +463,27 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     color: var(--color-text-muted);
   }
 
-  .map__controls {
-    display: flex;
+  /* Mobile-only filter wrapper — normal flow, above the canvas */
+  .map__mobile-filter {
+    display: none;
     justify-content: center;
-    margin: 0 auto 32px;
+    margin: 0 auto 20px;
   }
 
-  .map__pills {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 8px;
+  /* Desktop floating legend — absolute overlay inside the canvas */
+  .map__legend {
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     padding: 6px;
     background: var(--color-surface);
     backdrop-filter: blur(12px) saturate(1.4);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
+    border-radius: 10px;
     box-shadow:
       0 8px 24px rgba(0, 0, 0, 0.35),
       inset 0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -485,7 +493,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 16px;
+    padding: 6px 12px;
     border-radius: var(--radius-pill);
     background: transparent;
     border: 0;
@@ -524,7 +532,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
   }
 
   .map__select {
-    display: none;
+    display: block;
     appearance: none;
     width: 100%;
     max-width: 320px;
@@ -655,11 +663,11 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     #map-container {
       touch-action: none;
     }
-    .map__pills {
-      display: none;
+    .map__mobile-filter {
+      display: flex;
     }
-    .map__select {
-      display: block;
+    .map__legend {
+      display: none;
     }
   }
 
@@ -667,7 +675,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     .map__sub {
       font-size: var(--fs-body);
     }
-    .map__controls {
+    .map__mobile-filter {
       margin-top: 28px;
     }
     .map__canvas {
