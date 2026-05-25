@@ -1,6 +1,7 @@
 ---
 // Persistent floating OPS 24/7 contact module — visible on every page.
-// Links are placeholders for now (href="#"). Yellow-tinted glass to match the brand accent.
+// Email → mailto:ops@manny.aero
+// Phone → mini popover with two tel: links (US + MX)
 ---
 
 <aside class="float-ops" aria-label="OPS 24/7 contact">
@@ -9,23 +10,46 @@
     <span>24/7</span>
   </div>
 
-  <a class="float-ops__icon" href="#" aria-label="Email OPS 24/7">
+  <a class="float-ops__icon" href="mailto:ops@manny.aero" aria-label="Email OPS 24/7">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
       <path d="M3.5 6.5L12 13L20.5 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </a>
 
-  <a class="float-ops__icon" href="#" aria-label="Call OPS 24/7">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M5 4.5C5 4 5.4 3.5 6 3.5H8.5C9 3.5 9.4 3.8 9.5 4.3L10.4 7.6C10.5 8 10.4 8.5 10 8.8L8.4 10.1C9.6 12.4 11.6 14.4 13.9 15.6L15.2 14C15.5 13.6 16 13.5 16.4 13.6L19.7 14.5C20.2 14.6 20.5 15 20.5 15.5V18C20.5 18.6 20 19 19.5 19C11.5 19 5 12.5 5 4.5Z"
-        stroke="currentColor"
-        stroke-width="1.8"
-        stroke-linejoin="round"
-      />
-    </svg>
-  </a>
+  <div class="float-ops__phone-wrap">
+    <button
+      class="float-ops__icon"
+      id="ops-phone-btn"
+      aria-label="Call OPS 24/7"
+      aria-expanded="false"
+      aria-controls="ops-phone-popover"
+      type="button"
+    >
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M5 4.5C5 4 5.4 3.5 6 3.5H8.5C9 3.5 9.4 3.8 9.5 4.3L10.4 7.6C10.5 8 10.4 8.5 10 8.8L8.4 10.1C9.6 12.4 11.6 14.4 13.9 15.6L15.2 14C15.5 13.6 16 13.5 16.4 13.6L19.7 14.5C20.2 14.6 20.5 15 20.5 15.5V18C20.5 18.6 20 19 19.5 19C11.5 19 5 12.5 5 4.5Z"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+
+    <!-- Mini phone popover -->
+    <div class="ops-popover" id="ops-phone-popover" aria-hidden="true" role="dialog" aria-label="Call options">
+      <div class="ops-popover__arrow" aria-hidden="true"></div>
+      <p class="ops-popover__title">Call OPS</p>
+      <a href="tel:+18775062669" class="ops-popover__option">
+        <span class="ops-popover__region">US / Canada</span>
+        <span class="ops-popover__num">+1 877 506 2669</span>
+      </a>
+      <a href="tel:+527222730981" class="ops-popover__option">
+        <span class="ops-popover__region">México</span>
+        <span class="ops-popover__num">+52 722 273 0981</span>
+      </a>
+    </div>
+  </div>
 </aside>
 
 <style>
@@ -91,17 +115,114 @@
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.92);
     border: 1px solid rgba(255, 255, 255, 0.18);
+    cursor: pointer;
     transition: background-color 0.25s var(--ease-out),
       color 0.25s var(--ease-out),
       border-color 0.25s var(--ease-out),
       transform 0.25s var(--ease-out);
   }
 
-  .float-ops__icon:hover {
+  .float-ops__icon:hover,
+  .float-ops__icon[aria-expanded="true"] {
     background: var(--color-accent);
     color: #0a0a0a;
     border-color: var(--color-accent);
     transform: translateY(-2px);
+  }
+
+  /* ── PHONE WRAP (relative container for popover) ── */
+  .float-ops__phone-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── POPOVER ── */
+  .ops-popover {
+    position: absolute;
+    right: calc(100% + 16px); /* to the left of the widget */
+    top: 50%;
+    transform: translateY(-50%) translateX(6px);
+    z-index: 81;
+
+    background: rgba(12, 12, 18, 0.96);
+    border: 1px solid rgba(255, 185, 0, 0.45);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    min-width: 210px;
+    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255,185,0,0.08);
+
+    /* Hidden state */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+  }
+
+  .ops-popover.is-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) translateX(0);
+  }
+
+  /* Arrow pointing right toward the widget */
+  .ops-popover__arrow {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    background: rgba(12, 12, 18, 0.96);
+    border-top: 1px solid rgba(255, 185, 0, 0.45);
+    border-right: 1px solid rgba(255, 185, 0, 0.45);
+  }
+
+  .ops-popover__title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin: 0 0 10px;
+  }
+
+  .ops-popover__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: background 0.18s var(--ease-out);
+  }
+
+  .ops-popover__option:not(:last-child) {
+    margin-bottom: 4px;
+  }
+
+  .ops-popover__option:hover {
+    background: rgba(255, 185, 0, 0.1);
+  }
+
+  .ops-popover__region {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+  }
+
+  .ops-popover__num {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
   }
 
   /* Subtle pulse — draws attention without being intrusive */
@@ -118,7 +239,7 @@
     animation-play-state: paused;
   }
 
-  /* Hide while the loader is up so it doesn't peek over a black overlay */
+  /* Hide while the loader is up */
   html:not(.is-ready) .float-ops {
     opacity: 0;
     pointer-events: none;
@@ -144,5 +265,47 @@
       width: 16px;
       height: 16px;
     }
+    .ops-popover {
+      min-width: 186px;
+      padding: 12px 13px;
+    }
+    .ops-popover__num {
+      font-size: 12px;
+    }
   }
 </style>
+
+<script>
+  const btn = document.getElementById("ops-phone-btn");
+  const popover = document.getElementById("ops-phone-popover");
+
+  btn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = popover?.classList.toggle("is-open");
+    btn.setAttribute("aria-expanded", String(!!isOpen));
+    popover?.setAttribute("aria-hidden", String(!isOpen));
+  });
+
+  // Close when clicking anywhere outside
+  document.addEventListener("click", (e) => {
+    if (
+      popover?.classList.contains("is-open") &&
+      !popover.contains(e.target as Node) &&
+      e.target !== btn
+    ) {
+      popover.classList.remove("is-open");
+      popover.setAttribute("aria-hidden", "true");
+      btn?.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  // Close on Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && popover?.classList.contains("is-open")) {
+      popover.classList.remove("is-open");
+      popover.setAttribute("aria-hidden", "true");
+      btn?.setAttribute("aria-expanded", "false");
+      btn?.focus();
+    }
+  });
+</script>
