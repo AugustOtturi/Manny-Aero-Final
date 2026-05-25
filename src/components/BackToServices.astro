@@ -1,49 +1,65 @@
 ---
-// Back-to-services breadcrumb link — shown at the top of each service page.
-// Links to /#services (the 4-card grid on the index). The leading / makes it
-// work from any route (e.g. /isbha, /permits-and-authorizations, /catering).
+// Back-to-services link — first element inside BaseLayout on every service page.
+// Sits above the PageHero so it's the first thing the user sees.
 ---
 
-<div class="back-bar container">
-  <a href="/#services" class="back-link" aria-label="Back to all services">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.8"
-            stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    All Services
-  </a>
+<div class="back-bar">
+  <div class="container">
+    <a href="/#services" class="back-link" aria-label="Back to all services">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      All Services
+    </a>
+  </div>
 </div>
 
 <style>
   .back-bar {
-    padding-top: 28px;
+    padding-top: 104px; /* clears the fixed navbar height (~80px) + breathing room */
     padding-bottom: 0;
   }
 
   .back-link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 13px;
+    gap: 7px;
+    padding: 7px 16px 7px 12px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 185, 0, 0.14);
+    border: 1px solid rgba(255, 185, 0, 0.45);
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--color-accent);
     text-decoration: none;
-    transition: color 0.2s var(--ease-out), gap 0.2s var(--ease-out);
+    transition: background 0.2s var(--ease-out),
+                border-color 0.2s var(--ease-out),
+                gap 0.2s var(--ease-out),
+                color 0.2s var(--ease-out);
   }
 
   .back-link svg {
-    transition: transform 0.2s var(--ease-out);
     flex-shrink: 0;
+    transition: transform 0.2s var(--ease-out);
   }
 
   .back-link:hover {
-    color: var(--color-accent);
-    gap: 12px;
+    background: rgba(255, 185, 0, 0.22);
+    border-color: var(--color-accent);
+    color: #ffffff;
+    gap: 10px;
   }
 
   .back-link:hover svg {
     transform: translateX(-3px);
+  }
+
+  @media (max-width: 768px) {
+    .back-bar {
+      padding-top: 88px;
+    }
   }
 </style>
