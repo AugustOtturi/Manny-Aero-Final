@@ -25,3 +25,6 @@ Thumbs.db
 
 # claude code local tooling
 .claude/
+
+# PHP mailer credentials — never commit
+public/mail-config.php

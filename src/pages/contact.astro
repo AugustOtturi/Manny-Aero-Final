@@ -94,6 +94,8 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 
         <div class="form-card reveal">
           <form class="contact-form" id="contactForm" novalidate>
+            {/* Honeypot — hidden from humans, bots fill it automatically */}
+            <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
             <div class="form-divider">Your Information</div>
             <div class="form-row">
               <label class="field">
@@ -375,18 +377,74 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 </script>
 
 <script>
-  const form = document.getElementById("contactForm") as HTMLFormElement | null;
+  const form    = document.getElementById("contactForm") as HTMLFormElement | null;
   const success = document.getElementById("formSuccess");
-  const intro = document.querySelector<HTMLElement>(".form-intro");
-  const card = document.querySelector<HTMLElement>(".form-card");
+  const intro   = document.querySelector<HTMLElement>(".form-intro");
+  const card    = document.querySelector<HTMLElement>(".form-card");
+  const submitBtn = form?.querySelector<HTMLButtonElement>(".form-submit");
 
   if (form && success) {
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!form.reportValidity()) return;
-      if (card) card.style.display = "none";
-      if (intro) intro.style.display = "none";
-      success.classList.add("show");
+
+      // Collect standard fields
+      const fd = new FormData(form);
+      const payload: Record<string, unknown> = {
+        type:      "contact",
+        website:   (fd.get("website") as string) ?? "", // honeypot
+        firstName: fd.get("firstName") ?? "",
+        lastName:  fd.get("lastName")  ?? "",
+        email:     fd.get("email")     ?? "",
+        phone:     fd.get("phone")     ?? "",
+        company:   fd.get("company")   ?? "",
+        service:   fd.get("service")   ?? "",
+        aircraft:  fd.get("aircraft")  ?? "",
+        notes:     fd.get("notes")     ?? "",
+      };
+
+      // Collect flight repeater blocks
+      const flightEls = form.querySelectorAll<HTMLElement>(".flight");
+      const flights: Record<string, string>[] = [];
+      flightEls.forEach((el) => {
+        const block: Record<string, string> = {};
+        el.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-key]").forEach((inp) => {
+          const key = inp.dataset.key ?? "";
+          if (key && inp.value.trim()) block[key] = inp.value.trim();
+        });
+        if (Object.keys(block).length > 0) flights.push(block);
+      });
+      payload.flights = flights;
+
+      // Loading state
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.65";
+      }
+
+      try {
+        const res = await fetch("/mail.php", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify(payload),
+        });
+        const json = await res.json();
+
+        if (json.ok) {
+          if (card)  card.style.display  = "none";
+          if (intro) intro.style.display = "none";
+          success.classList.add("show");
+        } else {
+          throw new Error(json.error ?? "Server error");
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Unexpected error";
+        alert(`Could not send your request: ${msg}\n\nPlease try calling us directly or email ops@manny.aero`);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = "";
+        }
+      }
     });
   }
 </script>

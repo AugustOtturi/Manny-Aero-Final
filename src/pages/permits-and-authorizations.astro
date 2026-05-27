@@ -414,7 +414,7 @@ const sidebarItems = [
     });
   });
 
-  form?.addEventListener("submit", (e) => {
+  form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = emailInput?.value.trim() ?? "";
     const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -426,11 +426,23 @@ const sidebarItems = [
       return;
     }
     if (emailInput) emailInput.style.borderColor = "";
-    try {
-      localStorage.setItem("manny_email", email);
-    } catch {
-      /* ignore */
-    }
+
+    // Save locally so gate doesn't re-appear
+    try { localStorage.setItem("manny_email", email); } catch { /* ignore */ }
+
+    // Fire-and-forget POST to PHP — download is never blocked by this
+    fetch("/mail.php", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        type:     "gate",
+        website:  "",            // honeypot always empty for legit users
+        email:    email,
+        fileName: currentFileName,
+      }),
+    }).catch(() => { /* silent — download proceeds regardless */ });
+
+    // Show download regardless of email send result
     if (successLink) {
       successLink.href = currentFileUrl;
       successLink.download = currentFileName;

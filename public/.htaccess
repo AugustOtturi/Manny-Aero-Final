@@ -4,7 +4,19 @@
 # =========================================================
 
 # ---------------------------------------------------------
-# 0) URL migrations (301 permanent redirects)
+# 0a) Block direct access to PHP mailer internals
+# ---------------------------------------------------------
+<IfModule mod_authz_core.c>
+  <DirectoryMatch "phpmailer">
+    Require all denied
+  </DirectoryMatch>
+  <Files "mail-config.php">
+    Require all denied
+  </Files>
+</IfModule>
+
+# ---------------------------------------------------------
+# 0b) URL migrations (301 permanent redirects)
 # ---------------------------------------------------------
 <IfModule mod_rewrite.c>
   RewriteEngine On
