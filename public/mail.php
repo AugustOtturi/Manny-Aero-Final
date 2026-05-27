@@ -12,6 +12,14 @@ require __DIR__ . '/phpmailer/Exception.php';
 require __DIR__ . '/phpmailer/PHPMailer.php';
 require __DIR__ . '/phpmailer/SMTP.php';
 
+// Load credentials from a secrets file outside public_html (never wiped by deploys).
+// If not found, fall back to env vars (getenv / $_SERVER).
+$_secrets_file = '/home/u676595820/manny-secrets.php';
+if (file_exists($_secrets_file)) {
+    require $_secrets_file; // defines: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS,
+                             //          MAIL_FROM, MAIL_FROM_NAME, MAIL_TO_CONTACT, MAIL_TO_GATE
+}
+
 // Read an env var — tries getenv() first, then $_SERVER (Hostinger may use either).
 function env_get(string $key, string $default = ''): string {
     $v = getenv($key);
@@ -19,14 +27,14 @@ function env_get(string $key, string $default = ''): string {
     return $_SERVER[$key] ?? $default;
 }
 
-define('SMTP_HOST',      env_get('MANNY_SMTP_HOST',       'smtp.hostinger.com'));
-define('SMTP_PORT',      (int) env_get('MANNY_SMTP_PORT', '465'));
-define('SMTP_USER',      env_get('MANNY_SMTP_USER'));
-define('SMTP_PASS',      env_get('MANNY_SMTP_PASS'));
-define('MAIL_FROM',      env_get('MANNY_MAIL_FROM'));
-define('MAIL_FROM_NAME', env_get('MANNY_MAIL_FROM_NAME',  'Manny Aero Web'));
-define('MAIL_TO_CONTACT',env_get('MANNY_MAIL_TO_CONTACT'));
-define('MAIL_TO_GATE',   env_get('MANNY_MAIL_TO_GATE'));
+if (!defined('SMTP_HOST'))       define('SMTP_HOST',       env_get('MANNY_SMTP_HOST',       'smtp.hostinger.com'));
+if (!defined('SMTP_PORT'))       define('SMTP_PORT',       (int) env_get('MANNY_SMTP_PORT', '465'));
+if (!defined('SMTP_USER'))       define('SMTP_USER',       env_get('MANNY_SMTP_USER'));
+if (!defined('SMTP_PASS'))       define('SMTP_PASS',       env_get('MANNY_SMTP_PASS'));
+if (!defined('MAIL_FROM'))       define('MAIL_FROM',       env_get('MANNY_MAIL_FROM'));
+if (!defined('MAIL_FROM_NAME'))  define('MAIL_FROM_NAME',  env_get('MANNY_MAIL_FROM_NAME',  'Manny Aero Web'));
+if (!defined('MAIL_TO_CONTACT')) define('MAIL_TO_CONTACT', env_get('MANNY_MAIL_TO_CONTACT'));
+if (!defined('MAIL_TO_GATE'))    define('MAIL_TO_GATE',    env_get('MANNY_MAIL_TO_GATE'));
 define('RATE_LIMIT_MAX',    5);
 define('RATE_LIMIT_WINDOW', 300);
 

@@ -15,18 +15,32 @@ require __DIR__ . '/phpmailer/SMTP.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Load secrets file if present (same logic as mail.php)
+$_secrets_file = '/home/u676595820/manny-secrets.php';
+if (file_exists($_secrets_file)) {
+    require $_secrets_file;
+    echo "=== SECRETS FILE: found and loaded ===\n\n";
+} else {
+    echo "=== SECRETS FILE: not found — using env vars ===\n\n";
+}
+
 function env_get(string $key, string $default = ''): string {
     $v = getenv($key);
     if ($v !== false && $v !== '') return $v;
     return $_SERVER[$key] ?? $default;
 }
 
-$host = env_get('MANNY_SMTP_HOST', 'smtp.hostinger.com');
-$port = (int) env_get('MANNY_SMTP_PORT', '465');
-$user = env_get('MANNY_SMTP_USER');
-$pass = env_get('MANNY_SMTP_PASS');
-$from = env_get('MANNY_MAIL_FROM');
-$to   = env_get('MANNY_MAIL_TO_CONTACT');
+function const_or_env(string $const, string $env_key, string $default = ''): string {
+    if (defined($const)) return constant($const);
+    return env_get($env_key, $default);
+}
+
+$host = const_or_env('SMTP_HOST', 'MANNY_SMTP_HOST', 'smtp.hostinger.com');
+$port = (int) const_or_env('SMTP_PORT', 'MANNY_SMTP_PORT', '465');
+$user = const_or_env('SMTP_USER', 'MANNY_SMTP_USER');
+$pass = const_or_env('SMTP_PASS', 'MANNY_SMTP_PASS');
+$from = const_or_env('MAIL_FROM', 'MANNY_MAIL_FROM');
+$to   = const_or_env('MAIL_TO_CONTACT', 'MANNY_MAIL_TO_CONTACT');
 
 echo "=== SMTP TEST ===\n";
 echo "Host: {$host}:{$port}\n";
