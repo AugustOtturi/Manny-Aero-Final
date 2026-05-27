@@ -31,7 +31,8 @@ $to   = env_get('MANNY_MAIL_TO_CONTACT');
 echo "=== SMTP TEST ===\n";
 echo "Host: {$host}:{$port}\n";
 echo "User: {$user}\n";
-echo "Pass: " . substr($pass, 0, 4) . "****\n\n";
+echo "Pass (first 8): " . substr($pass, 0, 8) . "****\n";
+echo "Pass length: " . strlen($pass) . "\n\n";
 
 // Test 1 — Port 465 SSL (SMTPS)
 echo "--- Test 1: Port 465 / ENCRYPTION_SMTPS ---\n";
