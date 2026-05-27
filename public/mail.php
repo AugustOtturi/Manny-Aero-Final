@@ -8,10 +8,22 @@
 declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 
-require __DIR__ . '/mail-config.php';
 require __DIR__ . '/phpmailer/Exception.php';
 require __DIR__ . '/phpmailer/PHPMailer.php';
 require __DIR__ . '/phpmailer/SMTP.php';
+
+// Credentials from server environment variables (set in Hostinger hPanel).
+// Fallback values are for local dev only — never commit real credentials.
+define('SMTP_HOST',      getenv('MANNY_SMTP_HOST')      ?: 'smtp.hostinger.com');
+define('SMTP_PORT',      (int)(getenv('MANNY_SMTP_PORT') ?: 465));
+define('SMTP_USER',      getenv('MANNY_SMTP_USER')      ?: '');
+define('SMTP_PASS',      getenv('MANNY_SMTP_PASS')      ?: '');
+define('MAIL_FROM',      getenv('MANNY_MAIL_FROM')      ?: '');
+define('MAIL_FROM_NAME', getenv('MANNY_MAIL_FROM_NAME') ?: 'Manny Aero Web');
+define('MAIL_TO_CONTACT',getenv('MANNY_MAIL_TO_CONTACT')?: '');
+define('MAIL_TO_GATE',   getenv('MANNY_MAIL_TO_GATE')   ?: '');
+define('RATE_LIMIT_MAX',    5);
+define('RATE_LIMIT_WINDOW', 300);
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -43,23 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_error('Method not allowed', 405);
 }
 
-// ── 2. Origin check ─────────────────────────────────────────
-$origin  = $_SERVER['HTTP_ORIGIN']  ?? '';
-$referer = $_SERVER['HTTP_REFERER'] ?? '';
-$allowed = ALLOWED_ORIGIN;
-
-// During local dev (localhost) we skip the origin check
-$is_local = str_contains($referer, 'localhost') || str_contains($origin, 'localhost');
-
-if (!$is_local) {
-    $origin_ok  = str_starts_with($origin,  $allowed);
-    $referer_ok = str_starts_with($referer, $allowed);
-    if (!$origin_ok && !$referer_ok) {
-        json_error('Forbidden', 403);
-    }
-}
-
-// ── 3. Parse JSON body ───────────────────────────────────────
+// ── 2. Parse JSON body ───────────────────────────────────────
 $raw  = file_get_contents('php://input');
 $data = json_decode($raw, true);
 
