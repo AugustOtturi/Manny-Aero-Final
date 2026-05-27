@@ -93,6 +93,8 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
           method="post"
           novalidate
         >
+          {/* Honeypot — hidden from humans, bots fill it automatically */}
+          <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
           <label class="field">
             <span>Name</span>
             <input type="text" name="name" required autocomplete="name" placeholder="John Smith" />
@@ -274,32 +276,59 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     }
   });
 
-  form.addEventListener("submit", (e) => {
+  const submitBtn = form.querySelector(".form__submit");
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!form.reportValidity()) return;
 
     const fd = new FormData(form);
+
+    // Collect flight repeater
     const flights = [];
     list.querySelectorAll(".flight").forEach((flight) => {
       const entry = {};
       flight.querySelectorAll("[data-key]").forEach((input) => {
-        entry[input.dataset.key] = input.value.trim();
+        if (input.value.trim()) entry[input.dataset.key] = input.value.trim();
       });
-      flights.push(entry);
+      if (Object.keys(entry).length > 0) flights.push(entry);
     });
 
-    const data = {
-      name: (fd.get("name") || "").toString().trim(),
-      email: (fd.get("email") || "").toString().trim(),
-      phone: (fd.get("phone") || "").toString().trim(),
-      company: (fd.get("company") || "").toString().trim(),
-      message: (fd.get("message") || "").toString().trim(),
+    const payload = {
+      type:    "contact",
+      website: (fd.get("website") || "").toString(), // honeypot
+      // FinalCTA has a single "name" field — split for the mailer
+      firstName: (fd.get("name") || "").toString().trim().split(" ")[0],
+      lastName:  (fd.get("name") || "").toString().trim().split(" ").slice(1).join(" "),
+      email:     (fd.get("email")   || "").toString().trim(),
+      phone:     (fd.get("phone")   || "").toString().trim(),
+      company:   (fd.get("company") || "").toString().trim(),
+      notes:     (fd.get("message") || "").toString().trim(),
       flights,
     };
 
-    console.log("Form submitted:", data);
-    status.textContent = `Thanks! Your message${flights.length ? ` and ${flights.length} flight${flights.length === 1 ? "" : "s"}` : ""} has been captured.`;
-    status.dataset.state = "success";
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = "0.65"; }
+
+    try {
+      const res  = await fetch("/mail.php", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(payload),
+      });
+      const json = await res.json();
+
+      if (json.ok) {
+        status.textContent = `Request sent${flights.length ? ` with ${flights.length} flight${flights.length === 1 ? "" : "s"}` : ""}. Our team will be in touch shortly.`;
+        status.dataset.state = "success";
+        form.reset();
+      } else {
+        throw new Error(json.error ?? "Server error");
+      }
+    } catch (err) {
+      status.textContent = "Could not send — please call us directly or email ops@manny.aero";
+      status.dataset.state = "error";
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = ""; }
+    }
   });
 </script>
 

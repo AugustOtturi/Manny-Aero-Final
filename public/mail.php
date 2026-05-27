@@ -12,16 +12,21 @@ require __DIR__ . '/phpmailer/Exception.php';
 require __DIR__ . '/phpmailer/PHPMailer.php';
 require __DIR__ . '/phpmailer/SMTP.php';
 
-// Credentials from server environment variables (set in Hostinger hPanel).
-// Fallback values are for local dev only — never commit real credentials.
-define('SMTP_HOST',      getenv('MANNY_SMTP_HOST')      ?: 'smtp.hostinger.com');
-define('SMTP_PORT',      (int)(getenv('MANNY_SMTP_PORT') ?: 465));
-define('SMTP_USER',      getenv('MANNY_SMTP_USER')      ?: '');
-define('SMTP_PASS',      getenv('MANNY_SMTP_PASS')      ?: '');
-define('MAIL_FROM',      getenv('MANNY_MAIL_FROM')      ?: '');
-define('MAIL_FROM_NAME', getenv('MANNY_MAIL_FROM_NAME') ?: 'Manny Aero Web');
-define('MAIL_TO_CONTACT',getenv('MANNY_MAIL_TO_CONTACT')?: '');
-define('MAIL_TO_GATE',   getenv('MANNY_MAIL_TO_GATE')   ?: '');
+// Read an env var — tries getenv() first, then $_SERVER (Hostinger may use either).
+function env_get(string $key, string $default = ''): string {
+    $v = getenv($key);
+    if ($v !== false && $v !== '') return $v;
+    return $_SERVER[$key] ?? $default;
+}
+
+define('SMTP_HOST',      env_get('MANNY_SMTP_HOST',       'smtp.hostinger.com'));
+define('SMTP_PORT',      (int) env_get('MANNY_SMTP_PORT', '465'));
+define('SMTP_USER',      env_get('MANNY_SMTP_USER'));
+define('SMTP_PASS',      env_get('MANNY_SMTP_PASS'));
+define('MAIL_FROM',      env_get('MANNY_MAIL_FROM'));
+define('MAIL_FROM_NAME', env_get('MANNY_MAIL_FROM_NAME',  'Manny Aero Web'));
+define('MAIL_TO_CONTACT',env_get('MANNY_MAIL_TO_CONTACT'));
+define('MAIL_TO_GATE',   env_get('MANNY_MAIL_TO_GATE'));
 define('RATE_LIMIT_MAX',    5);
 define('RATE_LIMIT_WINDOW', 300);
 
