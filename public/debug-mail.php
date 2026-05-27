@@ -1,37 +1,78 @@
 <?php
-// TEMPORARY DEBUG — delete this file after diagnosing the SMTP issue
+// TEMPORARY DEBUG — delete after diagnosing SMTP
 // Access: https://yourdomain.com/debug-mail.php?key=manny2026debug
 
 if (($_GET['key'] ?? '') !== 'manny2026debug') {
-    http_response_code(404);
-    exit('Not found');
+    http_response_code(404); exit('Not found');
 }
 
 header('Content-Type: text/plain; charset=utf-8');
 
-$vars = [
-    'MANNY_SMTP_HOST',
-    'MANNY_SMTP_PORT',
-    'MANNY_SMTP_USER',
-    'MANNY_SMTP_PASS',
-    'MANNY_MAIL_FROM',
-    'MANNY_MAIL_TO_CONTACT',
-    'MANNY_MAIL_TO_GATE',
-];
+require __DIR__ . '/phpmailer/Exception.php';
+require __DIR__ . '/phpmailer/PHPMailer.php';
+require __DIR__ . '/phpmailer/SMTP.php';
 
-echo "=== ENV VAR CHECK ===\n\n";
-foreach ($vars as $key) {
-    $via_getenv = getenv($key);
-    $via_server = $_SERVER[$key] ?? null;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-    $found = ($via_getenv !== false && $via_getenv !== '') ? 'getenv()' : (($via_server !== null) ? '$_SERVER' : 'NOT FOUND');
-    // Show only first 4 chars of sensitive values
-    $val = $via_getenv ?: $via_server ?: '';
-    $display = ($val && in_array($key, ['MANNY_SMTP_PASS'])) ? substr($val, 0, 4) . '****' : $val;
-
-    echo "{$key}: [{$found}] {$display}\n";
+function env_get(string $key, string $default = ''): string {
+    $v = getenv($key);
+    if ($v !== false && $v !== '') return $v;
+    return $_SERVER[$key] ?? $default;
 }
 
-echo "\n=== PHP INFO ===\n";
-echo "PHP version: " . PHP_VERSION . "\n";
-echo "SAPI: " . php_sapi_name() . "\n";
+$host = env_get('MANNY_SMTP_HOST', 'smtp.hostinger.com');
+$port = (int) env_get('MANNY_SMTP_PORT', '465');
+$user = env_get('MANNY_SMTP_USER');
+$pass = env_get('MANNY_SMTP_PASS');
+$from = env_get('MANNY_MAIL_FROM');
+$to   = env_get('MANNY_MAIL_TO_CONTACT');
+
+echo "=== SMTP TEST ===\n";
+echo "Host: {$host}:{$port}\n";
+echo "User: {$user}\n";
+echo "Pass: " . substr($pass, 0, 4) . "****\n\n";
+
+// Test 1 — Port 465 SSL (SMTPS)
+echo "--- Test 1: Port 465 / ENCRYPTION_SMTPS ---\n";
+try {
+    $mail = new PHPMailer(true);
+    $mail->isSMTP();
+    $mail->Host       = $host;
+    $mail->SMTPAuth   = true;
+    $mail->Username   = $user;
+    $mail->Password   = $pass;
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+    $mail->Port       = 465;
+    $mail->SMTPOptions = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]];
+    $mail->setFrom($from, 'Manny Aero Debug');
+    $mail->addAddress($to);
+    $mail->Subject = 'SMTP Debug Test — 465 SSL';
+    $mail->Body    = 'If you see this, port 465 SSL works.';
+    $mail->send();
+    echo "SUCCESS — port 465 SSL works!\n\n";
+} catch (Exception $e) {
+    echo "FAILED: " . $mail->ErrorInfo . "\n\n";
+}
+
+// Test 2 — Port 587 STARTTLS
+echo "--- Test 2: Port 587 / ENCRYPTION_STARTTLS ---\n";
+try {
+    $mail2 = new PHPMailer(true);
+    $mail2->isSMTP();
+    $mail2->Host       = $host;
+    $mail2->SMTPAuth   = true;
+    $mail2->Username   = $user;
+    $mail2->Password   = $pass;
+    $mail2->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail2->Port       = 587;
+    $mail2->SMTPOptions = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]];
+    $mail2->setFrom($from, 'Manny Aero Debug');
+    $mail2->addAddress($to);
+    $mail2->Subject = 'SMTP Debug Test — 587 STARTTLS';
+    $mail2->Body    = 'If you see this, port 587 STARTTLS works.';
+    $mail2->send();
+    echo "SUCCESS — port 587 STARTTLS works!\n\n";
+} catch (Exception $e) {
+    echo "FAILED: " . $mail2->ErrorInfo . "\n\n";
+}
