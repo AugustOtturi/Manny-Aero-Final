@@ -1,0 +1,28 @@
+{
+  "name": "Manny Aero",
+  "short_name": "Manny Aero",
+  "description": "Premium aircraft ground handling, permits, in-flight catering and FBO coordination across Mexico. IS-BAH certified. 24/7 operations support since 1997.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["business", "travel"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

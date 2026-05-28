@@ -243,7 +243,9 @@ function send_mail(
 
         $mail->send();
     } catch (Exception $e) {
-        json_error('Mail delivery failed: ' . $mail->ErrorInfo, 500);
+        // Log full error server-side but never expose it to the client
+        error_log('[manny-aero mail] ' . $mail->ErrorInfo);
+        json_error('We could not send your message right now. Please try again or contact us directly.', 500);
     }
 }
 
