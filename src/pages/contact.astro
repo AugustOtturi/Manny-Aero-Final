@@ -112,25 +112,19 @@ const airportOptions = AIRPORT_OPTIONS;
             </label>
 
             <div class="form-divider">Flight Details</div>
-            <div class="form-row">
-              <label class="field">
-                <span>Service Required</span>
-                <select name="service">
-                  <option value="">Select a service…</option>
-                  <option>Ground Handling</option>
-                  <option>Landing / Overflight Permit</option>
-                  <option>Flight Planning &amp; Filing</option>
-                  <option>Jet Fuel Facilitation</option>
-                  <option>VIP Ground Transportation</option>
-                  <option>Gourmet In-flight Catering</option>
-                  <option>Crew Accommodation</option>
-                </select>
-              </label>
-              <label class="field">
-                <span>Aircraft Type</span>
-                <input type="text" name="aircraft" placeholder="e.g. Gulfstream G550" />
-              </label>
-            </div>
+            <label class="field field--full">
+              <span>Service Required</span>
+              <select name="service">
+                <option value="">Select a service…</option>
+                <option>Ground Handling</option>
+                <option>Landing / Overflight Permit</option>
+                <option>Flight Planning &amp; Filing</option>
+                <option>Jet Fuel Facilitation</option>
+                <option>VIP Ground Transportation</option>
+                <option>Gourmet In-flight Catering</option>
+                <option>Crew Accommodation</option>
+              </select>
+            </label>
             <div class="flights" data-flights>
               <button type="button" class="flights__add" data-flights-add>
                 <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -462,7 +456,6 @@ const airportOptions = AIRPORT_OPTIONS;
         phone:     fd.get("phone")     ?? "",
         company:   fd.get("company")   ?? "",
         service:   fd.get("service")   ?? "",
-        aircraft:  fd.get("aircraft")  ?? "",
         notes:     fd.get("notes")     ?? "",
       };
 
