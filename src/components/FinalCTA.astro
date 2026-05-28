@@ -84,7 +84,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
         <p class="form-header__lead">24/7 response — every request handled with precision.</p>
       </header>
 
-      <div class="form-card">
+      <div class="form-card" id="finalFormCard">
 
         <form
           id="form"
@@ -157,6 +157,60 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 
           <p class="form__status field--full" data-form-status aria-live="polite"></p>
         </form>
+      </div>
+
+      <div class="final-success" id="finalSuccess" aria-live="polite">
+        <div class="success-inner">
+          <div class="success-check">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <div class="success-title">Request received</div>
+          <p class="success-desc">
+            Thank you — your request has been sent to our operations team.
+          </p>
+          <div class="success-timeline">
+            <div class="timeline-item">
+              <span class="timeline-label">Contact</span>
+              <span class="timeline-value"><a href="tel:+527222730981">MEX +52 722 273 0981</a> · <a href="tel:+18775062669">US 1 877 50 MANNY</a></span>
+            </div>
+          </div>
+          <a href="/" class="success-cta">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            Back to Home
+          </a>
+        </div>
+      </div>
+
+      <div class="final-error" id="finalError" aria-live="assertive">
+        <div class="error-inner">
+          <div class="error-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </div>
+          <div class="error-title">Request failed</div>
+          <p class="error-desc" id="finalErrorDesc">
+            We couldn't send your request. Please try again or contact us directly.
+          </p>
+          <div class="error-timeline">
+            <div class="timeline-item">
+              <span class="timeline-label">Direct Phone</span>
+              <span class="timeline-value"><a href="tel:+527222730981">MEX +52 722 273 0981</a> · <a href="tel:+18775062669">US 1 877 50 MANNY</a></span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-label">Email</span>
+              <span class="timeline-value"><a href="mailto:ops@manny.aero">ops@manny.aero</a></span>
+            </div>
+          </div>
+          <div class="error-actions">
+            <button type="button" class="error-cta error-cta--primary" id="finalErrorRetry">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              Try again
+            </button>
+            <a href="tel:+527222730981" class="error-cta error-cta--secondary">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              Call us directly
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -277,6 +331,35 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
   });
 
   const submitBtn = form.querySelector(".form__submit");
+  const formCard = document.getElementById("finalFormCard");
+  const successUI = document.getElementById("finalSuccess");
+  const errorUI = document.getElementById("finalError");
+  const errorDesc = document.getElementById("finalErrorDesc");
+  const errorRetry = document.getElementById("finalErrorRetry");
+  const formHeader = document.querySelector(".form-header");
+
+  function showFinalError(msg) {
+    if (errorDesc) {
+      errorDesc.textContent = msg
+        ? `We couldn't send your request: ${msg}. Please try again or contact us directly.`
+        : "We couldn't send your request. Please try again or contact us directly.";
+    }
+    if (formCard)   formCard.style.display = "none";
+    if (formHeader) formHeader.style.display = "none";
+    errorUI?.classList.add("show");
+  }
+
+  function hideFinalError() {
+    errorUI?.classList.remove("show");
+    if (formCard)   formCard.style.display = "";
+    if (formHeader) formHeader.style.display = "";
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = ""; }
+  }
+
+  errorRetry?.addEventListener("click", () => {
+    hideFinalError();
+    formCard?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -318,16 +401,16 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
       const json = await res.json();
 
       if (json.ok) {
-        status.textContent = `Request sent${flights.length ? ` with ${flights.length} flight${flights.length === 1 ? "" : "s"}` : ""}. Our team will be in touch shortly.`;
-        status.dataset.state = "success";
+        if (formCard)   formCard.style.display = "none";
+        if (formHeader) formHeader.style.display = "none";
+        successUI?.classList.add("show");
         form.reset();
       } else {
         throw new Error(json.error ?? "Server error");
       }
     } catch (err) {
-      status.textContent = "Could not send — please call us directly or email ops@manny.aero";
-      status.dataset.state = "error";
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = ""; }
+      const msg = err instanceof Error ? err.message : "Unexpected error";
+      showFinalError(msg);
     }
   });
 </script>
@@ -836,5 +919,221 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     .flights__add {
       width: 100%;
     }
+  }
+
+  /* ── Success & error states ── */
+  .final-success,
+  .final-error {
+    display: none;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    padding: 56px 40px;
+    text-align: center;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    min-height: 520px;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+  .final-success {
+    border: 1px solid var(--color-border);
+  }
+  .final-error {
+    border: 1px solid rgba(232, 64, 64, 0.35);
+  }
+  .final-success.show,
+  .final-error.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .final-success .success-inner,
+  .final-error .error-inner {
+    width: 100%;
+    max-width: 520px;
+  }
+  .final-success .success-check {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 185, 0, 0.15);
+    border: 1px solid rgba(255, 185, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .final-success .success-check svg {
+    width: 26px;
+    height: 26px;
+    stroke: var(--color-accent);
+    fill: none;
+    stroke-width: 2;
+  }
+  .final-error .error-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(232, 64, 64, 0.15);
+    border: 1px solid rgba(232, 64, 64, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .final-error .error-icon svg {
+    width: 26px;
+    height: 26px;
+    stroke: #ff6b6b;
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+  .final-success .success-title,
+  .final-error .error-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: 400;
+    color: var(--color-text);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .final-success .success-desc,
+  .final-error .error-desc {
+    font-size: var(--fs-body);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin: 0 0 32px;
+  }
+  .final-success .success-timeline,
+  .final-error .error-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .final-success .success-timeline {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border);
+  }
+  .final-error .error-timeline {
+    background: rgba(232, 64, 64, 0.04);
+    border: 1px solid rgba(232, 64, 64, 0.18);
+  }
+  .final-success .timeline-item,
+  .final-error .timeline-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
+  .final-success .timeline-label,
+  .final-error .timeline-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+  .final-success .timeline-value,
+  .final-error .timeline-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-text);
+    line-height: 1.5;
+  }
+  .final-success .timeline-value a,
+  .final-error .timeline-value a {
+    color: var(--color-accent);
+    font-weight: 600;
+    transition: color 0.2s var(--ease-out);
+  }
+  .final-success .timeline-value a:hover,
+  .final-error .timeline-value a:hover {
+    color: var(--color-accent-hover);
+  }
+  .final-success .success-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: var(--color-accent);
+    color: #ffffff;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    text-decoration: none;
+    transition: all 0.25s var(--ease-out);
+  }
+  .final-success .success-cta:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-2px);
+  }
+  .final-success .success-cta svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    transition: transform 0.2s var(--ease-out);
+  }
+  .final-success .success-cta:hover svg {
+    transform: translateX(3px);
+  }
+  .final-error .error-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .final-error .error-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+  }
+  .final-error .error-cta--primary {
+    background: var(--color-accent);
+    color: #ffffff;
+  }
+  .final-error .error-cta--primary:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-2px);
+  }
+  .final-error .error-cta--secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-strong);
+  }
+  .final-error .error-cta--secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+  }
+  .final-error .error-cta svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 </style>
