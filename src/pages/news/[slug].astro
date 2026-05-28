@@ -43,15 +43,6 @@ const imageMap = {
       <div class="article-photo-wrap reveal">
         <Image
           src={imageMap[article.imageKey]}
-          alt=""
-          widths={[400, 800]}
-          sizes="100vw"
-          loading="eager"
-          class="article-photo-bg"
-          aria-hidden="true"
-        />
-        <Image
-          src={imageMap[article.imageKey]}
           alt={article.title}
           widths={[800, 1200, 1600]}
           sizes="(max-width: 1024px) 100vw, 1200px"
@@ -85,36 +76,23 @@ const imageMap = {
 
   .article-photo-wrap {
     position: relative;
-    aspect-ratio: 3 / 2;
-    max-height: 620px;
+    aspect-ratio: 5 / 4;
+    max-height: 720px;
+    max-width: 900px;
+    margin: 0 auto;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    background: #0a0a0f;
     box-shadow:
       0 24px 48px rgba(0, 0, 0, 0.5),
       inset 0 0 0 1px rgba(255, 255, 255, 0.15);
   }
 
-  .article-photo-bg {
-    position: absolute;
-    inset: 0;
+  .article-photo {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center;
-    filter: blur(40px) brightness(0.55) saturate(1.1);
-    transform: scale(1.15);
-    z-index: 0;
-  }
-
-  .article-photo {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center;
     display: block;
-    z-index: 1;
   }
 
   /* Body text */
