@@ -210,6 +210,38 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
             </a>
           </div>
         </div>
+
+        <div class="form-error" id="formError" aria-live="assertive">
+          <div class="error-inner">
+            <div class="error-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </div>
+            <div class="error-title">Request failed</div>
+            <p class="error-desc" id="errorDesc">
+              We couldn't send your request. Please try again or contact us directly.
+            </p>
+            <div class="error-timeline">
+              <div class="timeline-item">
+                <span class="timeline-label">Direct Phone</span>
+                <span class="timeline-value"><a href="tel:+527222730981">MEX +52 722 273 0981</a> · <a href="tel:+18775062669">US 1 877 50 MANNY</a></span>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-label">Email</span>
+                <span class="timeline-value"><a href="mailto:ops@manny.aero">ops@manny.aero</a></span>
+              </div>
+            </div>
+            <div class="error-actions">
+              <button type="button" class="error-cta error-cta--primary" id="errorRetry">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                Try again
+              </button>
+              <a href="tel:+527222730981" class="error-cta error-cta--secondary">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                Call us directly
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- SIDEBAR -->
@@ -394,9 +426,40 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
 <script>
   const form    = document.getElementById("contactForm") as HTMLFormElement | null;
   const success = document.getElementById("formSuccess");
+  const errorUI = document.getElementById("formError");
+  const errorDesc = document.getElementById("errorDesc");
+  const errorRetry = document.getElementById("errorRetry");
   const intro   = document.querySelector<HTMLElement>(".form-intro");
   const card    = document.querySelector<HTMLElement>(".form-card");
   const submitBtn = form?.querySelector<HTMLButtonElement>(".form-submit");
+
+  function showError(msg: string) {
+    if (!errorUI) return;
+    if (errorDesc) {
+      errorDesc.textContent = msg
+        ? `We couldn't send your request: ${msg}. Please try again or contact us directly.`
+        : "We couldn't send your request. Please try again or contact us directly.";
+    }
+    if (card)  card.style.display  = "none";
+    if (intro) intro.style.display = "none";
+    errorUI.classList.add("show");
+  }
+
+  function hideError() {
+    if (!errorUI) return;
+    errorUI.classList.remove("show");
+    if (card)  card.style.display  = "";
+    if (intro) intro.style.display = "";
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = "";
+    }
+  }
+
+  errorRetry?.addEventListener("click", () => {
+    hideError();
+    card?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 
   if (form && success) {
     form.addEventListener("submit", async (e) => {
@@ -454,11 +517,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Unexpected error";
-        alert(`Could not send your request: ${msg}\n\nPlease try calling us directly or email ops@manny.aero`);
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.style.opacity = "";
-        }
+        showError(msg);
       }
     });
   }
@@ -838,6 +897,122 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
   }
   .success-cta:hover svg {
     transform: translateX(3px);
+  }
+
+  /* Error state */
+  .form-error {
+    display: none;
+    background: var(--color-surface);
+    border: 1px solid rgba(232, 64, 64, 0.35);
+    border-radius: var(--radius-lg);
+    padding: 56px 40px;
+    text-align: center;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    min-height: 560px;
+  }
+  .form-error.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .error-inner {
+    width: 100%;
+    max-width: 520px;
+  }
+  .error-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(232, 64, 64, 0.15);
+    border: 1px solid rgba(232, 64, 64, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .error-icon svg {
+    width: 26px;
+    height: 26px;
+    stroke: #ff6b6b;
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+  .error-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    font-weight: 400;
+    color: var(--color-text);
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .error-desc {
+    font-size: var(--fs-body);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.7;
+    margin: 0 0 32px;
+  }
+  .error-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: rgba(232, 64, 64, 0.04);
+    border: 1px solid rgba(232, 64, 64, 0.18);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .error-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .error-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+  }
+  .error-cta--primary {
+    background: var(--color-accent);
+    color: #ffffff;
+  }
+  .error-cta--primary:hover {
+    background: var(--color-accent-hover);
+    transform: translateY(-2px);
+  }
+  .error-cta--secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-strong);
+  }
+  .error-cta--secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+  }
+  .error-cta svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 
   /* Sidebar */
