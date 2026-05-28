@@ -752,7 +752,7 @@ const stats = [
     gap: 10px;
     margin-bottom: 32px;
   }
-  .modal-feature {
+  :global(.modal-feature) {
     display: flex;
     align-items: flex-start;
     gap: 10px;
@@ -761,7 +761,7 @@ const stats = [
     color: var(--color-text-muted);
     line-height: 1.5;
   }
-  .modal-feature::before {
+  :global(.modal-feature)::before {
     content: "";
     width: 7px;
     height: 7px;
