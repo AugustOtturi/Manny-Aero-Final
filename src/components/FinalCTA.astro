@@ -1,6 +1,6 @@
 ---
 import { Image } from "astro:assets";
-import { AIRPORTS } from "../data/airports";
+import { AIRPORT_OPTIONS } from "../data/airportOptions";
 
 import Logo1 from "../assets/Logo1.png";
 import Logo2 from "../assets/Logo2.png";
@@ -25,19 +25,7 @@ const PARTNERS = [
 // Duplicate the list for seamless marquee loop
 const marqueeItems = [...PARTNERS, ...PARTNERS];
 
-// Deduplicate airports by their (CODE) token — pick the first occurrence of each airport
-const seenCodes = new Set<string>();
-const airportOptions: { value: string; label: string }[] = [];
-for (const loc of AIRPORTS) {
-  const match = loc.nombre.match(/\(([A-Z]{3,4})\)/);
-  if (!match) continue;
-  const code = match[1];
-  if (seenCodes.has(code)) continue;
-  seenCodes.add(code);
-  const cleanName = loc.nombre.replace(/\s*—.*$/, "").trim();
-  airportOptions.push({ value: code, label: cleanName });
-}
-airportOptions.sort((a, b) => a.label.localeCompare(b.label));
+const airportOptions = AIRPORT_OPTIONS;
 ---
 
 <section class="final section" id="contact" aria-labelledby="final-title">
@@ -305,7 +293,7 @@ airportOptions.sort((a, b) => a.label.localeCompare(b.label));
     for (const opt of airportOptions) {
       const o = document.createElement("option");
       o.value = opt.value;
-      o.textContent = `${opt.label} (${opt.value})`;
+      o.textContent = opt.label;
       select.appendChild(o);
     }
 
