@@ -208,7 +208,7 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 64px;
-    align-items: center;
+    align-items: start;
   }
 
   .isbah-hero__content {
@@ -216,6 +216,8 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
     flex-direction: column;
     gap: 20px;
     align-items: flex-start;
+    position: sticky;
+    top: 110px;
   }
 
   .isbah-hero__title {
@@ -444,6 +446,9 @@ import auditImg from "../assets/photos/isbaoisbah.jpg";
       order: -1;
       max-width: 420px;
       margin: 0 auto;
+    }
+    .isbah-hero__content {
+      position: static;
     }
     .audit-grid {
       grid-template-columns: 1fr;
