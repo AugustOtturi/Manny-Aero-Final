@@ -167,7 +167,7 @@ const stats = [
       <div class="mobile-list reveal" id="mobileList">
         {
           SERVICES.map((s, i) => (
-            <button class="mobile-item" data-index={i} type="button">
+            <button class="mobile-item" data-index={i} data-img={imageMap[s.id].src} type="button">
               <span class="mobile-item-name">{s.name}</span>
               <svg
                 class="mobile-item-icon"
@@ -256,7 +256,10 @@ const stats = [
       !modalFeatures
     )
       return;
-    modalImg.src = s.image;
+    const trigger = document.querySelector<HTMLButtonElement>(
+      `.mobile-item[data-index="${idx}"]`
+    );
+    modalImg.src = trigger?.dataset.img ?? s.image;
     modalImg.alt = s.name;
     modalTag.textContent = s.tag;
     modalTitle.innerHTML = s.title.replace("\n", "<br>");

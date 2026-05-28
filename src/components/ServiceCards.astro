@@ -37,7 +37,7 @@ const imageMap: Record<string, ImageMetadata> = {
             <Image
               src={imageMap[s.slug]}
               alt=""
-              widths={[300, 450, 600]}
+              widths={[400, 600, 800, 1200]}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
               loading="lazy"
               decoding="async"
@@ -256,7 +256,7 @@ const imageMap: Record<string, ImageMetadata> = {
       gap: 24px;
     }
     .card {
-      aspect-ratio: 3 / 4;
+      aspect-ratio: 2 / 3;
     }
     .card__title {
       font-size: 15px;
@@ -269,7 +269,7 @@ const imageMap: Record<string, ImageMetadata> = {
       gap: 20px;
     }
     .card {
-      aspect-ratio: 3 / 4;
+      aspect-ratio: 2 / 3;
       padding: 16px 16px 20px;
     }
     .services__intro {
@@ -283,7 +283,7 @@ const imageMap: Record<string, ImageMetadata> = {
       gap: 20px;
     }
     .card {
-      aspect-ratio: 16 / 10;
+      aspect-ratio: 2 / 3;
     }
   }
 </style>
