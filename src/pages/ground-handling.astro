@@ -236,6 +236,13 @@ const stats = [
   // Mobile modal
   const overlay = document.getElementById("modalOverlay");
   const sheet = document.getElementById("modalSheet");
+
+  // Portal: move modal to <body> so it escapes the <main> stacking context
+  // (otherwise footer can render on top due to global main/footer z-index: 2)
+  if (overlay && overlay.parentElement !== document.body) {
+    document.body.appendChild(overlay);
+  }
+
   const modalImg = document.getElementById("modalImg") as HTMLImageElement | null;
   const modalTag = document.getElementById("modalTag");
   const modalTitle = document.getElementById("modalTitle");
