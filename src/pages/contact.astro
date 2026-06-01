@@ -130,7 +130,7 @@ const airportOptions = AIRPORT_OPTIONS;
                 <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                   <path d="M9 3V15M3 9H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                 </svg>
-                Add Flight Information
+                Add Mission Information
               </button>
               <p class="flights__hint">
                 Optional — share flight details so we can prepare everything in advance.
@@ -382,6 +382,10 @@ const airportOptions = AIRPORT_OPTIONS;
       o.textContent = opt.label;
       select.appendChild(o);
     }
+    const other = document.createElement("option");
+    other.value = "Other";
+    other.textContent = "Other";
+    select.appendChild(other);
     list.querySelectorAll(".flight").forEach((f) => { f.open = false; });
     list.appendChild(node);
     reindex();

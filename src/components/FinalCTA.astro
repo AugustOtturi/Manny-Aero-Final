@@ -113,7 +113,7 @@ const airportOptions = AIRPORT_OPTIONS;
                   stroke-linecap="round"
                 />
               </svg>
-              Add Flight Information
+              Add Mission Information
             </button>
 
             <p class="flights__hint">
@@ -296,6 +296,10 @@ const airportOptions = AIRPORT_OPTIONS;
       o.textContent = opt.label;
       select.appendChild(o);
     }
+    const other = document.createElement("option");
+    other.value = "Other";
+    other.textContent = "Other";
+    select.appendChild(other);
 
     // Collapse all other flights when adding a new one
     list.querySelectorAll(".flight").forEach((f) => {
