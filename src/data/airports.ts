@@ -34,7 +34,7 @@ export const CATEGORIES: Record<"1" | "2" | "3" | "4", Category> = {
   },
   "2": {
     name: "Manny FBO Partnership",
-    short: "FBO",
+    short: "FBO Partnerships",
     color: "#e84040",
     priority: 2,
     description: "Fixed-base operator partnerships offering fuel, maintenance, and amenities.",
