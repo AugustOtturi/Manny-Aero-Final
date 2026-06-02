@@ -263,7 +263,7 @@ const airportOptions = AIRPORT_OPTIONS;
           </div>
         </div>
         <div class="contact-card">
-          <div class="contact-card-label">Main Offices</div>
+          <div class="contact-card-label">Our Offices</div>
           <div class="office-list">
             <div>
               <div class="office-item-name">Toluca, México</div>
@@ -1099,10 +1099,15 @@ const airportOptions = AIRPORT_OPTIONS;
   }
 
   .office-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
     margin-top: 4px;
+  }
+  @media (max-width: 480px) {
+    .office-list {
+      grid-template-columns: 1fr;
+    }
   }
   .office-item-name {
     font-size: 14px;
