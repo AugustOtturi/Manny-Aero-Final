@@ -26,7 +26,6 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         class="map__select"
         aria-label="Filter locations by category"
       >
-        <option value="all">All categories</option>
         {
           categoryEntries.map(([key, cat]) => (
             <option value={key}>{cat.name}</option>
@@ -42,16 +41,12 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         role="group"
         aria-label="Filter locations by category"
       >
-        <button type="button" class="map__pill is-active" data-filter="all">
-          <span class="map__pill-dot map__pill-dot--all" aria-hidden="true"
-          ></span>
-          All
-        </button>
+        <span class="map__legend-header">Select a category</span>
         {
           categoryEntries.map(([key, cat]) => (
             <button
               type="button"
-              class="map__pill"
+              class={`map__pill${key === "1" ? " is-active" : ""}`}
               data-filter={key}
               style={`--pill-color:${cat.color}`}
             >
@@ -382,7 +377,8 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       applyFilter(filter);
     });
 
-    applyFilter("all");
+    applyFilter("1");
+    if (sel) sel.value = "1";
 
     // Fix Leaflet sizing when the map animates in
     requestAnimationFrame(() => map.invalidateSize());
@@ -486,6 +482,16 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     box-shadow:
       0 8px 24px rgba(0, 0, 0, 0.5),
       inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+
+  .map__legend-header {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 10px 14px 6px;
   }
 
   .map__pill {
