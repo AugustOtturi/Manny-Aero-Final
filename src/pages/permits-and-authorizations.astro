@@ -356,6 +356,12 @@ const sidebarItems = [
   // Email gate
   const overlay = document.getElementById("gateOverlay") as HTMLDivElement | null;
   const modal = document.getElementById("gateModal") as HTMLDivElement | null;
+
+  // Portal: move overlay to <body> to escape main stacking context
+  // (otherwise footer renders on top due to global z-index layering)
+  if (overlay && overlay.parentElement !== document.body) {
+    document.body.appendChild(overlay);
+  }
   const form = document.getElementById("gateForm") as HTMLFormElement | null;
   const emailInput = document.getElementById("gateEmail") as HTMLInputElement | null;
   const fileNameEl = document.getElementById("gateFileName");
