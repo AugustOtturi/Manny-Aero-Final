@@ -1,9 +1,4 @@
 ---
-import { Image } from "astro:assets";
-import aircharterImg from "../assets/aircharter.png";
-import cbaaacaaImg   from "../assets/cbaaacaa.png";
-import ibacImg       from "../assets/ibac.png";
-import nbaaImg       from "../assets/nbaa.png";
 
 const socials = [
   { label: "Instagram", href: "https://www.instagram.com/manny_aero/" },
@@ -97,10 +92,10 @@ const offices = [
     <div class="footer__members-inner container">
       <span class="footer__members-label">Proud Member of the Following Organizations</span>
       <div class="footer__members-logos">
-        <Image src={aircharterImg} alt="Air Charter Association" class="footer__member-logo" height={44} />
-        <Image src={cbaaacaaImg}   alt="CBAA / ACAA"            class="footer__member-logo" height={44} />
-        <Image src={ibacImg}       alt="IBAC"                   class="footer__member-logo" height={44} />
-        <Image src={nbaaImg}       alt="NBAA"                   class="footer__member-logo" height={44} />
+        <img src="/member-logos/aircharter.png" alt="Air Charter Association" class="footer__member-logo" />
+        <img src="/member-logos/cbaaacaa.png"   alt="CBAA / ACAA"            class="footer__member-logo" />
+        <img src="/member-logos/ibac.png"       alt="IBAC"                   class="footer__member-logo" />
+        <img src="/member-logos/nbaa.png"       alt="NBAA"                   class="footer__member-logo" />
       </div>
     </div>
   </div>
