@@ -4,15 +4,17 @@
  * y los guarda en public/files/airports/.
  *
  * Uso: node download-airport-pdfs.js
- * Requiere Node 18+ (built-in https, fs — sin dependencias externas).
+ * Requiere Node 18+ (ES modules, built-in https/fs — sin dependencias externas).
  */
 
-const https = require("https");
-const http  = require("http");
-const fs    = require("fs");
-const path  = require("path");
+import https from "https";
+import http  from "http";
+import fs    from "fs";
+import path  from "path";
+import { fileURLToPath } from "url";
 
-const OUT_DIR = path.join(__dirname, "public", "files", "airports");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const OUT_DIR   = path.join(__dirname, "public", "files", "airports");
 
 // 72 URLs únicas — todas las que referencia airports.ts.
 // Para filenames repetidos entre 2025/06 y 2024/02 usamos la versión más nueva.
@@ -26,7 +28,7 @@ const URLS = [
   "https://manny.aero/wp-content/uploads/2025/06/MMSL-CSL.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMUN-CUN.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMVA-VSA.pdf",
-  "https://manny.aero/wp-content/uploads/2025/06/MMCY-CYW10.pdf",
+  "https://manny.aero/wp-content/uploads/2025/06/MMCY-CYW.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMCM-CTM.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMCT-CZA.pdf",
   "https://manny.aero/wp-content/uploads/2025/10/CHIHUAHUA-MMCU-CUU2025.pdf",
@@ -53,10 +55,8 @@ const URLS = [
   "https://manny.aero/wp-content/uploads/2025/06/MMRX-REX.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMML-MXL.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMGM-GYM.pdf",
-  "https://manny.aero/wp-content/uploads/2025/06/MMCV-CVM10.pdf",
-  "https://manny.aero/wp-content/uploads/2024/02/MMCV-CVM.pdf",
+  "https://manny.aero/wp-content/uploads/2025/06/MMCV-CVM.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMIO-SLW.pdf",
-  "https://manny.aero/wp-content/uploads/2025/06/MMLO-BJX10.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMLO-BJX.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMGR-GUB.pdf",
   "https://manny.aero/wp-content/uploads/2025/06/MMHO-HMO.pdf",
@@ -105,7 +105,7 @@ function get(url, redirectsLeft = 5) {
       .get(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; Manny-PDF-Downloader/1.0)" } }, (res) => {
         if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
           if (redirectsLeft === 0) return reject(new Error("Too many redirects: " + url));
-          res.resume(); // consume para liberar memoria
+          res.resume();
           resolve(get(res.headers.location, redirectsLeft - 1));
         } else {
           resolve(res);
@@ -128,7 +128,7 @@ async function download(url, destPath) {
   }
 
   return new Promise((resolve) => {
-    const tmp = destPath + ".tmp";
+    const tmp  = destPath + ".tmp";
     const file = fs.createWriteStream(tmp);
     res.pipe(file);
     file.on("finish", () => {
@@ -149,10 +149,10 @@ async function download(url, destPath) {
 async function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
-  const total   = URLS.length;
-  let ok        = 0;
-  let skipped   = 0;
-  const failed  = [];
+  const total  = URLS.length;
+  let ok       = 0;
+  let skipped  = 0;
+  const failed = [];
 
   console.log(`\nDescargando ${total} PDFs → ${OUT_DIR}\n`);
 
@@ -193,9 +193,7 @@ async function main() {
     failed.forEach(({ name, url, error }) => {
       console.log(`  • ${name}\n    ${url}\n    → ${error}`);
     });
-    console.log(
-      "\nReintentar manualmente los fallidos o descargarlos desde el WordPress viejo."
-    );
+    console.log("\nReintentar manualmente los fallidos o descargarlos desde el WordPress viejo.");
   } else {
     console.log("\nTodo OK — airports.ts ya apunta a /files/airports/ en el repo.");
   }
