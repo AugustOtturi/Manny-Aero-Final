@@ -87,35 +87,38 @@ if ($honeypot !== '') {
     json_ok('ok'); // silent discard
 }
 
-// ── 5. Rate limiting (file-based per IP) ────────────────────
-$ip         = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$ip_clean   = preg_replace('/[^a-f0-9.:]/i', '', explode(',', $ip)[0]);
-$rate_dir   = sys_get_temp_dir() . '/manny_rate';
-$rate_file  = $rate_dir . '/' . md5($ip_clean) . '.json';
+// ── 5. Rate limiting — runs only right before an actual send ──
+// Intentionally placed here as a callable, NOT executed on every
+// request. Validation errors should never consume a rate-limit slot —
+// only real email sends do. This also prevents bots from exhausting
+// a legitimate user's quota by flooding with invalid payloads.
+function rate_check(): void {
+    $ip        = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $ip_clean  = preg_replace('/[^a-f0-9.:]/i', '', explode(',', $ip)[0]);
+    $rate_dir  = sys_get_temp_dir() . '/manny_rate';
+    $rate_file = $rate_dir . '/' . md5($ip_clean) . '.json';
 
-if (!is_dir($rate_dir)) {
-    mkdir($rate_dir, 0700, true);
-}
-
-$now      = time();
-$window   = RATE_LIMIT_WINDOW;
-$max      = RATE_LIMIT_MAX;
-$hits     = [];
-
-if (file_exists($rate_file)) {
-    $stored = json_decode(file_get_contents($rate_file), true);
-    if (is_array($stored)) {
-        // Keep only timestamps within the current window
-        $hits = array_filter($stored, fn($t) => ($now - $t) < $window);
+    if (!is_dir($rate_dir)) {
+        mkdir($rate_dir, 0700, true);
     }
-}
 
-if (count($hits) >= $max) {
-    json_error('Too many requests. Please wait a few minutes and try again.', 429);
-}
+    $now   = time();
+    $hits  = [];
 
-$hits[] = $now;
-file_put_contents($rate_file, json_encode(array_values($hits)), LOCK_EX);
+    if (file_exists($rate_file)) {
+        $stored = json_decode(file_get_contents($rate_file), true);
+        if (is_array($stored)) {
+            $hits = array_filter($stored, fn($t) => ($now - $t) < RATE_LIMIT_WINDOW);
+        }
+    }
+
+    if (count($hits) >= RATE_LIMIT_MAX) {
+        json_error('Too many requests. Please wait a few minutes and try again.', 429);
+    }
+
+    $hits[] = $now;
+    file_put_contents($rate_file, json_encode(array_values($hits)), LOCK_EX);
+}
 
 // ── 6. Route by type ─────────────────────────────────────────
 $type = $data['type'] ?? '';
@@ -186,6 +189,7 @@ function handle_contact(array $d): never {
 
     $body = email_document('New Flight Request', $subheading, $sections, $footer);
 
+    rate_check();
     send_mail(MAIL_TO_CONTACT, $subject, $body, $email, $fullName, MAIL_CC_CONTACT);
     json_ok('Request sent');
 }
@@ -211,6 +215,7 @@ function handle_gate(array $d): never {
 
     $body = email_document('Permit Download Lead', $subheading, $sections, $footer);
 
+    rate_check();
     send_mail(MAIL_TO_GATE, $subject, $body, $email);
     json_ok('Recorded');
 }
