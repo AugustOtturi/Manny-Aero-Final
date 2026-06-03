@@ -146,46 +146,44 @@ function handle_contact(array $d): never {
         if (strlen($$key) > 1000) json_error("Field '$key' is too long");
     }
 
-    // Build email body
-    $subject = "New Flight Request — {$firstName} {$lastName}" . ($company ? " | {$company}" : '');
+    $fullName = trim("{$firstName} {$lastName}");
+    $subject  = "New Flight Request — {$fullName}" . ($company ? " | {$company}" : '');
 
-    $body  = "<h2 style='font-family:sans-serif;color:#111'>New Flight Request</h2>";
-    $body .= "<table style='font-family:sans-serif;font-size:14px;border-collapse:collapse;width:100%'>";
+    // ── Build sections (each only renders if it has content) ──
+    $sections = '';
 
-    $body .= row_header('OPERATOR');
-    $body .= row('Name',    "{$firstName} {$lastName}");
-    $body .= row('Email',   "<a href='mailto:{$email}'>{$email}</a>");
-    if ($phone)   $body .= row('Phone',   $phone);
-    if ($company) $body .= row('Company', $company);
+    // Operator
+    $sections .= section('Operator', [
+        field_row('Name',    $fullName),
+        field_row('Email',   "<a href='mailto:{$email}' style='color:#b8860b;text-decoration:none'>{$email}</a>"),
+        field_row('Phone',   $phone),
+        field_row('Company', $company),
+    ]);
 
-    $body .= row_header('SERVICE');
-    if ($service)  $body .= row('Service Requested', $service);
-    if ($aircraft) $body .= row('Aircraft Type',     $aircraft);
+    // Service
+    $sections .= section('Service Requested', [
+        field_row('Service',       $service),
+        field_row('Aircraft Type', $aircraft),
+    ]);
 
-    // Flights repeater
-    if (is_array($flights) && count($flights) > 0) {
-        $body .= row_header('FLIGHTS');
-        foreach ($flights as $i => $flight) {
-            if (!is_array($flight)) continue;
-            $n = $i + 1;
-            $body .= "<tr><td colspan='2' style='padding:6px 12px;font-weight:700;color:#555;font-size:12px;text-transform:uppercase;letter-spacing:.08em;padding-top:14px'>Flight {$n}</td></tr>";
-            foreach ($flight as $key => $val) {
-                $k = clean((string)$key);
-                $v = clean((string)$val);
-                if ($v !== '') $body .= row($k, $v);
-            }
-        }
+    // Flights repeater — each flight is its own mini-card, empty ones skipped
+    $sections .= flights_section($flights);
+
+    // Notes
+    if ($notes !== '') {
+        $sections .= "<tr><td style='padding:22px 32px 0'>"
+            . section_label('Notes')
+            . "<div style='font:400 14px/1.6 Arial,sans-serif;color:#1f2937;background:#f9fafb;border:1px solid #eceef1;border-radius:10px;padding:14px 16px;margin-top:8px'>"
+            . nl2br($notes)
+            . "</div></td></tr>";
     }
 
-    if ($notes) {
-        $body .= row_header('NOTES');
-        $body .= "<tr><td colspan='2' style='padding:8px 12px;color:#333'>" . nl2br($notes) . "</td></tr>";
-    }
+    $subheading = "Submitted " . gmdate('M j, Y · H:i') . " UTC · via manny.aero contact form";
+    $footer     = "Reply directly to this email to reach the operator. Sent automatically from the Manny Aero website contact form.";
 
-    $body .= "</table>";
-    $body .= "<p style='font-family:sans-serif;font-size:12px;color:#999;margin-top:24px'>Sent from manny.aero contact form</p>";
+    $body = email_document('New Flight Request', $subheading, $sections, $footer);
 
-    send_mail(MAIL_TO_CONTACT, $subject, $body, $email, "{$firstName} {$lastName}");
+    send_mail(MAIL_TO_CONTACT, $subject, $body, $email, $fullName);
     json_ok('Request sent');
 }
 
@@ -197,16 +195,20 @@ function handle_gate(array $d): never {
     if (!valid_email($email)) json_error('Valid email is required');
     $email = clean($email);
 
-    $subject = "Permit Download — New Email Captured";
-    $body    = "<h2 style='font-family:sans-serif;color:#111'>Permit Download — Email Captured</h2>";
-    $body   .= "<table style='font-family:sans-serif;font-size:14px;border-collapse:collapse;width:100%'>";
-    $body   .= row('Email',     "<a href='mailto:{$email}'>{$email}</a>");
-    $body   .= row('File',      $fileName);
-    $body   .= row('Timestamp', gmdate('Y-m-d H:i') . ' UTC');
-    $body   .= "</table>";
-    $body   .= "<p style='font-family:sans-serif;font-size:12px;color:#999;margin-top:24px'>Sent from manny.aero permit download gate</p>";
+    $subject = "New Lead — Permit Download Requested";
 
-    send_mail(MAIL_TO_GATE, $subject, $body);
+    $sections = section('Lead', [
+        field_row('Email',     "<a href='mailto:{$email}' style='color:#b8860b;text-decoration:none'>{$email}</a>"),
+        field_row('File',      $fileName),
+        field_row('Captured',  gmdate('M j, Y · H:i') . ' UTC'),
+    ]);
+
+    $subheading = "A visitor unlocked a downloadable permit document on manny.aero";
+    $footer     = "This lead was captured by the permit download gate. Reply to this email to follow up with the operator.";
+
+    $body = email_document('Permit Download Lead', $subheading, $sections, $footer);
+
+    send_mail(MAIL_TO_GATE, $subject, $body, $email);
     json_ok('Recorded');
 }
 
@@ -249,14 +251,102 @@ function send_mail(
     }
 }
 
-// ── Table helpers ────────────────────────────────────────────
-function row(string $label, string $value): string {
+// ── Email template helpers ───────────────────────────────────
+
+// A single label/value line. Returns '' when the value is empty,
+// so empty fields never leave a blank row behind.
+function field_row(string $label, string $value): string {
+    if (trim($value) === '') return '';
     return "<tr>
-        <td style='padding:6px 12px;font-weight:600;color:#555;width:160px;vertical-align:top'>{$label}</td>
-        <td style='padding:6px 12px;color:#111'>{$value}</td>
+        <td style='padding:7px 0;font:600 12px/1.5 Arial,Helvetica,sans-serif;color:#6b7280;width:150px;vertical-align:top;white-space:nowrap'>{$label}</td>
+        <td style='padding:7px 0;font:400 14px/1.5 Arial,Helvetica,sans-serif;color:#111827'>{$value}</td>
     </tr>";
 }
 
-function row_header(string $label): string {
-    return "<tr><td colspan='2' style='padding:10px 12px 4px;font-weight:700;color:#ffb900;font-size:12px;text-transform:uppercase;letter-spacing:.12em;background:#111;border-radius:4px'>{$label}</td></tr>";
+// Small accent label used at the top of every section.
+function section_label(string $label): string {
+    return "<div style='font:700 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#b8860b;padding-bottom:8px;border-bottom:1px solid #e5e7eb'>{$label}</div>";
+}
+
+// Wraps a set of field_row() strings in a titled section.
+// If every row is empty the whole section is omitted — this is what
+// kills the "empty bar" problem at the source.
+function section(string $label, array $rows): string {
+    $inner = '';
+    foreach ($rows as $r) $inner .= $r;
+    if (trim($inner) === '') return '';
+    return "<tr><td style='padding:22px 32px 0'>"
+        . section_label($label)
+        . "<table role='presentation' cellpadding='0' cellspacing='0' width='100%' style='margin-top:6px'>{$inner}</table>"
+        . "</td></tr>";
+}
+
+// Flights repeater — renders each non-empty flight as its own mini card.
+function flights_section($flights): string {
+    if (!is_array($flights) || count($flights) === 0) return '';
+
+    $cards = '';
+    $n = 0;
+    foreach ($flights as $flight) {
+        if (!is_array($flight)) continue;
+        $rows = '';
+        foreach ($flight as $key => $val) {
+            $rows .= field_row(clean((string)$key), clean((string)$val));
+        }
+        if (trim($rows) === '') continue; // skip empty flight blocks
+        $n++;
+        $cards .= "<table role='presentation' cellpadding='0' cellspacing='0' width='100%' style='margin-top:10px;background:#f9fafb;border:1px solid #eceef1;border-radius:10px'>
+            <tr><td style='padding:12px 16px'>
+                <div style='font:700 12px/1 Arial,Helvetica,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#0d0d0d;margin-bottom:4px'>&#9992;&#65039; Flight {$n}</div>
+                <table role='presentation' cellpadding='0' cellspacing='0' width='100%'>{$rows}</table>
+            </td></tr>
+        </table>";
+    }
+    if (trim($cards) === '') return '';
+
+    return "<tr><td style='padding:22px 32px 0'>"
+        . section_label('Flight Details')
+        . $cards
+        . "</td></tr>";
+}
+
+// Full branded HTML email document.
+function email_document(string $heading, string $subheading, string $sectionsHtml, string $footerNote): string {
+    return "<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<meta name='color-scheme' content='light'>
+</head>
+<body style='margin:0;padding:0;background:#eef0f3;-webkit-font-smoothing:antialiased'>
+  <table role='presentation' cellpadding='0' cellspacing='0' width='100%' style='background:#eef0f3'>
+    <tr><td align='center' style='padding:28px 12px'>
+      <table role='presentation' cellpadding='0' cellspacing='0' width='600' style='width:600px;max-width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 10px 34px rgba(13,13,13,.10)'>
+
+        <!-- Header -->
+        <tr><td style='background:#0d0d0d;padding:26px 32px;border-bottom:3px solid #ffb900'>
+          <div style='font:800 22px/1 Arial,Helvetica,sans-serif;color:#ffffff;letter-spacing:.04em'>MANNY<span style='color:#ffb900'>AERO</span></div>
+          <div style='font:600 11px/1 Arial,Helvetica,sans-serif;color:#9ca3af;letter-spacing:.16em;text-transform:uppercase;margin-top:9px'>Ground Handling &amp; FBO Coordination &middot; Mexico</div>
+        </td></tr>
+
+        <!-- Title -->
+        <tr><td style='padding:28px 32px 2px'>
+          <div style='font:700 20px/1.3 Arial,Helvetica,sans-serif;color:#0d0d0d'>{$heading}</div>
+          <div style='font:400 13px/1.5 Arial,Helvetica,sans-serif;color:#6b7280;margin-top:5px'>{$subheading}</div>
+        </td></tr>
+
+        {$sectionsHtml}
+
+        <!-- Footer -->
+        <tr><td style='padding:28px 32px 30px'>
+          <div style='border-top:1px solid #e5e7eb;padding-top:18px;font:400 12px/1.6 Arial,Helvetica,sans-serif;color:#9ca3af'>{$footerNote}</div>
+        </td></tr>
+
+      </table>
+      <div style='font:400 11px/1.5 Arial,Helvetica,sans-serif;color:#9ca3af;padding:16px 0'>Manny Aero &middot; 24/7 Operations &middot; manny.aero</div>
+    </td></tr>
+  </table>
+</body>
+</html>";
 }
