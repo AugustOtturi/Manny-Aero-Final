@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import GlassButton from "./ui/GlassButton.astro";
 import posterHero from "../assets/poster-hero.webp";
 import heroVideo from "../assets/hero-manny-final.mp4?url";
+import mannyLogo from "../assets/mannylogo.png";
 ---
 
 <section class="hero" aria-labelledby="hero-title">
@@ -33,7 +34,7 @@ import heroVideo from "../assets/hero-manny-final.mp4?url";
 
   <div class="hero__logo-wrap container" aria-hidden="false">
     <a href="/" class="hero__logo hero-enter" style="--enter-delay: 360ms" aria-label="Manny Aero — Home">
-      <img src="/logo-manny.svg" alt="Manny Aero" width="500" height="294" />
+      <Image src={mannyLogo} alt="Manny Aero" width={512} height={512} loading="eager" decoding="async" />
     </a>
   </div>
 

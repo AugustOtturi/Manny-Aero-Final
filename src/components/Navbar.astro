@@ -1,4 +1,7 @@
 ---
+import { Image } from "astro:assets";
+import mannyLogo from "../assets/mannylogo.png";
+
 type ActiveLink = "home" | "about" | "services" | "map" | "news" | "contact";
 
 interface Props {
@@ -64,7 +67,7 @@ const links: { key: ActiveLink; label: string; href: string; dropdown?: boolean 
     </button>
 
     <div class="flyout__logo">
-      <img src="/logo-manny.svg" alt="Manny Aero" width="500" height="294" />
+      <Image src={mannyLogo} alt="Manny Aero" width={512} height={512} loading="eager" decoding="async" />
     </div>
 
     <ul class="flyout__links">

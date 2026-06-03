@@ -1,4 +1,6 @@
 ---
+import { Image } from "astro:assets";
+import mannyLogo from "../assets/mannylogo.png";
 
 const socials = [
   { label: "Instagram", href: "https://www.instagram.com/manny_aero/" },
@@ -37,7 +39,7 @@ const offices = [
 
     <!-- COL 1: Brand -->
     <div class="footer__brand">
-      <img src="/logo-manny.svg" alt="Manny Aero" class="footer__logo" width="500" height="294" />
+      <Image src={mannyLogo} alt="Manny Aero" class="footer__logo" width={512} height={512} loading="lazy" decoding="async" />
       <p class="footer__tagline">
         Ground Handling &amp; FBO Coordination Across Mexico
       </p>
