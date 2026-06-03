@@ -43,7 +43,7 @@ export const PERMIT_SECTIONS: PermitSection[] = [
   {
     id: "far135",
     badge: "FAR Part 135",
-    title: "Charter / Air Carrier Operations",
+    title: "Charter / Non-Scheduled Commercial",
     noteBefore: "Lead time: 3–5 hours minimum.",
     items: [
       "Airworthiness Certificate",
@@ -62,7 +62,7 @@ export const PERMIT_SECTIONS: PermitSection[] = [
   {
     id: "far125",
     badge: "FAR Part 125",
-    title: "FAR Part 125 / Fletamento de Pasajeros",
+    title: "FAR Part 125 / Charter with more than 19 seats",
     items: [
       "Airworthiness Certificate",
       "Aircraft Registration",
