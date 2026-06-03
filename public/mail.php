@@ -33,8 +33,14 @@ if (!defined('SMTP_USER'))       define('SMTP_USER',       env_get('MANNY_SMTP_U
 if (!defined('SMTP_PASS'))       define('SMTP_PASS',       env_get('MANNY_SMTP_PASS'));
 if (!defined('MAIL_FROM'))       define('MAIL_FROM',       env_get('MANNY_MAIL_FROM'));
 if (!defined('MAIL_FROM_NAME'))  define('MAIL_FROM_NAME',  env_get('MANNY_MAIL_FROM_NAME',  'Manny Aero Web'));
-if (!defined('MAIL_TO_CONTACT')) define('MAIL_TO_CONTACT', env_get('MANNY_MAIL_TO_CONTACT'));
-if (!defined('MAIL_TO_GATE'))    define('MAIL_TO_GATE',    env_get('MANNY_MAIL_TO_GATE'));
+if (!defined('MAIL_TO_CONTACT')) define('MAIL_TO_CONTACT', env_get('MANNY_MAIL_TO_CONTACT', 'ops@manny.aero'));
+if (!defined('MAIL_TO_GATE'))    define('MAIL_TO_GATE',    env_get('MANNY_MAIL_TO_GATE',    'ops@manny.aero'));
+
+// CC recipients for the contact form (always copied on every submission)
+define('MAIL_CC_CONTACT', [
+    'marcia.alvarado@manny.aero',
+    'augustotturi99@gmail.com',   // ← testing, remove once live
+]);
 define('RATE_LIMIT_MAX',    5);
 define('RATE_LIMIT_WINDOW', 300);
 
@@ -183,7 +189,7 @@ function handle_contact(array $d): never {
 
     $body = email_document('New Flight Request', $subheading, $sections, $footer);
 
-    send_mail(MAIL_TO_CONTACT, $subject, $body, $email, $fullName);
+    send_mail(MAIL_TO_CONTACT, $subject, $body, $email, $fullName, MAIL_CC_CONTACT);
     json_ok('Request sent');
 }
 
@@ -218,7 +224,8 @@ function send_mail(
     string $subject,
     string $body,
     string $replyTo = '',
-    string $replyToName = ''
+    string $replyToName = '',
+    array  $cc = []
 ): void {
     $mail = new PHPMailer(true);
     try {
@@ -233,6 +240,12 @@ function send_mail(
 
         $mail->setFrom(MAIL_FROM, MAIL_FROM_NAME);
         $mail->addAddress($to);
+
+        foreach ($cc as $ccAddr) {
+            if (filter_var($ccAddr, FILTER_VALIDATE_EMAIL)) {
+                $mail->addCC($ccAddr);
+            }
+        }
 
         if ($replyTo && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
             $mail->addReplyTo($replyTo, $replyToName);
