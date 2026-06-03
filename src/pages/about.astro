@@ -82,31 +82,11 @@ const values = [
 <BaseLayout
   title="About Manny Aero — Aviation Ground Handling Since 1997"
   description="Since 1997, Manny Aero has delivered world-class ground handling, permits, and aviation support across Mexico. IS-BAH certified. Meet the team behind every operation."
+  ogImage="/og/about.webp"
+  ogImageAlt="Manuel RomeroVargas, CEO and founder of Manny Aero"
   activeLink="about"
 >
   <Fragment slot="head">
-    <script type="application/ld+json" set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Manny Aero",
-      "url": "https://manny.aero",
-      "logo": "https://manny.aero/logo-manny.svg",
-      "foundingDate": "1997",
-      "numberOfEmployees": { "@type": "QuantitativeValue", "value": "50+" },
-      "description": "Premium aircraft ground handling, permits, catering and FBO coordination across Mexico. IS-BAH certified since 2016.",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Toluca",
-        "addressRegion": "Estado de México",
-        "addressCountry": "MX"
-      },
-      "founders": [{
-        "@type": "Person",
-        "name": "Manuel RomeroVargas",
-        "jobTitle": "Founder & Chairman",
-        "url": "https://manny.aero/founder"
-      }]
-    })} />
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",

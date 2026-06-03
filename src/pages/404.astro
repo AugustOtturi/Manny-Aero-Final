@@ -3,10 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import GlassButton from "../components/ui/GlassButton.astro";
 ---
 
-<BaseLayout title="404 — Page not found | Manny Aero" activeLink="home">
-  <Fragment slot="head">
-    <meta name="robots" content="noindex" />
-  </Fragment>
+<BaseLayout title="404 — Page not found | Manny Aero" activeLink="home" robots="noindex">
 
   <section class="notfound" aria-labelledby="notfound-title">
     <div class="container notfound__inner">
