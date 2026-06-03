@@ -129,7 +129,7 @@ export const PERMIT_SECTIONS: PermitSection[] = [
         ],
       },
       {
-        label: "Convalidación / Validation of Native AOC",
+        label: "Validation of Native AOC",
         items: [
           "Certificates of Registration of all the fleet",
           "Certificates of Airworthiness of all the fleet",
