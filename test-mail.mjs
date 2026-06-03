@@ -202,6 +202,65 @@ async function run() {
     ],
   });
 
+  sep('CONTACTO — 4 vuelos, tiempos en formato libre (sin Z)');
+  await post('Cuatro vuelos formato libre', {
+    type: 'contact',
+    website: '',
+    firstName: 'Marco',
+    lastName: 'Villanueva',
+    email: 'augustotturi99@gmail.com',
+    phone: '+52 33 9876 5432',
+    company: 'Villanueva Air Group',
+    service: 'Ground Handling',
+    notes: 'Tour ejecutivo de 4 tramos por México. Necesitamos coordinación completa en cada escala: handling, combustible y transporte VIP.',
+    flights: [
+      {
+        'PAX': '8',
+        'CREW': '3',
+        'AIRCRAFT TYPE': 'Bombardier Global 6500',
+        'TAIL NUMBER': 'XA-VMG',
+        'ARRIVAL DATE': '2026-10-05',
+        'ARRIVAL TIME': '10:30 AM local',
+        'DEPARTURE DATE': '2026-10-05',
+        'DEPARTURE TIME': '6:00 PM',
+        'AIRPORT': 'MMTO/TLC',
+      },
+      {
+        'PAX': '8',
+        'CREW': '3',
+        'AIRCRAFT TYPE': 'Bombardier Global 6500',
+        'TAIL NUMBER': 'XA-VMG',
+        'ARRIVAL DATE': '2026-10-06',
+        'ARRIVAL TIME': '09:00',
+        'DEPARTURE DATE': '2026-10-07',
+        'DEPARTURE TIME': '14:00 hrs',
+        'AIRPORT': 'MMUN/CUN',
+      },
+      {
+        'PAX': '8',
+        'CREW': '3',
+        'AIRCRAFT TYPE': 'Bombardier Global 6500',
+        'TAIL NUMBER': 'XA-VMG',
+        'ARRIVAL DATE': '2026-10-07',
+        'ARRIVAL TIME': '16:30',
+        'DEPARTURE DATE': '2026-10-08',
+        'DEPARTURE TIME': '11:00 AM',
+        'AIRPORT': 'MMGL/GDL',
+      },
+      {
+        'PAX': '8',
+        'CREW': '3',
+        'AIRCRAFT TYPE': 'Bombardier Global 6500',
+        'TAIL NUMBER': 'XA-VMG',
+        'ARRIVAL DATE': '2026-10-09',
+        'ARRIVAL TIME': '08:45',
+        'DEPARTURE DATE': '2026-10-09',
+        'DEPARTURE TIME': '7:30 PM local',
+        'AIRPORT': 'MMMX/MEX',
+      },
+    ],
+  });
+
   // ─────────────────────────────────────────────────────────
   // BLOQUE 3 — Email gate (lead capture)
   // ─────────────────────────────────────────────────────────
@@ -215,7 +274,7 @@ async function run() {
 
   console.log('\n✅  Todas las pruebas terminaron.\n');
   console.log('📬  Revisa augustotturi99@gmail.com — deberían haber llegado:');
-  console.log('    • 4 correos de contacto (mínimo, con servicio, 1 vuelo, solo notas, 2 vuelos)');
+  console.log('    • 5 correos de contacto (mínimo, con servicio, 1 vuelo, solo notas, 2 vuelos, 4 vuelos formato libre)');
   console.log('    • 1 correo de email gate (lead de descarga)');
   console.log('    • El bot (honeypot) NO debe haber generado correo\n');
 }
