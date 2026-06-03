@@ -32,9 +32,13 @@ async function post(label, payload) {
 }
 
 function sep(title) {
-  console.log(`\n${'─'.repeat(55)}`);
+  console.log(`\n${'─'.repeat(60)}`);
   console.log(`  ${title}`);
-  console.log('─'.repeat(55));
+  console.log('─'.repeat(60));
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
 }
 
 // ── Test cases ───────────────────────────────────────────────
@@ -42,161 +46,178 @@ function sep(title) {
 async function run() {
   console.log(`\n🛫  Manny Aero Mail Tests → ${ENDPOINT}\n`);
 
-  // ── CONTACT FORM ─────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────
+  // BLOQUE 1 — Validaciones (van primero, antes de agotar el rate limit)
+  // ─────────────────────────────────────────────────────────
 
-  sep('CONTACT — Full submission (all fields + 2 flights)');
-  await post('Full form', {
+  sep('VALIDACIÓN — Falta nombre (espera error 400)');
+  await post('Sin firstName', {
     type: 'contact',
-    firstName: 'James',
-    lastName: 'Holloway',
-    email: 'james.holloway@testoperator.com',
-    phone: '+1 212 555 0101',
-    company: 'Holloway Aviation LLC',
-    service: 'Ground Handling',
-    aircraft: 'Gulfstream G650',
-    notes: 'Please ensure fuel uplift is ready on arrival. Crew of 3, 6 passengers.\nVIP handling required.',
-    flights: [
-      {
-        'Origin': 'KTEB — Teterboro',
-        'Destination': 'MMTO — Toluca',
-        'Date': '2026-07-15',
-        'ETA': '14:30 local',
-        'Registration': 'N123GX',
-      },
-      {
-        'Origin': 'MMTO — Toluca',
-        'Destination': 'MMUN — Cancún',
-        'Date': '2026-07-17',
-        'ETD': '09:00 local',
-        'Registration': 'N123GX',
-      },
-    ],
-    website: '', // honeypot — empty = human
+    website: '',
+    firstName: '',
+    lastName: 'Smith',
+    email: 'test@test.com',
+    phone: '', company: '', service: '', notes: '', flights: [],
   });
 
-  sep('CONTACT — Minimal (name + email only, no optional fields)');
-  await post('Minimal form', {
+  sep('VALIDACIÓN — Email inválido (espera error 400)');
+  await post('Email malo', {
     type: 'contact',
+    website: '',
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'esto-no-es-un-email',
+    phone: '', company: '', service: '', notes: '', flights: [],
+  });
+
+  sep('VALIDACIÓN — Honeypot activado (silencioso, no manda correo)');
+  await post('Bot spam', {
+    type: 'contact',
+    website: 'http://spam.com',   // honeypot relleno → bot
+    firstName: 'Bot',
+    lastName: 'Spammer',
+    email: 'spam@spam.com',
+    phone: '', company: '', service: '', notes: '', flights: [],
+  });
+
+  sep('VALIDACIÓN — Tipo desconocido (espera error 400)');
+  await post('Tipo inválido', {
+    type: 'suscripcion',
+    email: 'test@test.com',
+  });
+
+  sep('EMAIL GATE — Email inválido (espera error 400)');
+  await post('Gate: email malo', {
+    type: 'gate',
+    email: 'nope',
+    fileName: 'Algún documento',
+  });
+
+  // ─────────────────────────────────────────────────────────
+  // BLOQUE 2 — Formularios reales (usan el rate limit)
+  // ─────────────────────────────────────────────────────────
+
+  sep('CONTACTO — Mínimo: solo nombre + email');
+  await post('Solo nombre y email', {
+    type: 'contact',
+    website: '',
     firstName: 'Sofia',
     lastName: 'Reyes',
     email: 'sofia.reyes@minimalist.io',
     phone: '',
     company: '',
     service: '',
-    aircraft: '',
     notes: '',
     flights: [],
-    website: '',
   });
 
-  sep('CONTACT — One flight, no notes, no aircraft');
-  await post('One flight / no notes', {
+  sep('CONTACTO — Con teléfono, empresa y servicio, sin vuelos');
+  await post('Sin vuelos, con servicio', {
     type: 'contact',
+    website: '',
     firstName: 'Carlos',
     lastName: 'Mendez',
     email: 'cmendez@charter.mx',
     phone: '+52 55 1234 5678',
     company: 'AeroCharter MX',
     service: 'Landing / Overflight Permit',
-    aircraft: '',
-    notes: '',
-    flights: [
-      {
-        'Origin': 'KLAX — Los Angeles',
-        'Destination': 'MMMX — Mexico City',
-        'Date': '2026-08-01',
-        'ETA': '18:00 local',
-      },
-    ],
-    website: '',
+    notes: 'Necesitamos permiso para sobrevuelo de espacio aéreo mexicano.',
+    flights: [],
   });
 
-  sep('CONTACT — Only notes, no flights, no phone/company');
-  await post('Notes only, no flights', {
+  sep('CONTACTO — 1 vuelo completo');
+  await post('Un vuelo completo', {
     type: 'contact',
+    website: '',
+    firstName: 'James',
+    lastName: 'Holloway',
+    email: 'j.holloway@testoperator.com',
+    phone: '+1 212 555 0101',
+    company: 'Holloway Aviation LLC',
+    service: 'Ground Handling',
+    notes: 'Por favor confirmar disponibilidad de hangar.',
+    flights: [
+      {
+        'PAX': '6',
+        'CREW': '2',
+        'AIRCRAFT TYPE': 'Gulfstream G650',
+        'TAIL NUMBER': 'N123GX',
+        'ARRIVAL DATE': '2026-07-15',
+        'ARRIVAL TIME': '14:30Z',
+        'DEPARTURE DATE': '2026-07-17',
+        'DEPARTURE TIME': '09:00Z',
+        'AIRPORT': 'MMTO/TLC',
+      },
+    ],
+  });
+
+  sep('CONTACTO — Solo notas, sin vuelos, sin teléfono');
+  await post('Solo notas', {
+    type: 'contact',
+    website: '',
     firstName: 'Petra',
     lastName: 'Vogt',
     email: 'p.vogt@eurobiz.de',
     phone: '',
     company: '',
     service: 'VIP Ground Transportation',
-    aircraft: 'Bombardier Global 7500',
-    notes: 'We need a fully equipped VIP van and driver from MMTO to Mexico City. German-speaking preferred.',
+    notes: 'Necesitamos transporte VIP desde MMTO hasta Ciudad de México. Preferiblemente con chofer que hable alemán.',
     flights: [],
-    website: '',
   });
 
-  sep('CONTACT — 3 flights, all fields populated');
-  await post('3 flights full', {
+  sep('CONTACTO — 2 vuelos, todos los campos');
+  await post('Dos vuelos completos', {
     type: 'contact',
+    website: '',
     firstName: 'Robert',
     lastName: 'Chen',
     email: 'rchen@pacificjet.com',
     phone: '+1 310 555 0099',
     company: 'Pacific Jet Partners',
     service: 'Ground Handling',
-    aircraft: 'Dassault Falcon 8X',
-    notes: 'Multi-leg tour. Need ground coordination at all three stops.',
+    notes: 'Tour de dos tramos. Coordinación en ambas escalas.',
     flights: [
-      { 'Leg': '1', 'Origin': 'KSFO', 'Destination': 'MMTJ — Tijuana', 'Date': '2026-09-10', 'ETA': '11:00' },
-      { 'Leg': '2', 'Origin': 'MMTJ', 'Destination': 'MMGL — Guadalajara', 'Date': '2026-09-11', 'ETD': '08:30' },
-      { 'Leg': '3', 'Origin': 'MMGL', 'Destination': 'MMTO — Toluca', 'Date': '2026-09-12', 'ETD': '14:00' },
+      {
+        'PAX': '4',
+        'CREW': '3',
+        'AIRCRAFT TYPE': 'Dassault Falcon 8X',
+        'TAIL NUMBER': 'N888PJ',
+        'ARRIVAL DATE': '2026-09-10',
+        'ARRIVAL TIME': '11:00Z',
+        'DEPARTURE DATE': '2026-09-11',
+        'DEPARTURE TIME': '08:30Z',
+        'AIRPORT': 'MMTJ/TIJ',
+      },
+      {
+        'PAX': '4',
+        'CREW': '3',
+        'AIRCRAFT TYPE': 'Dassault Falcon 8X',
+        'TAIL NUMBER': 'N888PJ',
+        'ARRIVAL DATE': '2026-09-11',
+        'ARRIVAL TIME': '10:00Z',
+        'DEPARTURE DATE': '2026-09-12',
+        'DEPARTURE TIME': '14:00Z',
+        'AIRPORT': 'MMTO/TLC',
+      },
     ],
-    website: '',
   });
 
-  // ── VALIDATION ERRORS ─────────────────────────────────────
+  // ─────────────────────────────────────────────────────────
+  // BLOQUE 3 — Email gate (lead capture)
+  // ─────────────────────────────────────────────────────────
 
-  sep('VALIDATION — Missing first name (expect 400 error)');
-  await post('No first name', {
-    type: 'contact',
-    firstName: '',
-    lastName: 'Smith',
-    email: 'test@test.com',
-    website: '',
-  });
-
-  sep('VALIDATION — Invalid email (expect 400 error)');
-  await post('Bad email', {
-    type: 'contact',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'not-an-email',
-    website: '',
-  });
-
-  sep('VALIDATION — Honeypot triggered (expect silent ok, no email sent)');
-  await post('Bot submission', {
-    type: 'contact',
-    firstName: 'Bot',
-    lastName: 'Spammer',
-    email: 'spam@spam.com',
-    website: 'http://spam.com', // honeypot filled → should be silently discarded
-  });
-
-  // ── EMAIL GATE ────────────────────────────────────────────
-
-  sep('EMAIL GATE — Permit download lead capture');
-  await post('Gate: valid email', {
+  sep('EMAIL GATE — Descarga de documento de permiso');
+  await post('Gate: lead válido', {
     type: 'gate',
     email: 'augustotturi99@gmail.com',
-    fileName: 'FAR Part 91 — Mexico Permit Guide.pdf',
+    fileName: 'FAR Part 91 — Guía de Permisos México.pdf',
   });
 
-  sep('EMAIL GATE — Invalid email (expect 400 error)');
-  await post('Gate: bad email', {
-    type: 'gate',
-    email: 'nope',
-    fileName: 'Some document',
-  });
-
-  sep('UNKNOWN TYPE — expect 400 error');
-  await post('Unknown type', {
-    type: 'newsletter',
-    email: 'test@test.com',
-  });
-
-  console.log('\n✅  All tests finished.\n');
+  console.log('\n✅  Todas las pruebas terminaron.\n');
+  console.log('📬  Revisa augustotturi99@gmail.com — deberían haber llegado:');
+  console.log('    • 4 correos de contacto (mínimo, con servicio, 1 vuelo, solo notas, 2 vuelos)');
+  console.log('    • 1 correo de email gate (lead de descarga)');
+  console.log('    • El bot (honeypot) NO debe haber generado correo\n');
 }
 
 run().catch(console.error);
