@@ -38,7 +38,8 @@ if (!defined('MAIL_TO_GATE'))    define('MAIL_TO_GATE',    env_get('MANNY_MAIL_T
 
 // CC recipients for the contact form
 define('MAIL_CC_CONTACT', []);
-define('RATE_LIMIT_MAX',    15);   // max sends per IP per window
+// ⚠️  TESTING VALUES — reset to (15, 3600) before go-live on manny.aero
+define('RATE_LIMIT_MAX',    100);  // max sends per IP per window
 define('RATE_LIMIT_WINDOW', 3600); // 1 hour
 
 use PHPMailer\PHPMailer\PHPMailer;
