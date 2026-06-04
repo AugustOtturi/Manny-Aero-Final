@@ -4,15 +4,20 @@ Guidance for Claude Code when working on the Manny Aero website.
 
 ## Project
 
-Static marketing site for **Manny Aero** — premium aircraft ground handling, permits, catering and FBO coordination across Mexico. Multi-page Astro site (6 routes), content is hardcoded in components / `src/data/*`. No CMS, no backend.
+Static marketing site for **Manny Aero** — premium aircraft ground handling, permits, catering and FBO coordination across Mexico. Multi-page Astro site, content is hardcoded in components / `src/data/*`. No CMS, no backend.
 
-Routes:
+Routes (todas las páginas construidas a junio 2026):
 - `/` — main landing (hero video, subhero, service cards, map, final CTA)
 - `/about` — company story, timeline, team, values
-- `/services` — detailed services (tabs desktop, modal bottom-sheet mobile)
+- `/ground-handling` — servicios detallados (tabs desktop, modal bottom-sheet mobile). `/services` redirige aquí via 301 en `.htaccess`.
+- `/catering` — Manny's In-Flight Catering (foto hero + lista de servicios + CTA)
 - `/isbha` — IS-BAH compliance program (sticky sidebar nav + accordions)
 - `/permits-and-authorizations` — permit categories (sticky sidebar nav + accordions + email-gated downloads)
 - `/contact` — flight request form + contact cards
+- `/founder` — historia del fundador (sticky photo + body texto)
+- `/news` — index de artículos (grid 3 col)
+- `/news/[slug]` — artículo individual (generado desde `src/data/news.ts`)
+- `/404` — página de error personalizada
 
 ## Stack
 
@@ -40,40 +45,55 @@ Commit + push to `main` → Hostinger redeploys automatically. No manual deploy 
 
 ```
 public/
-  .htaccess           # Apache config (Brotli, 1y immutable cache, MIME, security headers, HTTPS redirect)
+  .htaccess              # Apache config (Brotli, 1y immutable cache, MIME, security headers, HTTPS redirect)
   favicon.svg, logo-manny.svg, og-default.jpg
   map/mexico-states.geojson
+  og/                    # OG images por página (catering, isbha, founder, permits, ground-handling, about, services, contact)
+  phpmailer/             # PHPMailer bundle (acceso bloqueado por .htaccess DirectoryMatch)
+  mail.php               # Handler PHP del formulario de contacto y email gate
+  mail-config.php        # ⚠️ DEBE ELIMINARSE — credenciales SMTP en texto plano (ver Auditoría)
 src/
   layouts/BaseLayout.astro     # <head>, app-loader, font preloads, reveal observer
   pages/
     index.astro                # main landing
     about.astro
-    services.astro             # tabs (desktop) + modal sheet (mobile)
+    ground-handling.astro      # tabs (desktop) + modal sheet (mobile) — mismo patrón que /services original
+    catering.astro             # In-flight catering page
     isbha.astro                # sticky sidebar + accordions
     permits-and-authorizations.astro  # sidebar + accordions + email-gated downloads
     contact.astro              # form + sidebar
+    founder.astro              # sticky photo + body texto fundador
+    404.astro                  # error page
+    news/
+      index.astro              # grid de artículos
+      [slug].astro             # artículo individual (getStaticPaths desde news.ts)
   components/
     Hero.astro, SubHero.astro, ServiceCards.astro,
     MapSection.astro, FinalCTA.astro, Navbar.astro, Footer.astro
     PageHero.astro             # internal-page hero (badge + title + subtitle, no video/photo)
     StatsBand.astro            # 4-up stats strip (glass cards)
     FloatingContact.astro      # OPS 24/7 yellow-glass module, fixed right side, persistent on every page
+    BackToServices.astro       # link de regreso usado en /ground-handling y /catering
     ui/GlassButton.astro, ui/GlassPill.astro
   data/
-    airports.ts                # 80+ airports for the map
-    services.ts                # minimal data (slug, title, href, tone) for ServiceCards on the index
-    servicesDetail.ts          # rich data (tag, desc, features, image) for /services page
-    isbhaModules.ts            # 6 ISBHA compliance modules for /isbha
-    permits.ts                 # PERMIT_SECTIONS + DOWNLOADS for /permits-and-authorizations
+    airports.ts                # 80+ airports para el mapa
+    airportOptions.ts          # opciones serializadas para el select del formulario de contacto
+    services.ts                # minimal data (slug, title, href, tone) para ServiceCards en el index
+    servicesDetail.ts          # rich data (tag, desc, features, image) para /ground-handling
+    isbhaModules.ts            # 6 ISBHA compliance modules para /isbha
+    permits.ts                 # PERMIT_SECTIONS + DOWNLOADS para /permits-and-authorizations
     events.ts                  # event partners
+    news.ts                    # artículos de noticias (imageKey, slug, body, etc.)
   styles/
     tokens.css                 # CSS variables (colors, fonts, breakpoints, motion)
     global.css                 # base styles + utilities (includes the white-title shine rule)
   assets/
-    photos/                    # B&W webp photos (subhero-1..4, service-*)
-    Logo1..8.png               # partner logos for the marquee
+    photos/                    # fotos webp/jpg (subhero-1..4, service-*, catering, founder, noticias)
+    fonts/                     # Aileron otf self-hosted
+    Logo1..8.png               # partner logos para el marquee
     poster-hero.webp           # hero LQIP fallback
     hero-manny-final.mp4
+    mannylogo.png              # logo para el flyout mobile del navbar
 ```
 
 ## Conventions
@@ -99,9 +119,11 @@ src/
 
 ### Navbar
 
-- Real routes for the 5 internal pages (`/about`, `/services`, `/isbha`, `/permits-and-authorizations`, `/contact`).
-- Anchor links (`/#map`, `/#news`) prefix with `/` so they work from any page (route + scroll).
-- Services dropdown lists All Services, Permits & Authorization, IS-BAH (real routes), plus Manny's Catering and Majola Chauffeur (placeholders that 404 — those pages are not built yet).
+- Rutas reales: `/about`, `/ground-handling`, `/isbha`, `/permits-and-authorizations`, `/contact`, `/news`, `/catering`, `/founder`.
+- El dropdown de Services lista: Ground Handling, Permits & Authorizations, IS-BAH, Manny's In-flight Catering — todos tienen página real.
+- Majola Chauffeur ya no está en el dropdown (pendiente de confirmar con cliente).
+- Anchor links (`/#map`) prefijados con `/` para funcionar desde cualquier página.
+- CSS muerto en Navbar: `.nav__dd-item--full`, `.nav__dd-item--divider`, `.flyout__sublink--all`, `.flyout__sublink--divider` — selectores de variantes que se quitaron del HTML pero el CSS quedó.
 
 ### Hero logo positioning
 
@@ -164,10 +186,72 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 ## Out-of-scope reminders
 
 - The "client gradient background" (4-corner gray mesh from a client mockup) is **planned but not implemented**. The user explicitly opted out — they'll handle it later. Don't apply it without being asked.
-- `/services/catering` and `/services/chauffeur` are linked from the Navbar dropdown but **don't exist yet** — they'll 404. The pages will be added later by the user; leave the links unless asked to remove them.
 - Download files in `permits.ts` use `url: "#"` — real downloadable assets haven't been hooked up yet.
 - Pre-existing `astro check` errors (unrelated to this codebase's pages):
   - `MapSection.astro:165` — `tap: false` not in Leaflet's `MapOptions` type.
-  - `BaseLayout.astro:220` — `ActiveLink` mismatch ("blog" vs "news") between BaseLayout and Navbar types.
+  - `BaseLayout.astro:220` — `ActiveLink` mismatch ("blog" vs "news") entre BaseLayout y Navbar types. El tipo en BaseLayout tiene `"blog"` en lugar de `"news"`.
   Build still succeeds.
 - The optimization plan in `~/.claude/plans/declarative-twirling-puppy.md` had 4 phases. Only **Phase 1** (Hero LQIP) and **Phase 4** (`.htaccess`) were applied. Phases 2 (video compression, JPG/SVG/GeoJSON optimization) and 3 (font-display, blob audit) are deferred.
+
+---
+
+## Auditoría de seguridad y calidad — 2026-06-03
+
+Auditoría completa realizada antes del go-live. Estado actual del sitio.
+
+### 🔴 Bloqueantes de deploy (pendiente)
+
+1. **`public/mail-config.php` — credenciales SMTP en texto plano en el repo**
+   - Contiene `SMTP_PASS` en claro. El `.htaccess` bloquea el acceso web pero el archivo existe en disco y en git.
+   - Acción: eliminar del servidor via FTP/panel Hostinger, añadir a `.gitignore`, rotar la contraseña SMTP desde el panel de Hostinger.
+
+2. **`dist/debug-mail.php` — endpoint de debug desplegado en producción**
+   - Gateado por `?key=manny2026debug` (clave hardcodeada en el propio archivo). Expone configuración SMTP.
+   - Acción: eliminar del servidor ahora (`https://manny.aero/debug-mail.php`), y de `public/` si existe ahí.
+
+3. **Rate limit en valores de testing (`mail.php:42-43`)**
+   - Actualmente: `RATE_LIMIT_MAX = 100`, `RATE_LIMIT_WINDOW = 3600`. El comentario en el código dice "reset antes del go-live".
+   - Acción: cambiar a `RATE_LIMIT_MAX = 15`.
+
+4. **`ALLOWED_ORIGIN` definido pero nunca verificado en `mail.php`**
+   - `mail-config.php` define la constante pero `mail.php` nunca hace el chequeo de `Origin` header.
+   - Acción: añadir bloque de verificación al principio de `mail.php` después del parse del JSON.
+
+### 🟡 Deuda técnica (post go-live)
+
+5. **`innerHTML` sin escapar en el modal de servicios** (`ground-handling.astro` y `services.astro`)
+   - `modalFeatures.innerHTML` y `modalTitle.innerHTML` usan template literals directos.
+   - Acción: reemplazar con `document.createElement` + `textContent`.
+
+6. **`buildPopupHtml` en `MapSection.astro` usa `innerHTML` con datos de aeropuertos**
+   - `modalBody.innerHTML = buildPopupHtml(a)` — inyecta `a.nombre`, `a.info`, `a.pdf` sin escapar.
+   - Acción: reemplazar con función DOM imperativa; validar scheme de `a.pdf` (`http` o `/`).
+
+7. **Rate limit usa `X-Forwarded-For` sin verificar el proxy** (`mail.php:97`)
+   - Un cliente puede spoofear el header y evadir el rate limit. En Hostinger shared hosting usar `REMOTE_ADDR` directamente.
+
+8. **CSS muerto en `contact.astro`** (~100 líneas):
+   - `.hero-avail*`, `.map-placeholder*`, `.response-row*`, `.response-item*`, `.response-num`, `.response-lbl` — definidos pero ningún elemento los usa.
+
+9. **CSS muerto en `catering.astro`**: clase `.catering-lead` definida con `!important` pero no usada.
+
+10. **CSS muerto en `Navbar.astro`**: `.nav__dd-item--full`, `.nav__dd-item--divider`, `.flyout__sublink--all`, `.flyout__sublink--divider`.
+
+11. **`PageHero.astro` usa `set:html` con prop derivado** — actualmente seguro (datos hardcodeados), pero frágil si algún caller pasa data externa.
+
+12. **Versión de PHPMailer sin verificar** — confirmar que es ≥ 6.8.0 (`grep Version public/phpmailer/PHPMailer.php`).
+
+### ✅ Lo que está bien (no tocar)
+
+- Cabeceras HTTP: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy — bien configuradas.
+- HTTPS forzado con 301 en `.htaccess`.
+- Brotli + Gzip configurados correctamente.
+- Fuentes self-hosted sin CDN externo.
+- `Options -Indexes` activo.
+- Honeypot silencioso en formulario de contacto y email gate.
+- Sanitización PHP: `clean()` con `strip_tags + htmlspecialchars + ENT_QUOTES`.
+- Validación de email con `FILTER_VALIDATE_EMAIL` en PHP.
+- Errores SMTP loggeados server-side, nunca expuestos al cliente.
+- Todos los links `target="_blank"` en Footer usan `rel="noopener noreferrer"`.
+- JSON-LD structured data en todas las páginas internas.
+- OG images específicas por página.

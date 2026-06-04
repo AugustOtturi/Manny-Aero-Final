@@ -27,19 +27,18 @@ function env_get(string $key, string $default = ''): string {
     return $_SERVER[$key] ?? $default;
 }
 
-if (!defined('SMTP_HOST'))       define('SMTP_HOST',       env_get('MANNY_SMTP_HOST',       'smtp.hostinger.com'));
-if (!defined('SMTP_PORT'))       define('SMTP_PORT',       (int) env_get('MANNY_SMTP_PORT', '465'));
-if (!defined('SMTP_USER'))       define('SMTP_USER',       env_get('MANNY_SMTP_USER'));
-if (!defined('SMTP_PASS'))       define('SMTP_PASS',       env_get('MANNY_SMTP_PASS'));
-if (!defined('MAIL_FROM'))       define('MAIL_FROM',       env_get('MANNY_MAIL_FROM'));
-if (!defined('MAIL_FROM_NAME'))  define('MAIL_FROM_NAME',  env_get('MANNY_MAIL_FROM_NAME',  'Manny Aero Web'));
+if (!defined('SMTP_HOST'))       define('SMTP_HOST',       env_get('MANNY_SMTP_HOST',       'smtp-mail.outlook.com'));
+if (!defined('SMTP_PORT'))       define('SMTP_PORT',       (int) env_get('MANNY_SMTP_PORT', '587'));
+if (!defined('SMTP_USER'))       define('SMTP_USER',       env_get('MANNY_SMTP_USER',       'no-replay@manny.aero'));
+if (!defined('SMTP_PASS'))       define('SMTP_PASS',       env_get('MANNY_SMTP_PASS',       ''));
+if (!defined('MAIL_FROM'))       define('MAIL_FROM',       env_get('MANNY_MAIL_FROM',       'no-replay@manny.aero'));
+if (!defined('MAIL_FROM_NAME'))  define('MAIL_FROM_NAME',  env_get('MANNY_MAIL_FROM_NAME',  'Website Form'));
 if (!defined('MAIL_TO_CONTACT')) define('MAIL_TO_CONTACT', env_get('MANNY_MAIL_TO_CONTACT', 'augustotturi99@gmail.com'));
 if (!defined('MAIL_TO_GATE'))    define('MAIL_TO_GATE',    env_get('MANNY_MAIL_TO_GATE',    'augustotturi99@gmail.com'));
 
 // CC recipients for the contact form
 define('MAIL_CC_CONTACT', []);
-// ⚠️  TESTING VALUES — reset to (15, 3600) before go-live on manny.aero
-define('RATE_LIMIT_MAX',    100);  // max sends per IP per window
+define('RATE_LIMIT_MAX',    15);   // max sends per IP per window
 define('RATE_LIMIT_WINDOW', 3600); // 1 hour
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -78,6 +77,16 @@ $data = json_decode($raw, true);
 
 if (!is_array($data)) {
     json_error('Invalid payload');
+}
+
+// ── 3. Origin check ─────────────────────────────────────────────
+$origin  = $_SERVER['HTTP_ORIGIN']  ?? '';
+$referer = $_SERVER['HTTP_REFERER'] ?? '';
+$allowed = 'https://manny.aero';
+$origin_ok = str_starts_with($origin, $allowed) || str_starts_with($referer, $allowed);
+if (!$origin_ok) {
+    error_log('[manny-aero mail] Origin blocked — origin: ' . $origin . ' | referer: ' . $referer);
+    json_error('Forbidden', 403);
 }
 
 // ── 4. Honeypot ──────────────────────────────────────────────
@@ -237,7 +246,7 @@ function send_mail(
         $mail->SMTPAuth   = true;
         $mail->Username   = SMTP_USER;
         $mail->Password   = SMTP_PASS;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // port 465
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // port 587
         $mail->Port       = SMTP_PORT;
         $mail->CharSet    = 'UTF-8';
 
@@ -261,8 +270,11 @@ function send_mail(
 
         $mail->send();
     } catch (Exception $e) {
-        // Log full error server-side but never expose it to the client
-        error_log('[manny-aero mail] ' . $mail->ErrorInfo);
+        // Log full error server-side — never expose raw SMTP detail to the client
+        error_log('[manny-aero mail] SMTP ERROR | host: ' . SMTP_HOST . ':' . SMTP_PORT
+            . ' | user: ' . SMTP_USER
+            . ' | to: ' . $to
+            . ' | detail: ' . $mail->ErrorInfo);
         json_error('We could not send your message right now. Please try again or contact us directly.', 500);
     }
 }
