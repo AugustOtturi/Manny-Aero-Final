@@ -82,7 +82,7 @@ if (!is_array($data)) {
 // ── 3. Origin check ─────────────────────────────────────────────
 $origin  = $_SERVER['HTTP_ORIGIN']  ?? '';
 $referer = $_SERVER['HTTP_REFERER'] ?? '';
-$allowed = 'https://manny.aero';
+$allowed = defined('ALLOWED_ORIGIN') ? ALLOWED_ORIGIN : 'https://manny.aero';
 $origin_ok = str_starts_with($origin, $allowed) || str_starts_with($referer, $allowed);
 if (!$origin_ok) {
     error_log('[manny-aero mail] Origin blocked — origin: ' . $origin . ' | referer: ' . $referer);
