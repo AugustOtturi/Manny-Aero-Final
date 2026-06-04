@@ -14,7 +14,7 @@ require __DIR__ . '/phpmailer/SMTP.php';
 
 // Load credentials from a secrets file outside public_html (never wiped by deploys).
 // If not found, fall back to env vars (getenv / $_SERVER).
-$_secrets_file = '/home/u676595820/manny-secrets.php';
+$_secrets_file = '/home/u824529850/manny-secrets.php';
 if (file_exists($_secrets_file)) {
     require $_secrets_file; // defines: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS,
                              //          MAIL_FROM, MAIL_FROM_NAME, MAIL_TO_CONTACT, MAIL_TO_GATE
