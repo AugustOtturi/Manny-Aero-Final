@@ -28,3 +28,6 @@ Thumbs.db
 
 # PHP mailer credentials — never commit
 public/mail-config.php
+
+# SMTP test scripts con credenciales — never commit
+test-smtp.mjs
