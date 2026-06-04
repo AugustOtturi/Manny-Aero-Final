@@ -36,8 +36,8 @@ if (!defined('MAIL_FROM_NAME'))  define('MAIL_FROM_NAME',  env_get('MANNY_MAIL_F
 if (!defined('MAIL_TO_CONTACT')) define('MAIL_TO_CONTACT', env_get('MANNY_MAIL_TO_CONTACT', 'augustotturi99@gmail.com'));
 if (!defined('MAIL_TO_GATE'))    define('MAIL_TO_GATE',    env_get('MANNY_MAIL_TO_GATE',    'augustotturi99@gmail.com'));
 
-// CC recipients for the contact form
-define('MAIL_CC_CONTACT', []);
+// CC recipients — loaded from secrets file if defined, otherwise empty
+if (!defined('MAIL_CC')) define('MAIL_CC', []);
 define('RATE_LIMIT_MAX',    15);   // max sends per IP per window
 define('RATE_LIMIT_WINDOW', 3600); // 1 hour
 
@@ -200,7 +200,7 @@ function handle_contact(array $d): never {
     $body = email_document('New Flight Request', $subheading, $sections, $footer);
 
     rate_check();
-    send_mail(MAIL_TO_CONTACT, $subject, $body, $email, $fullName, MAIL_CC_CONTACT);
+    send_mail(MAIL_TO_CONTACT, $subject, $body, $email, $fullName, MAIL_CC);
     json_ok('Request sent');
 }
 
@@ -226,7 +226,7 @@ function handle_gate(array $d): never {
     $body = email_document('Permit Download Lead', $subheading, $sections, $footer);
 
     rate_check();
-    send_mail(MAIL_TO_GATE, $subject, $body, $email);
+    send_mail(MAIL_TO_GATE, $subject, $body, $email, '', MAIL_CC);
     json_ok('Recorded');
 }
 
