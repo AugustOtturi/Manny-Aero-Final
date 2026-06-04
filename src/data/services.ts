@@ -27,7 +27,7 @@ export const SERVICES: Service[] = [
   {
     slug: "audits",
     title: "IS-BAH & IS-BAO Audits",
-    href: "/isbha",
+    href: "/isbah",
     tone: "d",
   },
 ];

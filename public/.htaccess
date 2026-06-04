@@ -21,6 +21,7 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteRule ^services/?$ /ground-handling [R=301,L]
+  RewriteRule ^isbha/?$ /isbah [R=301,L]
 </IfModule>
 
 # ---------------------------------------------------------
