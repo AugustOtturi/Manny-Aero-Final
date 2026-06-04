@@ -1000,3 +1000,56 @@ const categoryEntries = Object.entries(CATEGORIES) as [
   }
 
 </style>
+
+<script>
+  // Count-up animation for the stats strip below the map.
+  // Handles "+14", "+300", "+10,000" — prefix "+" is preserved.
+  function animateMapCounter(el: HTMLElement, duration = 1600): void {
+    const original = el.textContent?.trim() ?? '';
+    const match = original.match(/^(\+?)([\d,]+)(.*)$/);
+    if (!match) return;
+
+    const prefix = match[1] ?? '';
+    const numStr = match[2].replace(/,/g, '');
+    const target = parseInt(numStr, 10);
+    if (isNaN(target) || target === 0) return;
+
+    const suffix = match[3] ?? '';
+    const useCommas = match[2].includes(',');
+    const start = performance.now();
+
+    const easeOut = (t: number): number => 1 - Math.pow(1 - t, 3);
+
+    const tick = (now: number): void => {
+      const t = Math.min((now - start) / duration, 1);
+      const value = Math.round(easeOut(t) * target);
+      el.textContent = prefix + (useCommas ? value.toLocaleString('en-US') : String(value)) + suffix;
+      if (t < 1) requestAnimationFrame(tick);
+      else el.textContent = original;
+    };
+
+    el.textContent = prefix + '0' + suffix;
+    requestAnimationFrame(tick);
+  }
+
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReducedMotion && 'IntersectionObserver' in window) {
+    const statsObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target
+              .querySelectorAll<HTMLElement>('.map__stat-num')
+              .forEach((el) => animateMapCounter(el));
+            statsObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+
+    const statsEl = document.querySelector<HTMLElement>('.map__stats');
+    if (statsEl) statsObserver.observe(statsEl);
+  }
+</script>
