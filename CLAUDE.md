@@ -11,7 +11,7 @@ Routes (todas las páginas construidas a junio 2026):
 - `/about` — company story, timeline, team, values
 - `/ground-handling` — servicios detallados (tabs desktop, modal bottom-sheet mobile). `/services` redirige aquí via 301 en `.htaccess`.
 - `/catering` — Manny's In-Flight Catering (foto hero + lista de servicios + CTA)
-- `/isbha` — IS-BAH compliance program (sticky sidebar nav + accordions)
+- `/isbah` — IS-BAH compliance program (sticky sidebar nav + accordions). `/isbha` redirige aquí via 301 en `.htaccess`.
 - `/permits-and-authorizations` — permit categories (sticky sidebar nav + accordions + email-gated downloads)
 - `/contact` — flight request form + contact cards
 - `/founder` — historia del fundador (sticky photo + body texto)
@@ -28,7 +28,8 @@ Routes (todas las páginas construidas a junio 2026):
 - **Fonts** (self-hosted via `@fontsource`, never Google CDN):
   - `Inter` 400–900 → body, UI, navigation (`var(--font-sans)`)
   - `Bebas Neue` 400 → display titles only (`var(--font-display)`)
-- **Hosting**: Hostinger Business Premium, Apache/LiteSpeed, auto-deploys from GitHub `main`. Node 22.x, build `npm run build`, output `dist/`.
+- **Hosting (dev/staging)**: cuenta de Engenio Digital en Hostinger, conectada a GitHub `main`. Auto-deploy al push.
+- **Hosting (cliente/producción)**: cuenta del cliente en Hostinger (`u824529850`). **No conectada a GitHub** — deploy manual: `npm run build` → zipear `dist/` → subir y extraer en `public_html/`.
 
 ## Commands
 
@@ -39,27 +40,33 @@ npm run preview  # serve dist/ locally
 npm run check    # astro check (TypeScript)
 ```
 
-Commit + push to `main` → Hostinger redeploys automatically. No manual deploy step.
+## Deploy manual (servidor del cliente)
+
+1. `npm run build`
+2. `cd dist && powershell Compress-Archive -Path * -DestinationPath ../manny-aero-dist.zip -Force`
+3. Subir `manny-aero-dist.zip` al `public_html/` del cliente via File Manager
+4. Extraer (con "Overwrite existing files" activado)
+
+> ⚠️ Al zipear hacerlo **desde dentro del `dist/`** para evitar paths `dist\archivo` en Windows.
 
 ## File layout
 
 ```
 public/
-  .htaccess              # Apache config (Brotli, 1y immutable cache, MIME, security headers, HTTPS redirect)
+  .htaccess              # Apache config (Brotli, 1y immutable cache, MIME, security headers, HTTPS redirect, 301 redirects)
   favicon.svg, logo-manny.svg, og-default.jpg
   map/mexico-states.geojson
-  og/                    # OG images por página (catering, isbha, founder, permits, ground-handling, about, services, contact)
+  og/                    # OG images por página (catering, isbah, founder, permits, ground-handling, about, services, contact)
   phpmailer/             # PHPMailer bundle (acceso bloqueado por .htaccess DirectoryMatch)
   mail.php               # Handler PHP del formulario de contacto y email gate
-  mail-config.php        # ⚠️ DEBE ELIMINARSE — credenciales SMTP en texto plano (ver Auditoría)
 src/
-  layouts/BaseLayout.astro     # <head>, app-loader, font preloads, reveal observer
+  layouts/BaseLayout.astro     # <head>, app-loader, font preloads, reveal observer, Google Search Console meta tag
   pages/
     index.astro                # main landing
     about.astro
-    ground-handling.astro      # tabs (desktop) + modal sheet (mobile) — mismo patrón que /services original
+    ground-handling.astro      # tabs (desktop) + modal sheet (mobile)
     catering.astro             # In-flight catering page
-    isbha.astro                # sticky sidebar + accordions
+    isbah.astro                # sticky sidebar + accordions (ruta: /isbah)
     permits-and-authorizations.astro  # sidebar + accordions + email-gated downloads
     contact.astro              # form + sidebar
     founder.astro              # sticky photo + body texto fundador
@@ -80,7 +87,7 @@ src/
     airportOptions.ts          # opciones serializadas para el select del formulario de contacto
     services.ts                # minimal data (slug, title, href, tone) para ServiceCards en el index
     servicesDetail.ts          # rich data (tag, desc, features, image) para /ground-handling
-    isbhaModules.ts            # 6 ISBHA compliance modules para /isbha
+    isbhaModules.ts            # 6 ISBHA compliance modules para /isbah
     permits.ts                 # PERMIT_SECTIONS + DOWNLOADS para /permits-and-authorizations
     events.ts                  # event partners
     news.ts                    # artículos de noticias (imageKey, slug, body, etc.)
@@ -90,11 +97,58 @@ src/
   assets/
     photos/                    # fotos webp/jpg (subhero-1..4, service-*, catering, founder, noticias)
     fonts/                     # Aileron otf self-hosted
+    files/                     # archivos descargables para /permits-and-authorizations
     Logo1..8.png               # partner logos para el marquee
     poster-hero.webp           # hero LQIP fallback
     hero-manny-final.mp4
     mannylogo.png              # logo para el flyout mobile del navbar
 ```
+
+## Mail / formulario de contacto
+
+### Arquitectura
+
+`mail.php` carga credenciales en este orden de prioridad:
+1. **Secrets file en el servidor** (fuera de `public_html`, nunca en git)
+2. Variables de entorno (`MANNY_SMTP_*`)
+3. Defaults hardcodeados en `mail.php`
+
+El secrets file **siempre gana** — las otras capas son fallback. En la práctica solo existe el secrets file.
+
+### Servidor de desarrollo (Engenio)
+- Path del secrets file: `/home/u676595820/manny-secrets.php`
+- SMTP: `smtp.hostinger.com:465` (SSL) con `testmanny@engeniodigital.tech`
+- Destino: `augustotturi99@gmail.com`
+
+### Servidor del cliente (producción)
+- Path del secrets file: `/home/u824529850/manny-secrets.php`
+- SMTP: `smtp.office365.com:587` (STARTTLS) con `no-replay@manny.aero` (Microsoft 365)
+- Destino: `ops@manny.aero`
+- `ALLOWED_ORIGIN`: cambiar a `https://manny.aero` antes del go-live final
+
+### Contenido del secrets file (producción)
+```php
+<?php
+define('SMTP_HOST',       'smtp.office365.com');
+define('SMTP_PORT',       587);
+define('SMTP_USER',       'no-replay@manny.aero');
+define('SMTP_PASS',       'N0R3pl4y.Manny');
+define('MAIL_FROM',       'no-replay@manny.aero');
+define('MAIL_FROM_NAME',  'Website Form');
+define('MAIL_TO_CONTACT', 'ops@manny.aero');
+define('MAIL_TO_GATE',    'ops@manny.aero');
+define('ALLOWED_ORIGIN',  'https://manny.aero');
+define('RATE_LIMIT_MAX',    15);
+define('RATE_LIMIT_WINDOW', 3600);
+```
+
+### Blog / noticias
+
+El sistema de noticias es **estático** — no hay CMS. Para agregar un artículo:
+1. Agregar entrada en `src/data/news.ts` con: `slug`, `title`, `category`, `date`, `excerpt`, `body[]`, `imageKey`
+2. `imageKey` solo acepta: `"ibac" | "fifa" | "nbaa"` (imágenes pre-existentes)
+3. `npm run build` + deploy manual al servidor del cliente
+4. El cliente manda el contenido al desarrollador — no puede publicar solo.
 
 ## Conventions
 
@@ -107,19 +161,19 @@ src/
 - **Marquees / carousels** → duplicate the array (`[...items, ...items]`) and animate `translateX(0 → -50%)` for seamless loops. Mark duplicates `aria-hidden="true"` and pass `alt=""` for screen readers.
 - **Astro Image** for everything in `src/assets/` → responsive widths + automatic webp/avif. Use `loading="eager"` only above the fold.
 
-### Internal pages (about, services, isbha, permits, contact)
+### Internal pages (about, isbah, permits, contact)
 
 - **Hero pattern** → use `<PageHero badge title subtitle accent />`. Lighter than the main `Hero` (no video, no photo), inherits the page gradient. The `accent` prop wraps a substring of `title` in the yellow accent span.
 - **Stats** → use `<StatsBand stats={...} />` for the 4-up glass strip below the hero.
 - **Same look & feel as index** → all internal pages share the same gradient, blobs, noise, and glass tokens. Don't introduce a separate dark theme — that was tried and reverted (see "Things to avoid").
-- **Sidebar scroll-sync** (isbha, permits) → sticky `<aside>` with `data-target` links and a scroll listener that toggles `.active` based on which section is in viewport at offset 100–130px. On mobile (<1024px) the sidebar collapses to a horizontal pill row with bottom-border active state.
-- **Accordions** (isbha, permits) → `.req-card` / `.permit-section` with a header button toggling `.open` on the parent. Chevron rotates 180° via `transform`. First card opens by default.
+- **Sidebar scroll-sync** (isbah, permits) → sticky `<aside>` with `data-target` links and a scroll listener that toggles `.active` based on which section is in viewport at offset 100–130px. On mobile (<1024px) the sidebar collapses to a horizontal pill row with bottom-border active state.
+- **Accordions** (isbah, permits) → `.req-card` / `.permit-section` with a header button toggling `.open` on the parent. Chevron rotates 180° via `transform`. First card opens by default.
 - **Email gate** (permits downloads) → modal overlay; on submit, persists email to `localStorage` under key `manny_email`. Subsequent download clicks bypass the gate.
-- **Tabs + modal sheet** (services) → desktop shows side nav + content panels with opacity transitions. Mobile (<1024px) hides that and shows a list that opens a bottom-sheet modal. Both share the same `SERVICES` array from `servicesDetail.ts`.
+- **Tabs + modal sheet** (ground-handling) → desktop shows side nav + content panels with opacity transitions. Mobile (<1024px) hides that and shows a list that opens a bottom-sheet modal. Both share the same `SERVICES` array from `servicesDetail.ts`.
 
 ### Navbar
 
-- Rutas reales: `/about`, `/ground-handling`, `/isbha`, `/permits-and-authorizations`, `/contact`, `/news`, `/catering`, `/founder`.
+- Rutas reales: `/about`, `/ground-handling`, `/isbah`, `/permits-and-authorizations`, `/contact`, `/news`, `/catering`, `/founder`.
 - El dropdown de Services lista: Ground Handling, Permits & Authorizations, IS-BAH, Manny's In-flight Catering — todos tienen página real.
 - Majola Chauffeur ya no está en el dropdown (pendiente de confirmar con cliente).
 - Anchor links (`/#map`) prefijados con `/` para funcionar desde cualquier página.
@@ -143,7 +197,7 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 - **Yellow-tinted glass** (`rgba(255, 185, 0, 0.32)` background, 1.5px gold border, white inset). Distinct from the navbar's neutral glass on purpose — it's the brand-colored "always available" channel.
 - Hidden during the loader via `html:not(.is-ready) .float-ops { opacity: 0 }`.
 - Mobile: smaller padding/icons (28-30px circles), still visible. Don't hide on mobile — the client wants it persistent.
-- Email/phone links are placeholders (`href="#"`) — wire them when the client provides numbers.
+- Email y teléfonos ya están configurados: `ops@manny.aero`, `+52 722 273 0981`, `+1 877 50 MANNY`.
 
 ## Visual system (tokens.css)
 
@@ -165,85 +219,64 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 - **Heavy backdrop-filter blur on mobile** kills scroll perf. The mobile media query in `global.css` clamps all glass blurs to 8px.
 - **Adding `font-display: swap`** comes free with `@fontsource` — don't override it.
 - **Don't use Google Fonts CDN.** Self-host via `@fontsource/<font>` so the `.htaccess` 1y immutable cache rule applies and there are zero third-party requests.
-- **Don't extend `services.ts` with rich fields** — it's used by `ServiceCards.astro` on the index and only needs `slug`, `title`, `href`, `tone`. Rich data (tag, desc, features, image) lives in `servicesDetail.ts` for the `/services` page.
+- **Don't extend `services.ts` with rich fields** — it's used by `ServiceCards.astro` on the index and only needs `slug`, `title`, `href`, `tone`. Rich data (tag, desc, features, image) lives in `servicesDetail.ts` for the `/ground-handling` page.
 - **Don't relocate the map filter pills inside the canvas.** Tried as a fix for the navbar overlap on scroll, the client rejected it. Pills stay above the map.
 - **Don't switch the body gradient to `background-attachment: fixed`** to "unify" page heights. Tried, the client rejected it. The current stretch-per-page behavior is intentional.
 - **Don't add a 3-side / asymmetric white inset border to cards.** Tried (left+top+bottom only, 2px white) so the cards felt outlined, the client rejected it. The cards keep the original full-perimeter `inset 0 0 0 1px rgba(255,255,255,0.35)` ring.
+- **No zipear el `dist/` desde la raíz del proyecto en Windows.** Genera paths `dist\archivo` que Hostinger interpreta como nombres de archivo. Siempre zipear desde dentro del `dist/`.
 
 ## Deploy / hosting specifics
 
 - `public/.htaccess` ships to `dist/.htaccess` automatically. It handles compression (Brotli + Gzip fallback), cache (1y immutable for hashed `_astro/*` assets, no-cache for HTML), MIME types, security headers, HTTPS redirect, font CORS.
-- Hostinger panel config: Astro preset, branch `main`, Node 22.x, root `./`, build `npm run build`, output `dist`, entry empty (static, no SSR).
-- After push, hard-refresh (Ctrl+F5) to bypass browser cache while testing.
+- 301 redirects activos: `/services` → `/ground-handling`, `/isbha` → `/isbah`.
+- Servidor de desarrollo: Hostinger conectado a GitHub `main`, auto-deploy al push.
+- Servidor del cliente: deploy manual (ver sección Deploy manual arriba).
+- After push/deploy, hard-refresh (Ctrl+F5) to bypass browser cache while testing.
 
 ## Performance baseline
 
 - LCP target: <2.0s (hero title in Bebas, preloaded woff2 + webp poster as LQIP)
-- Hero video (`hero-manny-final.mp4`) is currently ~4 MB unoptimized — known tech debt, not yet compressed (FASE 2.1 of the optimization plan we drafted but didn't run).
+- Hero video (`hero-manny-final.mp4`) is currently ~4 MB unoptimized — known tech debt, not yet compressed.
 - Page weight is dominated by the video; everything else is tightly optimized via Astro Image + `.htaccess` cache.
 - Internal pages are noticeably lighter than the index (no video, no Leaflet, no marquee) — they ride the same shell but render only PageHero + StatsBand + page-specific content.
 
 ## Out-of-scope reminders
 
 - The "client gradient background" (4-corner gray mesh from a client mockup) is **planned but not implemented**. The user explicitly opted out — they'll handle it later. Don't apply it without being asked.
-- Download files in `permits.ts` use `url: "#"` — real downloadable assets haven't been hooked up yet.
 - Pre-existing `astro check` errors (unrelated to this codebase's pages):
   - `MapSection.astro:165` — `tap: false` not in Leaflet's `MapOptions` type.
   - `BaseLayout.astro:220` — `ActiveLink` mismatch ("blog" vs "news") entre BaseLayout y Navbar types. El tipo en BaseLayout tiene `"blog"` en lugar de `"news"`.
   Build still succeeds.
-- The optimization plan in `~/.claude/plans/declarative-twirling-puppy.md` had 4 phases. Only **Phase 1** (Hero LQIP) and **Phase 4** (`.htaccess`) were applied. Phases 2 (video compression, JPG/SVG/GeoJSON optimization) and 3 (font-display, blob audit) are deferred.
+- Phases 2 (video compression, JPG/SVG/GeoJSON optimization) y 3 (font-display, blob audit) del plan de optimización están diferidas.
 
 ---
 
-## Auditoría de seguridad y calidad — 2026-06-03
+## Estado de seguridad — 2026-06-04
 
-Auditoría completa realizada antes del go-live. Estado actual del sitio.
+### ✅ Resuelto
 
-### 🔴 Bloqueantes de deploy (pendiente)
-
-1. **`public/mail-config.php` — credenciales SMTP en texto plano en el repo**
-   - Contiene `SMTP_PASS` en claro. El `.htaccess` bloquea el acceso web pero el archivo existe en disco y en git.
-   - Acción: eliminar del servidor via FTP/panel Hostinger, añadir a `.gitignore`, rotar la contraseña SMTP desde el panel de Hostinger.
-
-2. **`dist/debug-mail.php` — endpoint de debug desplegado en producción**
-   - Gateado por `?key=manny2026debug` (clave hardcodeada en el propio archivo). Expone configuración SMTP.
-   - Acción: eliminar del servidor ahora (`https://manny.aero/debug-mail.php`), y de `public/` si existe ahí.
-
-3. **Rate limit en valores de testing (`mail.php:42-43`)**
-   - Actualmente: `RATE_LIMIT_MAX = 100`, `RATE_LIMIT_WINDOW = 3600`. El comentario en el código dice "reset antes del go-live".
-   - Acción: cambiar a `RATE_LIMIT_MAX = 15`.
-
-4. **`ALLOWED_ORIGIN` definido pero nunca verificado en `mail.php`**
-   - `mail-config.php` define la constante pero `mail.php` nunca hace el chequeo de `Origin` header.
-   - Acción: añadir bloque de verificación al principio de `mail.php` después del parse del JSON.
+1. **`public/mail-config.php` eliminado** — credenciales ya no están en el repo ni en el servidor.
+2. **`debug-mail.php` eliminado** — endpoint de debug removido del repo y del servidor.
+3. **Rate limit en producción** — `RATE_LIMIT_MAX = 15`, `RATE_LIMIT_WINDOW = 3600`.
+4. **`ALLOWED_ORIGIN` ahora verificado** — `mail.php` lee la constante del secrets file y la aplica en el origin check.
+5. **Secrets file fuera de `public_html`** — credenciales SMTP nunca accesibles via web.
 
 ### 🟡 Deuda técnica (post go-live)
 
-5. **`innerHTML` sin escapar en el modal de servicios** (`ground-handling.astro` y `services.astro`)
+5. **`innerHTML` sin escapar en el modal de servicios** (`ground-handling.astro`)
    - `modalFeatures.innerHTML` y `modalTitle.innerHTML` usan template literals directos.
-   - Acción: reemplazar con `document.createElement` + `textContent`.
 
 6. **`buildPopupHtml` en `MapSection.astro` usa `innerHTML` con datos de aeropuertos**
-   - `modalBody.innerHTML = buildPopupHtml(a)` — inyecta `a.nombre`, `a.info`, `a.pdf` sin escapar.
-   - Acción: reemplazar con función DOM imperativa; validar scheme de `a.pdf` (`http` o `/`).
+   - Reemplazar con función DOM imperativa; validar scheme de `a.pdf`.
 
-7. **Rate limit usa `X-Forwarded-For` sin verificar el proxy** (`mail.php:97`)
-   - Un cliente puede spoofear el header y evadir el rate limit. En Hostinger shared hosting usar `REMOTE_ADDR` directamente.
+7. **Rate limit usa `X-Forwarded-For` sin verificar el proxy** (`mail.php`)
+   - En Hostinger shared hosting usar `REMOTE_ADDR` directamente.
 
-8. **CSS muerto en `contact.astro`** (~100 líneas):
-   - `.hero-avail*`, `.map-placeholder*`, `.response-row*`, `.response-item*`, `.response-num`, `.response-lbl` — definidos pero ningún elemento los usa.
-
-9. **CSS muerto en `catering.astro`**: clase `.catering-lead` definida con `!important` pero no usada.
-
-10. **CSS muerto en `Navbar.astro`**: `.nav__dd-item--full`, `.nav__dd-item--divider`, `.flyout__sublink--all`, `.flyout__sublink--divider`.
-
-11. **`PageHero.astro` usa `set:html` con prop derivado** — actualmente seguro (datos hardcodeados), pero frágil si algún caller pasa data externa.
-
-12. **Versión de PHPMailer sin verificar** — confirmar que es ≥ 6.8.0 (`grep Version public/phpmailer/PHPMailer.php`).
+8. **CSS muerto** en `contact.astro`, `catering.astro` y `Navbar.astro`.
 
 ### ✅ Lo que está bien (no tocar)
 
-- Cabeceras HTTP: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy — bien configuradas.
+- Cabeceras HTTP: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
 - HTTPS forzado con 301 en `.htaccess`.
 - Brotli + Gzip configurados correctamente.
 - Fuentes self-hosted sin CDN externo.
@@ -255,3 +288,4 @@ Auditoría completa realizada antes del go-live. Estado actual del sitio.
 - Todos los links `target="_blank"` en Footer usan `rel="noopener noreferrer"`.
 - JSON-LD structured data en todas las páginas internas.
 - OG images específicas por página.
+- Google Search Console verificado con meta tag en `BaseLayout.astro`.
