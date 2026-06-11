@@ -22,6 +22,8 @@
   RewriteEngine On
   RewriteRule ^services/?$ /ground-handling [R=301,L]
   RewriteRule ^isbha/?$ /isbah [R=301,L]
+  RewriteRule ^permits_and_authorizations/?$ /permits-and-authorizations [R=301,L]
+  RewriteRule ^our_founder/?$ /founder [R=301,L]
 </IfModule>
 
 # ---------------------------------------------------------
