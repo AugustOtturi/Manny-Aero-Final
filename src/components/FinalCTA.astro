@@ -374,7 +374,7 @@ const airportOptions = AIRPORT_OPTIONS;
       website: (fd.get("website") || "").toString(), // honeypot
       // FinalCTA has a single "name" field — split for the mailer
       firstName: (fd.get("name") || "").toString().trim().split(" ")[0],
-      lastName:  (fd.get("name") || "").toString().trim().split(" ").slice(1).join(" "),
+      lastName:  (fd.get("name") || "").toString().trim().split(" ").slice(1).join(" ") || ".",
       email:     (fd.get("email")   || "").toString().trim(),
       phone:     (fd.get("phone")   || "").toString().trim(),
       company:   (fd.get("company") || "").toString().trim(),

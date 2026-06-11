@@ -156,7 +156,7 @@
   # - 'unsafe-inline' en scripts es necesario para los JSON-LD inline y define:vars de Astro
   # - 'unsafe-inline' en styles es necesario para el loader inline y Astro's scoped styles
   # - img-src permite https: para tiles de Leaflet/OpenStreetMap
-  Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.tile.openstreetmap.org; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.tile.openstreetmap.org https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 
   # CORS para fuentes (por si se sirven desde un subdominio)
   <FilesMatch "\.(woff2?|ttf|eot|otf)$">
