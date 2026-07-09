@@ -68,17 +68,6 @@ const { rows, total } = await listLeads({ limit: 50 });
 </AdminLayout>
 
 <script>
-  function getCsrfToken() {
-    return document.querySelector('meta[name="x-astro-csrf"]')?.getAttribute('content') ?? '';
-  }
-
-  function fetchWithCsrf(url, opts = {}) {
-    const token = getCsrfToken();
-    return fetch(url, {
-      ...opts,
-      headers: { ...opts.headers, 'x-astro-csrf': token },
-    });
-  }
 
   interface Lead {
     id: number;
@@ -255,7 +244,7 @@ const { rows, total } = await listLeads({ limit: 50 });
       });
       if (!ok) return;
 
-      const res = await fetchWithCsrf(`/api/admin/leads/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/leads/${id}`, { method: "DELETE" });
       if (res.ok) {
         deleteBtn.closest("tr")?.remove();
         leadsById.delete(Number(id));

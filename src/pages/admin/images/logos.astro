@@ -48,18 +48,6 @@ const logos = await listImages("logo");
 </AdminLayout>
 
 <script>
-  function getCsrfToken(): string {
-    return document.querySelector('meta[name="x-astro-csrf"]')?.getAttribute('content') ?? '';
-  }
-
-  function fetchWithCsrf(url: string, opts: RequestInit = {}) {
-    const token = getCsrfToken();
-    return fetch(url, {
-      ...opts,
-      headers: { ...opts.headers, 'x-astro-csrf': token },
-    });
-  }
-
   const addForm = document.getElementById("add-form") as HTMLFormElement;
   const addStatus = document.getElementById("add-status")!;
   const addSubmit = document.getElementById("add-submit") as HTMLButtonElement;
@@ -86,7 +74,7 @@ const logos = await listImages("logo");
     uploadFd.append("file", file);
 
     try {
-      const res = await fetchWithCsrf("/api/admin/images/upload", { method: "POST", body: uploadFd });
+      const res = await fetch("/api/admin/images/upload", { method: "POST", body: uploadFd });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
       window.location.reload();
@@ -125,7 +113,7 @@ const logos = await listImages("logo");
 
       showStatus("Subiendo…");
       try {
-        const res = await fetchWithCsrf("/api/admin/images/upload", { method: "POST", body: fd });
+        const res = await fetch("/api/admin/images/upload", { method: "POST", body: fd });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
         preview.innerHTML = `<img src="/uploads/logo/${data.image.fileName}?t=${Date.now()}" alt="" />`;
@@ -143,7 +131,7 @@ const logos = await listImages("logo");
       if (!ok) return;
       showStatus("Eliminando…");
       try {
-        const res = await fetchWithCsrf(`/api/admin/images/logo/${slug}`, { method: "DELETE" });
+        const res = await fetch(`/api/admin/images/logo/${slug}`, { method: "DELETE" });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Error al eliminar");
         card.remove();

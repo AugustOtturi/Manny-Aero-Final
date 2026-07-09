@@ -17,6 +17,17 @@ export default defineConfig({
   adapter: node({
     mode: "middleware",
   }),
+  // Astro's built-in checkOrigin compares the browser `Origin` header against
+  // `url.origin`, which the node adapter reconstructs from the (internal) Host
+  // header behind Hostinger's reverse proxy — so it never matches the public
+  // domain and every form-like / bodyless POST (image uploads, logout) 403s.
+  // We disable it and rely on our own defenses instead: public endpoints
+  // (/api/contact, /api/gate) run isAllowedOrigin(), and every admin endpoint
+  // requires the JWT session cookie (httpOnly, sameSite: lax) which browsers
+  // won't send on cross-site POSTs.
+  security: {
+    checkOrigin: false,
+  },
   integrations: [sitemap()],
   prefetch: {
     prefetchAll: true,

@@ -47,17 +47,6 @@ const articles = await listNews();
 </AdminLayout>
 
 <script>
-  function getCsrfToken() {
-    return document.querySelector('meta[name="x-astro-csrf"]')?.getAttribute('content') ?? '';
-  }
-
-  function fetchWithCsrf(url, opts = {}) {
-    const token = getCsrfToken();
-    return fetch(url, {
-      ...opts,
-      headers: { ...opts.headers, 'x-astro-csrf': token },
-    });
-  }
 
   document.getElementById("news-body")?.addEventListener("click", async (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".delete-btn");
@@ -70,7 +59,7 @@ const articles = await listNews();
     });
     if (!ok) return;
 
-    const res = await fetchWithCsrf(`/api/admin/news/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/news/${id}`, { method: "DELETE" });
     if (res.ok) {
       btn.closest("tr")?.remove();
     } else {
