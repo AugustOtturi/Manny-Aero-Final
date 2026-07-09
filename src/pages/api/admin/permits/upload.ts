@@ -37,6 +37,31 @@ function safeBaseName(fileName: string): string {
   return (base || "file") + ext.toLowerCase();
 }
 
+// Verify the leading bytes match the claimed extension so a renamed
+// executable/script can't slip in as a .pdf/.docx. docx/xlsx are ZIP
+// containers (PK…); legacy doc/xls are OLE compound files.
+function magicBytesOk(buf: Buffer, ext: string): boolean {
+  if (buf.length < 8) return false;
+  const isPdf = buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46;
+  const isZip =
+    buf[0] === 0x50 && buf[1] === 0x4b && (buf[2] === 0x03 || buf[2] === 0x05 || buf[2] === 0x07);
+  const isOle =
+    buf[0] === 0xd0 && buf[1] === 0xcf && buf[2] === 0x11 && buf[3] === 0xe0 &&
+    buf[4] === 0xa1 && buf[5] === 0xb1 && buf[6] === 0x1a && buf[7] === 0xe1;
+  switch (ext) {
+    case ".pdf":
+      return isPdf;
+    case ".docx":
+    case ".xlsx":
+      return isZip;
+    case ".doc":
+    case ".xls":
+      return isOle;
+    default:
+      return false;
+  }
+}
+
 export const POST: APIRoute = async ({ request }) => {
   let formData: FormData;
   try {
@@ -62,10 +87,14 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ ok: false, error: "File must be smaller than 15MB" }, 400);
   }
 
+  const buffer = Buffer.from(await file.arrayBuffer());
+  if (!magicBytesOk(buffer, ext)) {
+    return json({ ok: false, error: "File content doesn't match its extension" }, 400);
+  }
+
   await mkdir(UPLOADS_DIR, { recursive: true });
 
   const fileName = `${Date.now()}-${safeBaseName(file.name)}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(path.join(UPLOADS_DIR, fileName), buffer);
 
   const created = await createPermitDownload({

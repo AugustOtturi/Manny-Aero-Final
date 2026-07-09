@@ -5,9 +5,14 @@ import { deleteImage, getImage } from "../../../../../lib/server/repositories/im
 
 export const prerender = false;
 
+// Same allowlist/pattern the upload endpoint enforces — the delete path builds
+// a filesystem path from these, so validate them here too (defense in depth).
+const ALLOWED_CATEGORIES = new Set(["subhero", "service", "logo", "news", "team", "catering", "og"]);
+const SAFE_SLUG = /^[a-z0-9-]+$/;
+
 export const DELETE: APIRoute = async ({ params }) => {
   const { category, slug } = params;
-  if (!category || !slug) {
+  if (!category || !slug || !ALLOWED_CATEGORIES.has(category) || !SAFE_SLUG.test(slug)) {
     return new Response(JSON.stringify({ ok: false, error: "Invalid category/slug" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },

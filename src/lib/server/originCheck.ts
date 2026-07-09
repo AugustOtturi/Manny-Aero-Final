@@ -8,7 +8,9 @@ export function isAllowedOrigin(request: Request): boolean {
   const origin = request.headers.get("origin") ?? "";
   const referer = request.headers.get("referer") ?? "";
 
-  if (allowed && (origin.startsWith(allowed) || referer.startsWith(allowed))) return true;
+  // Exact origin match (not startsWith — that let "https://manny.aero.evil.com"
+  // pass when ALLOWED_ORIGIN was "https://manny.aero").
+  if (allowed && (sameOrigin(origin, allowed) || sameOrigin(referer, allowed))) return true;
 
   // Same-origin fallback: behind Hostinger's reverse proxy the public host
   // arrives in `x-forwarded-host` (server.mjs sets `trust proxy`), while the
@@ -39,6 +41,15 @@ function hostMatches(urlish: string, host: string): boolean {
   if (!urlish) return false;
   try {
     return new URL(urlish).host === host;
+  } catch {
+    return false;
+  }
+}
+
+function sameOrigin(urlish: string, allowed: string): boolean {
+  if (!urlish || !allowed) return false;
+  try {
+    return new URL(urlish).origin === new URL(allowed).origin;
   } catch {
     return false;
   }

@@ -1,10 +1,22 @@
 import type { APIRoute } from "astro";
+import { z } from "zod";
 import { SESSION_COOKIE, signSession, verifyCredentials } from "../../../lib/server/auth";
 import { checkRateLimit, getClientIp } from "../../../lib/server/rateLimit";
+import { isAllowedOrigin } from "../../../lib/server/originCheck";
 
 export const prerender = false;
 
+const loginSchema = z.object({
+  username: z.string().min(1).max(255),
+  password: z.string().min(1).max(1000),
+});
+
 export const POST: APIRoute = async ({ request, cookies }) => {
+  // Reject cross-site login attempts (login CSRF) before doing any work.
+  if (!isAllowedOrigin(request)) {
+    return json({ ok: false, error: "Forbidden" }, 403);
+  }
+
   const ip = getClientIp(request);
   if (!checkRateLimit(`login:${ip}`, 10, 300)) {
     return json({ ok: false, error: "Too many attempts. Please wait a few minutes." }, 429);
@@ -17,10 +29,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return json({ ok: false, error: "Invalid payload" }, 400);
   }
 
-  const { username, password } = (body ?? {}) as { username?: string; password?: string };
-  if (!username || !password) {
+  const parsed = loginSchema.safeParse(body);
+  if (!parsed.success) {
     return json({ ok: false, error: "Username and password are required" }, 400);
   }
+  const { username, password } = parsed.data;
 
   let valid = false;
   try {
