@@ -1,0 +1,121 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { listNews } from "../../lib/server/repositories/news";
+import { listLeads } from "../../lib/server/repositories/leads";
+import { listPermitDownloads } from "../../lib/server/repositories/permitDownloads";
+
+export const prerender = false;
+
+const [articles, leadsResult, permitDownloads] = await Promise.all([
+  listNews(),
+  listLeads({ limit: 1 }),
+  listPermitDownloads(),
+]);
+
+const sections = [
+  {
+    href: "/admin/news",
+    title: "Noticias",
+    desc: "Crear, editar y eliminar artículos del sitio.",
+    count: `${articles.length} publicadas`,
+  },
+  {
+    href: "/admin/leads",
+    title: "Leads",
+    desc: "Solicitudes de contacto y descargas de permisos.",
+    count: `${leadsResult.total} recibidos`,
+  },
+  {
+    href: "/admin/images",
+    title: "Imágenes",
+    desc: "SubHero, tarjetas de servicio y logos de partners del home.",
+    count: "Ver secciones",
+  },
+  {
+    href: "/admin/permits",
+    title: "Permisos",
+    desc: "Archivos descargables de la página de Permits & Authorizations.",
+    count: `${permitDownloads.length} archivos`,
+  },
+];
+---
+
+<AdminLayout title="Admin">
+  <main class="page">
+    <h1>Panel de administración</h1>
+    <p class="page__lead">Elige qué querés gestionar.</p>
+
+    <div class="grid">
+      {sections.map((s) => (
+        <a href={s.href} class="card">
+          <h2>{s.title}</h2>
+          <p class="card__desc">{s.desc}</p>
+          <span class="card__count">{s.count}</span>
+        </a>
+      ))}
+    </div>
+  </main>
+</AdminLayout>
+
+<style>
+  .page {
+    padding: 40px 32px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .page h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    margin: 0 0 6px;
+  }
+
+  .page__lead {
+    color: var(--color-text-muted);
+    margin: 0 0 32px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 28px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: border-color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+  }
+
+  .card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+
+  .card h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .card__desc {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin: 0;
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .card__count {
+    font-size: 12px;
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+</style>

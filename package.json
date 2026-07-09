@@ -5,22 +5,43 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "start": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "start": "node server.mjs",
+    "preview": "astro build && node server.mjs",
     "astro": "astro",
-    "check": "astro check"
+    "check": "astro check",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:seed-news": "tsx src/lib/server/db/scripts/seed-news.ts",
+    "db:seed-logos": "tsx src/lib/server/db/scripts/seed-logos.ts",
+    "db:seed-permit-downloads": "tsx src/lib/server/db/scripts/seed-permit-downloads.ts"
   },
   "dependencies": {
+    "@astrojs/node": "^9.5.5",
     "@astrojs/sitemap": "^3.2.1",
     "@fontsource/bebas-neue": "^5.2.7",
     "@fontsource/inter": "^5.1.0",
     "@types/leaflet": "^1.9.21",
     "astro": "^5.1.0",
-    "leaflet": "^1.9.4"
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "express": "^5.2.1",
+    "jose": "^6.2.3",
+    "leaflet": "^1.9.4",
+    "mysql2": "^3.22.6",
+    "nodemailer": "^9.0.3",
+    "sharp": "^0.35.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/express": "^5.0.6",
+    "@types/nodemailer": "^8.0.1",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.0",
     "typescript": "^5.9.3"
   }
 }

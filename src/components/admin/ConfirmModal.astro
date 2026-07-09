@@ -1,0 +1,152 @@
+---
+// Mounted once in AdminLayout. Exposes window.adminConfirm(message, opts?)
+// as a promise-based replacement for the native confirm() dialog.
+---
+
+<div class="confirm-overlay" id="confirm-overlay" hidden>
+  <div class="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+    <p class="confirm-title" id="confirm-title">¿Estás seguro?</p>
+    <p class="confirm-message" id="confirm-message"></p>
+    <div class="confirm-actions">
+      <button type="button" class="confirm-cancel" id="confirm-cancel">Cancelar</button>
+      <button type="button" class="confirm-ok" id="confirm-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    const overlay = document.getElementById("confirm-overlay");
+    const titleEl = document.getElementById("confirm-title");
+    const messageEl = document.getElementById("confirm-message");
+    const okBtn = document.getElementById("confirm-ok");
+    const cancelBtn = document.getElementById("confirm-cancel");
+    let resolver = null;
+
+    function close(result) {
+      overlay.hidden = true;
+      document.removeEventListener("keydown", onKeydown);
+      if (resolver) {
+        resolver(result);
+        resolver = null;
+      }
+    }
+
+    function onKeydown(e) {
+      if (e.key === "Escape") close(false);
+      if (e.key === "Enter") close(true);
+    }
+
+    okBtn.addEventListener("click", () => close(true));
+    cancelBtn.addEventListener("click", () => close(false));
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close(false);
+    });
+
+    window.adminConfirm = function (message, opts) {
+      opts = opts || {};
+      titleEl.textContent = opts.title || "¿Estás seguro?";
+      messageEl.textContent = message || "";
+      okBtn.textContent = opts.confirmLabel || "Confirmar";
+      okBtn.classList.toggle("confirm-ok--danger", opts.danger !== false);
+      cancelBtn.hidden = false;
+      overlay.hidden = false;
+      document.addEventListener("keydown", onKeydown);
+      return new Promise((resolve) => {
+        resolver = resolve;
+      });
+    };
+
+    window.adminAlert = function (message, opts) {
+      opts = opts || {};
+      titleEl.textContent = opts.title || "Aviso";
+      messageEl.textContent = message || "";
+      okBtn.textContent = opts.okLabel || "Entendido";
+      okBtn.classList.remove("confirm-ok--danger");
+      cancelBtn.hidden = true;
+      overlay.hidden = false;
+      document.addEventListener("keydown", onKeydown);
+      return new Promise((resolve) => {
+        resolver = () => resolve();
+      });
+    };
+  })();
+</script>
+
+<style>
+  .confirm-overlay[hidden] {
+    display: none;
+  }
+
+  .confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .confirm-modal {
+    width: 100%;
+    max-width: 380px;
+    background: #26262a;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow-card-lg);
+  }
+
+  .confirm-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 8px;
+  }
+
+  .confirm-message {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    margin: 0 0 22px;
+  }
+
+  .confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .confirm-cancel {
+    padding: 9px 18px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border-strong);
+    background: transparent;
+    color: var(--color-text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .confirm-cancel:hover {
+    border-color: var(--color-text-muted);
+  }
+
+  .confirm-ok {
+    padding: 9px 18px;
+    border-radius: var(--radius-pill);
+    border: none;
+    background: var(--color-accent);
+    color: #0a0a0a;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .confirm-ok--danger {
+    background: #ff6b6b;
+    color: #2a0a0a;
+  }
+</style>

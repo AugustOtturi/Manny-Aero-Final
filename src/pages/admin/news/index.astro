@@ -1,0 +1,170 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { listNews } from "../../../lib/server/repositories/news";
+import { formatNewsDate } from "../../../lib/format";
+
+export const prerender = false;
+
+const articles = await listNews();
+---
+
+<AdminLayout title="Noticias" active="news">
+  <main class="page">
+    <header class="page__header">
+      <h1>Noticias</h1>
+      <a href="/admin/news/new" class="page__new">+ Nueva noticia</a>
+    </header>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Categoría</th>
+            <th>Fecha</th>
+            <th>Slug</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="news-body">
+          {articles.map((a) => (
+            <tr data-id={a.id}>
+              <td>{a.title}</td>
+              <td>{a.category}</td>
+              <td>{formatNewsDate(a.date)}</td>
+              <td class="muted">{a.slug}</td>
+              <td class="actions">
+                <a href={`/admin/news/${a.id}/edit`}>Editar</a>
+                <button class="delete-btn" data-id={a.id}>Eliminar</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {articles.length === 0 && <p class="empty">No hay noticias todavía.</p>}
+    </div>
+  </main>
+</AdminLayout>
+
+<script>
+  document.getElementById("news-body")?.addEventListener("click", async (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".delete-btn");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    if (!id) return;
+    const ok = await window.adminConfirm("Esta acción no se puede deshacer.", {
+      title: "¿Eliminar esta noticia?",
+      confirmLabel: "Eliminar",
+    });
+    if (!ok) return;
+
+    const res = await fetch(`/api/admin/news/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      btn.closest("tr")?.remove();
+    } else {
+      await window.adminAlert("No se pudo eliminar la noticia.");
+    }
+  });
+</script>
+
+<style>
+  .page {
+    padding: 40px 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .page__header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .page__back {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .page__header h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    margin: 0;
+    flex: 1;
+  }
+
+  .page__new {
+    padding: 10px 18px;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: #0a0a0a;
+    font-weight: 700;
+    font-size: 13px;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+
+  .table-wrap {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table th,
+  .table td {
+    text-align: left;
+    padding: 14px 18px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table th {
+    color: var(--color-text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .muted {
+    color: var(--color-text-muted);
+    font-size: 13px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 14px;
+    white-space: nowrap;
+  }
+
+  .actions a {
+    color: var(--color-accent);
+    font-size: 13px;
+    text-decoration: none;
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .empty {
+    padding: 32px;
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+</style>

@@ -3,61 +3,72 @@ import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHero from "../../components/PageHero.astro";
 import GlassButton from "../../components/ui/GlassButton.astro";
-import { NEWS } from "../../data/news";
+import { getNewsBySlug } from "../../lib/server/repositories/news";
+import { formatNewsDate, newsBodyToParagraphs } from "../../lib/format";
 
 import ibacImg from "../../assets/photos/NOTICIA IBAC.webp";
 import fifaImg from "../../assets/photos/FIFA.webp";
 import nbaaImg from "../../assets/photos/NBAA-BACE.webp";
 
-export function getStaticPaths() {
-  return NEWS.map((article) => ({
-    params: { slug: article.slug },
-    props: { article },
-  }));
-}
+export const prerender = false;
 
-const { article } = Astro.props;
-
-const imageMap = {
+const legacyImageMap: Record<string, ImageMetadata> = {
   ibac: ibacImg,
   fifa: fifaImg,
   nbaa: nbaaImg,
 };
+
+const { slug } = Astro.params;
+const article = slug ? await getNewsBySlug(slug) : null;
+
+if (!article) {
+  return Astro.redirect("/news");
+}
+
+const legacyImage = article.imageKey ? legacyImageMap[article.imageKey] : undefined;
+const uploadedImage = !legacyImage && article.imageKey ? `/uploads/news/${article.imageKey}` : null;
+const paragraphs = newsBodyToParagraphs(article.body);
 ---
 
 <BaseLayout
   title={`${article.title} — Manny Aero`}
-  description={article.excerpt}
+  description={article.excerpt ?? undefined}
   activeLink="news"
 >
   <PageHero
     badge={article.category}
     title={article.title}
-    subtitle={article.date}
+    subtitle={formatNewsDate(article.date)}
     accent=""
   />
 
   <!-- Feature image -->
-  <div class="article-photo-band">
-    <div class="container">
-      <div class="article-photo-wrap reveal">
-        <Image
-          src={imageMap[article.imageKey]}
-          alt={article.title}
-          widths={[800, 1200, 1600]}
-          sizes="(max-width: 1024px) 100vw, 1200px"
-          loading="eager"
-          class="article-photo"
-        />
+  {(legacyImage || uploadedImage) && (
+    <div class="article-photo-band">
+      <div class="container">
+        <div class="article-photo-wrap reveal">
+          {legacyImage ? (
+            <Image
+              src={legacyImage}
+              alt={article.title}
+              widths={[800, 1200, 1600]}
+              sizes="(max-width: 1024px) 100vw, 1200px"
+              loading="eager"
+              class="article-photo"
+            />
+          ) : (
+            <img src={uploadedImage!} alt={article.title} class="article-photo" />
+          )}
+        </div>
       </div>
     </div>
-  </div>
+  )}
 
   <!-- Article body -->
   <section class="article-section section">
     <div class="container">
       <div class="article-body reveal">
-        {article.body.map((paragraph) => (
+        {paragraphs.map((paragraph) => (
           <p>{paragraph}</p>
         ))}
       </div>

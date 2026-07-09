@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import { SERVICES } from "../data/services";
+import { listImages } from "../lib/server/repositories/images";
 
 import permitsImg from "../assets/photos/permisyauthoriations.jpg";
 import groundHandlingImg from "../assets/photos/groundhandling.jpg";
@@ -13,6 +14,12 @@ const imageMap: Record<string, ImageMetadata> = {
   catering: cateringImg,
   audits: auditsImg,
 };
+
+const overrides = new Map((await listImages()).map((row) => [`${row.category}:${row.slug}`, row]));
+function overrideUrl(slug: string): string | null {
+  const row = overrides.get(`service:${slug}`);
+  return row ? `/uploads/service/${row.fileName}` : null;
+}
 ---
 
 <section class="services section" id="services" aria-labelledby="services-title">
@@ -34,15 +41,19 @@ const imageMap: Record<string, ImageMetadata> = {
             class={`card card--${s.tone} reveal`}
             style={`--delay:${i * 160}ms`}
           >
-            <Image
-              src={imageMap[s.slug]}
-              alt=""
-              widths={[400, 600, 800, 1200]}
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
-              loading="lazy"
-              decoding="async"
-              class="card__img"
-            />
+            {overrideUrl(s.slug) ? (
+              <img src={overrideUrl(s.slug)!} alt="" loading="lazy" decoding="async" class="card__img" />
+            ) : (
+              <Image
+                src={imageMap[s.slug]}
+                alt=""
+                widths={[400, 600, 800, 1200]}
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
+                loading="lazy"
+                decoding="async"
+                class="card__img"
+              />
+            )}
             <div class="card__overlay" aria-hidden="true" />
 
             <div class="card__bottom">

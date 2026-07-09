@@ -1,0 +1,130 @@
+---
+interface Props {
+  active?: "news" | "leads" | "images" | "permits";
+  username: string;
+}
+
+const { active, username } = Astro.props;
+
+const links = [
+  { key: "news", href: "/admin/news", label: "Noticias" },
+  { key: "leads", href: "/admin/leads", label: "Leads" },
+  { key: "images", href: "/admin/images", label: "Imágenes" },
+  { key: "permits", href: "/admin/permits", label: "Permisos" },
+] as const;
+---
+
+<header class="topbar">
+  <a href="/admin" class="topbar__brand">MANNY<span>AERO</span></a>
+
+  <nav class="topbar__nav">
+    {links.map((l) => (
+      <a href={l.href} class={`topbar__link ${active === l.key ? "is-active" : ""}`}>
+        {l.label}
+      </a>
+    ))}
+  </nav>
+
+  <div class="topbar__user">
+    <span class="topbar__username">{username}</span>
+    <button id="topbar-logout" class="topbar__logout">Salir</button>
+  </div>
+</header>
+
+<script>
+  document.getElementById("topbar-logout")?.addEventListener("click", async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/admin/login";
+  });
+</script>
+
+<style>
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 14px 28px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .topbar__brand {
+    font-family: var(--font-display);
+    font-size: 19px;
+    letter-spacing: 0.04em;
+    color: var(--color-text);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .topbar__brand span {
+    color: var(--color-accent);
+  }
+
+  .topbar__nav {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .topbar__link {
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .topbar__link:hover {
+    color: var(--color-text);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .topbar__link.is-active {
+    color: var(--color-accent);
+    background: rgba(255, 185, 0, 0.1);
+    font-weight: 600;
+  }
+
+  .topbar__user {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .topbar__username {
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+
+  .topbar__logout {
+    padding: 7px 16px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border-strong);
+    background: transparent;
+    color: var(--color-text);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .topbar__logout:hover {
+    border-color: var(--color-accent);
+  }
+
+  @media (max-width: 720px) {
+    .topbar {
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 14px 18px;
+    }
+    .topbar__nav {
+      order: 3;
+      width: 100%;
+      overflow-x: auto;
+    }
+    .topbar__username {
+      display: none;
+    }
+  }
+</style>

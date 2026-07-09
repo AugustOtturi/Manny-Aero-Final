@@ -1,0 +1,325 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+
+export const prerender = false;
+
+const today = new Date().toISOString().slice(0, 10);
+---
+
+<AdminLayout title="Nueva noticia" active="news">
+  <main class="page">
+    <header class="page__header">
+      <a href="/admin/news" class="page__back">← Noticias</a>
+      <h1>Nueva noticia</h1>
+    </header>
+
+    <form id="news-form" class="form">
+      <label class="field">
+        <span>Título</span>
+        <input type="text" name="title" required minlength="5" />
+      </label>
+
+      <label class="field">
+        <span>Slug (URL)</span>
+        <input type="text" name="slug" placeholder="se genera del título si lo dejas vacío" />
+      </label>
+
+      <div class="field-row">
+        <label class="field">
+          <span>Categoría</span>
+          <input type="text" name="category" required placeholder="Industry, Operations, Events…" />
+        </label>
+        <label class="field">
+          <span>Fecha</span>
+          <input type="date" name="date" required value={today} />
+        </label>
+      </div>
+
+      <div class="field">
+        <span>Imagen</span>
+        <div class="image-upload">
+          <div class="image-upload__preview" id="image-preview"><span>Sin imagen</span></div>
+          <div class="image-upload__controls">
+            <input type="file" id="image-file" accept="image/jpeg,image/png,image/webp" />
+            <button type="button" id="image-upload-btn">Subir imagen</button>
+            <p class="image-upload__status" id="image-status" hidden></p>
+          </div>
+        </div>
+        <input type="hidden" name="imageKey" id="image-key" value="" />
+      </div>
+
+      <label class="field">
+        <span>Extracto</span>
+        <textarea name="excerpt" rows="2" maxlength="500"></textarea>
+      </label>
+
+      <label class="field">
+        <span>Contenido (un párrafo por línea en blanco)</span>
+        <textarea name="body" rows="10" required minlength="10"></textarea>
+      </label>
+
+      <p class="error" id="form-error" hidden></p>
+
+      <div class="form__actions">
+        <button type="submit" id="submit-btn">Publicar</button>
+      </div>
+    </form>
+  </main>
+</AdminLayout>
+
+<script>
+  const form = document.getElementById("news-form") as HTMLFormElement;
+  const errorEl = document.getElementById("form-error")!;
+  const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+
+  const imageFile = document.getElementById("image-file") as HTMLInputElement;
+  const imageUploadBtn = document.getElementById("image-upload-btn") as HTMLButtonElement;
+  const imageKeyInput = document.getElementById("image-key") as HTMLInputElement;
+  const imagePreview = document.getElementById("image-preview")!;
+  const imageStatus = document.getElementById("image-status")!;
+
+  function slugify(input: string) {
+    return input
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  imageUploadBtn.addEventListener("click", async () => {
+    const file = imageFile.files?.[0];
+    if (!file) {
+      imageStatus.hidden = false;
+      imageStatus.textContent = "Selecciona un archivo primero.";
+      imageStatus.style.color = "#ff6b6b";
+      return;
+    }
+
+    imageUploadBtn.disabled = true;
+    imageStatus.hidden = false;
+    imageStatus.textContent = "Subiendo…";
+    imageStatus.style.color = "var(--color-accent)";
+
+    const fd = new FormData();
+    fd.append("category", "news");
+    fd.append("slug", `news-${Date.now()}`);
+    fd.append("file", file);
+
+    try {
+      const res = await fetch("/api/admin/images/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
+
+      imageKeyInput.value = data.image.fileName;
+      imagePreview.innerHTML = `<img src="/uploads/news/${data.image.fileName}" alt="" />`;
+      imageStatus.textContent = "Imagen subida.";
+    } catch (err) {
+      imageStatus.textContent = err instanceof Error ? err.message : "Error inesperado";
+      imageStatus.style.color = "#ff6b6b";
+    } finally {
+      imageUploadBtn.disabled = false;
+    }
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorEl.hidden = true;
+    submitBtn.disabled = true;
+
+    const fd = new FormData(form);
+    const slugRaw = (fd.get("slug") as string)?.trim();
+    const titleRaw = (fd.get("title") as string) ?? "";
+
+    const payload = {
+      slug: slugRaw ? slugify(slugRaw) : slugify(titleRaw),
+      title: titleRaw,
+      category: fd.get("category"),
+      date: fd.get("date"),
+      excerpt: fd.get("excerpt"),
+      body: fd.get("body"),
+      imageKey: fd.get("imageKey"),
+    };
+
+    try {
+      const res = await fetch("/api/admin/news", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Error al guardar");
+      window.location.href = "/admin/news";
+    } catch (err) {
+      errorEl.textContent = err instanceof Error ? err.message : "Error inesperado";
+      errorEl.hidden = false;
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  .page {
+    padding: 40px 32px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .page__header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .page__back {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .page__header h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    margin: 0;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 28px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .field input,
+  .field textarea {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    padding: 11px 13px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    resize: vertical;
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+
+  .image-upload {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .image-upload__preview {
+    width: 120px;
+    height: 90px;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    opacity: 0.85;
+  }
+
+  .image-upload__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-upload__controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .image-upload__controls input[type="file"] {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+  }
+
+  .image-upload__controls button {
+    align-self: flex-start;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border-strong);
+    background: transparent;
+    color: var(--color-text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .image-upload__controls button:hover {
+    border-color: var(--color-accent);
+  }
+
+  .image-upload__status {
+    font-size: 12px;
+    font-weight: 400;
+    margin: 0;
+  }
+
+  .error {
+    color: #ff6b6b;
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .form__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .form__actions button {
+    padding: 12px 24px;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: #0a0a0a;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .form__actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>

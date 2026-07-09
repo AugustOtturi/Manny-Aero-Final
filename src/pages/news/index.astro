@@ -2,17 +2,22 @@
 import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHero from "../../components/PageHero.astro";
-import { NEWS } from "../../data/news";
+import { listNews } from "../../lib/server/repositories/news";
+import { formatNewsDate } from "../../lib/format";
 
 import ibacImg from "../../assets/photos/NOTICIA IBAC.webp";
 import fifaImg from "../../assets/photos/FIFA.webp";
 import nbaaImg from "../../assets/photos/NBAA-BACE.webp";
 
-const imageMap = {
+export const prerender = false;
+
+const legacyImageMap: Record<string, ImageMetadata> = {
   ibac: ibacImg,
   fifa: fifaImg,
   nbaa: nbaaImg,
 };
+
+const articles = await listNews();
 ---
 
 <BaseLayout
@@ -31,34 +36,46 @@ const imageMap = {
     <div class="container">
       <div class="news-grid stagger">
         {
-          NEWS.map((article) => (
-            <a href={`/news/${article.slug}`} class="news-card">
-              <div class="news-card__img">
-                <Image
-                  src={imageMap[article.imageKey]}
-                  alt={article.title}
-                  widths={[480, 800, 1200]}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  loading="lazy"
-                  class="news-card__photo"
-                />
-                <div class="news-card__overlay" aria-hidden="true" />
-                <span class="news-card__category">{article.category}</span>
-              </div>
-              <div class="news-card__body">
-                <div class="news-card__date">{article.date}</div>
-                <h2 class="news-card__title">{article.title}</h2>
-                <p class="news-card__excerpt">{article.excerpt}</p>
-                <span class="news-card__cta">
-                  Read article
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                    <polyline points="12 5 19 12 12 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-              </div>
-            </a>
-          ))
+          articles.map((article) => {
+            const legacyImage = article.imageKey ? legacyImageMap[article.imageKey] : undefined;
+            const uploadedImage =
+              !legacyImage && article.imageKey ? `/uploads/news/${article.imageKey}` : null;
+
+            return (
+              <a href={`/news/${article.slug}`} class="news-card">
+                <div class="news-card__img">
+                  {legacyImage ? (
+                    <Image
+                      src={legacyImage}
+                      alt={article.title}
+                      widths={[480, 800, 1200]}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      loading="lazy"
+                      class="news-card__photo"
+                    />
+                  ) : uploadedImage ? (
+                    <img src={uploadedImage} alt={article.title} loading="lazy" class="news-card__photo" />
+                  ) : (
+                    <div class="news-card__placeholder" aria-hidden="true" />
+                  )}
+                  <div class="news-card__overlay" aria-hidden="true" />
+                  <span class="news-card__category">{article.category}</span>
+                </div>
+                <div class="news-card__body">
+                  <div class="news-card__date">{formatNewsDate(article.date)}</div>
+                  <h2 class="news-card__title">{article.title}</h2>
+                  <p class="news-card__excerpt">{article.excerpt}</p>
+                  <span class="news-card__cta">
+                    Read article
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                      <polyline points="12 5 19 12 12 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                </div>
+              </a>
+            );
+          })
         }
       </div>
     </div>
@@ -104,6 +121,12 @@ const imageMap = {
     object-fit: cover;
     display: block;
     transition: transform 0.6s var(--ease-out);
+  }
+
+  .news-card__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 185, 0, 0.18), rgba(255, 255, 255, 0.05));
   }
 
   .news-card:hover .news-card__photo {

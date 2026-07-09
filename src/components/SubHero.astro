@@ -1,25 +1,36 @@
 ---
 import { Image } from "astro:assets";
 import GlassButton from "./ui/GlassButton.astro";
+import { listImages } from "../lib/server/repositories/images";
 import featureImg from "../assets/photos/subhero-4.webp";
 import photo1 from "../assets/photos/subhero-1.webp";
 import photo2 from "../assets/photos/subhero-2.jpg";
 import photo3 from "../assets/photos/subhero-3.jpg";
+
+const overrides = new Map((await listImages()).map((row) => [`${row.category}:${row.slug}`, row]));
+function overrideUrl(slug: string): string | null {
+  const row = overrides.get(`subhero:${slug}`);
+  return row ? `/uploads/subhero/${row.fileName}` : null;
+}
 ---
 
 <section class="subhero section" id="about" aria-labelledby="subhero-title">
   <div class="container">
     <div class="subhero__grid">
       <article class="subhero__feature reveal">
-        <Image
-          src={featureImg}
-          alt=""
-          widths={[640, 960, 1280, 1600]}
-          sizes="(max-width: 1024px) 100vw, 60vw"
-          loading="lazy"
-          decoding="async"
-          class="subhero__feature-img"
-        />
+        {overrideUrl("feature") ? (
+          <img src={overrideUrl("feature")!} alt="" loading="lazy" decoding="async" class="subhero__feature-img" />
+        ) : (
+          <Image
+            src={featureImg}
+            alt=""
+            widths={[640, 960, 1280, 1600]}
+            sizes="(max-width: 1024px) 100vw, 60vw"
+            loading="lazy"
+            decoding="async"
+            class="subhero__feature-img"
+          />
+        )}
         <div class="subhero__feature-overlay" aria-hidden="true"></div>
         <div class="subhero__feature-content">
           <p class="subhero__years">
@@ -39,37 +50,49 @@ import photo3 from "../assets/photos/subhero-3.jpg";
 
       <div class="subhero__stack">
         <div class="subhero__photo reveal">
-          <Image
-            src={photo1}
-            alt="Manny agents on tarmac"
-            widths={[400, 640, 800, 1200]}
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
-            loading="lazy"
-            decoding="async"
-            class="subhero__photo-bg"
-          />
+          {overrideUrl("photo-1") ? (
+            <img src={overrideUrl("photo-1")!} alt="Manny agents on tarmac" loading="lazy" decoding="async" class="subhero__photo-bg" />
+          ) : (
+            <Image
+              src={photo1}
+              alt="Manny agents on tarmac"
+              widths={[400, 640, 800, 1200]}
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
+              loading="lazy"
+              decoding="async"
+              class="subhero__photo-bg"
+            />
+          )}
         </div>
         <div class="subhero__photo reveal">
-          <Image
-            src={photo2}
-            alt="Technician working on landing gear"
-            widths={[400, 640, 800, 1200]}
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
-            loading="lazy"
-            decoding="async"
-            class="subhero__photo-bg"
-          />
+          {overrideUrl("photo-2") ? (
+            <img src={overrideUrl("photo-2")!} alt="Technician working on landing gear" loading="lazy" decoding="async" class="subhero__photo-bg" />
+          ) : (
+            <Image
+              src={photo2}
+              alt="Technician working on landing gear"
+              widths={[400, 640, 800, 1200]}
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
+              loading="lazy"
+              decoding="async"
+              class="subhero__photo-bg"
+            />
+          )}
         </div>
         <div class="subhero__photo reveal">
-          <Image
-            src={photo3}
-            alt="Operations dispatcher with headset"
-            widths={[400, 640, 800, 1200]}
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
-            loading="lazy"
-            decoding="async"
-            class="subhero__photo-bg"
-          />
+          {overrideUrl("photo-3") ? (
+            <img src={overrideUrl("photo-3")!} alt="Operations dispatcher with headset" loading="lazy" decoding="async" class="subhero__photo-bg" />
+          ) : (
+            <Image
+              src={photo3}
+              alt="Operations dispatcher with headset"
+              widths={[400, 640, 800, 1200]}
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
+              loading="lazy"
+              decoding="async"
+              class="subhero__photo-bg"
+            />
+          )}
         </div>
       </div>
     </div>

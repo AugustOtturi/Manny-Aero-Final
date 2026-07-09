@@ -3,7 +3,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import StatsBand from "../components/StatsBand.astro";
 import BackToServices from "../components/BackToServices.astro";
-import { PERMIT_SECTIONS, DOWNLOADS } from "../data/permits";
+import { PERMIT_SECTIONS } from "../data/permits";
+import { listPermitDownloads } from "../lib/server/repositories/permitDownloads";
+
+export const prerender = false;
+
+const DOWNLOADS = await listPermitDownloads();
 
 const stats = [
   { value: "Fastest", label: "Turnaround Time" },
@@ -164,7 +169,7 @@ const sidebarItems = [
                   class="download-card"
                   type="button"
                   data-file-name={d.name}
-                  data-file-url={d.url}
+                  data-file-url={d.fileUrl}
                 >
                   <div class="download-icon">
                     {d.icon === "check" ? (
@@ -198,7 +203,7 @@ const sidebarItems = [
                     )}
                   </div>
                   <div class="download-name">{d.name}</div>
-                  <div class="download-type">{d.type}</div>
+                  <div class="download-type">{d.fileType}</div>
                   <div class="download-action">
                     Download
                     <svg viewBox="0 0 24 24">
@@ -438,8 +443,8 @@ const sidebarItems = [
     // Save locally so gate doesn't re-appear
     try { localStorage.setItem("manny_email", email); } catch { /* ignore */ }
 
-    // Fire-and-forget POST to PHP — download is never blocked by this
-    fetch("/mail.php", {
+    // Fire-and-forget POST — download is never blocked by this
+    fetch("/api/gate", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({

@@ -4,9 +4,9 @@ Guidance for Claude Code when working on the Manny Aero website.
 
 ## Project
 
-Static marketing site for **Manny Aero** — premium aircraft ground handling, permits, catering and FBO coordination across Mexico. Multi-page Astro site, content is hardcoded in components / `src/data/*`. No CMS, no backend.
+Marketing site + admin CMS for **Manny Aero** — premium aircraft ground handling, permits, catering and FBO coordination across Mexico. Multi-page **Astro 5 SSR** site (migrated from static in jul 2026). Public content (services, permits, ISBAH modules, airports) is still hardcoded in `src/data/*`; **news, form leads, and index images now live in MySQL** and are editable from `/admin`.
 
-Routes (todas las páginas construidas a junio 2026):
+Routes (actualizado jul 2026):
 - `/` — main landing (hero video, subhero, service cards, map, final CTA)
 - `/about` — company story, timeline, team, values
 - `/ground-handling` — servicios detallados (tabs desktop, modal bottom-sheet mobile). `/services` redirige aquí via 301 en `.htaccess`.
@@ -15,39 +15,70 @@ Routes (todas las páginas construidas a junio 2026):
 - `/permits-and-authorizations` — permit categories (sticky sidebar nav + accordions + email-gated downloads)
 - `/contact` — flight request form + contact cards
 - `/founder` — historia del fundador (sticky photo + body texto)
-- `/news` — index de artículos (grid 3 col)
-- `/news/[slug]` — artículo individual (generado desde `src/data/news.ts`)
+- `/news`, `/news/[slug]` — noticias, leídas de MySQL en cada request (SSR, no rebuild al publicar)
 - `/404` — página de error personalizada
+- `/admin/login`, `/admin`, `/admin/news[/new|/[id]/edit]`, `/admin/leads`, `/admin/images` — panel de administración (ver sección **Admin CMS** abajo)
 
 ## Stack
 
-- **Astro 5** (static output, no SSR adapter — output is plain HTML/CSS/JS in `dist/`)
+- **Astro 5**, `output: "server"` con adapter `@astrojs/node` (modo `middleware`). **No hay páginas prerenderizadas todavía** — todo se sirve por request; es una optimización pendiente marcar con `export const prerender = true` las páginas 100% estáticas (about, catering, isbah, founder, etc.) que no leen de la DB.
 - **TypeScript** (strict)
+- **Express** (`server.mjs`, raíz del proyecto) — envuelve el handler SSR de Astro como middleware; solo agrega: servir `public/uploads/` con cache headers y `trust proxy` para IPs correctas detrás del proxy de Hostinger. Es el entry point de producción (`npm start`). **No se usa en dev** — `astro dev` corre su propio servidor y todas las rutas API (`src/pages/api/**`) funcionan igual ahí, sin Express.
+- **MySQL + Drizzle ORM** (`src/lib/server/db/`) — tablas `news`, `leads`, `images`, `admin_users` (esta última sin usar aún, ver Auth abajo). Esquema en `src/lib/server/db/schema.ts`, migraciones con `drizzle-kit`.
+- **Nodemailer** (`src/lib/server/mail.ts`) — reemplaza PHPMailer para `/contact` y el email gate. `public/mail.php` y `public/phpmailer/` **siguen en el repo pero ya no los llama ningún formulario** (legacy, no borrar sin confirmar con el cliente por si algo externo aún apunta ahí).
+- **Auth admin**: JWT (`jose`) en cookie `httpOnly`, un solo usuario configurado por variables de entorno (`ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH` con `bcryptjs`) — **no** por la tabla `admin_users`. Ver sección Admin CMS.
+- **sharp** — optimiza imágenes subidas desde `/admin/images` (resize + conversión a WebP) antes de guardarlas en `public/uploads/`.
+- **zod** — validación de payloads en todos los endpoints (`src/pages/api/**`).
 - **Leaflet** for the map (lazy-loaded via IntersectionObserver in `MapSection.astro`)
 - **@astrojs/sitemap** for sitemap generation
 - **Fonts** (self-hosted via `@fontsource`, never Google CDN):
   - `Inter` 400–900 → body, UI, navigation (`var(--font-sans)`)
   - `Bebas Neue` 400 → display titles only (`var(--font-display)`)
-- **Hosting (dev/staging)**: cuenta de Engenio Digital en Hostinger, conectada a GitHub `main`. Auto-deploy al push.
-- **Hosting (cliente/producción)**: cuenta del cliente en Hostinger (`u824529850`). **No conectada a GitHub** — deploy manual: `npm run build` → zipear `dist/` → subir y extraer en `public_html/`.
+- **Hosting (dev/staging — QA)**: Hostinger, cuenta `u676595820` (Engenio Digital). MySQL: host `srv1578.hstgr.io`, db `u676595820_cmsmanny`. SMTP: `smtp.hostinger.com:465` (SSL) con `manny.cms@augustotturi.com`.
+- **Hosting (cliente/producción)**: Hostinger Business, cuenta del cliente (`u824529850`), como **app Node.js persistente** (ya no static hosting). Ver sección Deploy abajo.
 
 ## Commands
 
 ```
-npm run dev      # local preview at http://localhost:4321
-npm run build    # validate before commit (also re-encodes images)
-npm run preview  # serve dist/ locally
-npm run check    # astro check (TypeScript)
+npm run dev          # local preview (astro dev) at http://localhost:4321
+npm run build        # astro build → dist/client (assets) + dist/server (SSR handler)
+npm start             # production: node server.mjs (requires npm run build first)
+npm run preview       # build + start, for a quick local prod-mode smoke test
+npm run check         # astro check (TypeScript)
+npm run db:generate    # drizzle-kit generate — crea archivos de migración desde schema.ts
+npm run db:push        # drizzle-kit push — aplica schema.ts directo a la DB (usado en dev/QA)
+npm run db:studio      # drizzle-kit studio — explorador visual de la DB
+npm run db:seed-news   # copia src/data/news.ts a la tabla `news` (idempotente, upsert por slug)
+npm run db:seed-logos  # copia los 8 logos originales (src/assets/Logo1..8) a la tabla `images` (idempotente)
+npm run db:seed-permit-downloads  # registra los 10 archivos de public/files/ en `permit_downloads` (idempotente, no copia archivos)
 ```
 
-## Deploy manual (servidor del cliente)
+## Variables de entorno
 
-1. `npm run build`
-2. `cd dist && powershell Compress-Archive -Path * -DestinationPath ../manny-aero-dist.zip -Force`
-3. Subir `manny-aero-dist.zip` al `public_html/` del cliente via File Manager
-4. Extraer (con "Overwrite existing files" activado)
+`.env.local` (nunca se commitea — está en `.gitignore`). Ver `.env.example` para la lista completa y comentada. Resumen:
 
-> ⚠️ Al zipear hacerlo **desde dentro del `dist/`** para evitar paths `dist\archivo` en Windows.
+- `DB_HOST/PORT/USER/PASS/NAME` — MySQL
+- `SMTP_HOST/PORT/SECURE/USER/PASS`, `MAIL_FROM(_NAME)`, `MAIL_TO_CONTACT`, `MAIL_TO_GATE`, `MAIL_CC` — Nodemailer
+- `JWT_SECRET` — firma de la cookie de sesión admin (32+ bytes random)
+- `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` — credenciales del único usuario admin (hash bcrypt, nunca la password en texto plano)
+- `ALLOWED_ORIGIN` — origin check en `/api/contact` y `/api/gate` (mismo mecanismo que `mail.php` tenía)
+- `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW` — rate limit in-memory (por proceso, no por archivo como antes)
+
+⚠️ **`astro.config.mjs` carga `.env.local` manualmente** con `dotenv` (Astro/Vite no inyecta `.env.local` a `process.env` automáticamente para código server-side). Por esto `dotenv` está en `dependencies`, no en `devDependencies` — `astro.config.mjs` se ejecuta durante `npm run build`, que Hostinger corre en producción.
+
+## Deploy (Hostinger Business — Node.js app)
+
+El sitio ya **no** se deploya como archivos estáticos. Es una app Node.js persistente.
+
+1. `npm run build` (genera `dist/client` + `dist/server`)
+2. Subir el repo completo (o `dist/`, `server.mjs`, `package.json`, `public/`) al servidor — vía Git si Hostinger lo soporta para Node apps, o File Manager/SFTP si no.
+3. En el panel de Hostinger, configurar la app Node.js:
+   - Entry point: `server.mjs`
+   - Startup command: `npm run build && npm start` (o build en un paso separado + `npm start` como startup)
+   - Variables de entorno: cargar todas las de `.env.example` con los valores reales de producción (**no** subir `.env.local` al servidor)
+4. Verificar que `public/uploads/` sea escribible por el proceso Node (ahí se guardan las imágenes subidas desde `/admin/images`) y que persista entre deploys (no debe limpiarse en cada build).
+
+> ⚠️ El flujo viejo (`npm run build` → zip de `dist/` → extraer en `public_html/`) ya no aplica — no hay backend PHP/DB en ese modelo y el CMS no funcionaría.
 
 ## File layout
 
@@ -57,24 +88,68 @@ public/
   favicon.svg, logo-manny.svg, og-default.jpg
   map/mexico-states.geojson
   og/                    # OG images por página (catering, isbah, founder, permits, ground-handling, about, services, contact)
-  phpmailer/             # PHPMailer bundle (acceso bloqueado por .htaccess DirectoryMatch)
-  mail.php               # Handler PHP del formulario de contacto y email gate
+  files/                 # archivos originales de /permits-and-authorizations (no tocar/borrar — referenciados por permit_downloads)
+  uploads/               # subido desde el admin (gitignored) — subcarpetas: subhero/, service/, logo/, news/, permit-files/
+  phpmailer/, mail.php   # legacy — ya no los llama ningún formulario, ver sección Mail / formularios
+server.mjs                # entry point de producción (Express + handler SSR de Astro)
+drizzle.config.ts         # config de drizzle-kit (lee .env.local) — usar con cuidado, ver "Things to avoid"
+.env.example               # plantilla documentada de variables de entorno
 src/
-  layouts/BaseLayout.astro     # <head>, app-loader, font preloads, reveal observer, Google Search Console meta tag
+  middleware.ts            # Astro middleware global — protege /admin/* y /api/admin/* con la cookie JWT
+  env.d.ts                  # tipos de Astro.locals.user + window.adminConfirm/adminAlert
+  layouts/
+    BaseLayout.astro         # <head>, app-loader, font preloads, reveal observer — layout del sitio público
+    AdminLayout.astro         # layout del panel admin (sin navbar/footer/loader públicos), monta <AdminTopbar> y <ConfirmModal> si hay sesión
+  lib/
+    format.ts                 # formatNewsDate, newsBodyToParagraphs
+    imageSlots.ts              # lista canónica de slots reemplazables en /admin/images/[category] (subhero + service — logos NO están acá, son CRUD dinámico)
+    server/                    # código SOLO server-side — nunca importar desde componentes que se hidratan en cliente
+      env.ts                    # getEnv() — valida process.env con zod, cachea el resultado
+      auth.ts                   # signSession/verifySession (JWT), verifyCredentials (bcrypt contra ADMIN_USERNAME/HASH)
+      mail.ts                    # Nodemailer — sendContactEmail, sendGateEmail (mismo template HTML que tenía mail.php)
+      rateLimit.ts                # rate limiter in-memory (checkRateLimit, getClientIp)
+      originCheck.ts               # isAllowedOrigin — localhost cualquier puerto en dev, ALLOWED_ORIGIN exacto en prod
+      db/
+        schema.ts                  # tablas Drizzle: news, leads, images, permitDownloads, adminUsers
+        client.ts                   # getDb() — pool mysql2 + instancia drizzle (singleton)
+        scripts/                     # migraciones one-off (seed-news, seed-logos, seed-permit-downloads) — todas idempotentes, correr con tsx
+      repositories/
+        news.ts, leads.ts, images.ts, permitDownloads.ts  # queries CRUD tipadas, usadas tanto por páginas públicas como por /api/admin/*
+      schemas/news.ts               # zod schema + slugify() para el formulario de noticias
   pages/
     index.astro                # main landing
     about.astro
     ground-handling.astro      # tabs (desktop) + modal sheet (mobile)
     catering.astro             # In-flight catering page
     isbah.astro                # sticky sidebar + accordions (ruta: /isbah)
-    permits-and-authorizations.astro  # sidebar + accordions + email-gated downloads
+    permits-and-authorizations.astro  # sidebar + accordions + email-gated downloads; DOWNLOADS lee de MySQL, PERMIT_SECTIONS sigue hardcodeado en src/data/permits.ts
     contact.astro              # form + sidebar
     founder.astro              # sticky photo + body texto fundador
     404.astro                  # error page
     news/
-      index.astro              # grid de artículos
-      [slug].astro             # artículo individual (getStaticPaths desde news.ts)
+      index.astro               # grid de artículos, lee de MySQL (SSR)
+      [slug].astro                # artículo individual, lee de MySQL por slug (SSR, no getStaticPaths)
+    api/
+      contact.ts, gate.ts        # públicos — reemplazan mail.php, validan con zod, insertan lead + envían email
+      auth/login.ts, logout.ts, me.ts
+      admin/                      # protegidos por middleware.ts (requieren sesión)
+        news/index.ts, [id].ts
+        leads/index.ts, [id].ts, export.ts
+        images/index.ts, upload.ts, [category]/[slug].ts
+        permits/index.ts, upload.ts, [id].ts, [id]/file.ts
+    admin/
+      login.astro
+      index.astro                 # hub con cards → Noticias / Leads / Imágenes / Permisos (sin "dashboard", sin stats sueltas)
+      news/index.astro, new.astro, [id]/edit.astro
+      leads.astro                  # tabla con filtros + export CSV + modal de detalle (click "Ver") + modal de confirmación al eliminar
+      images.astro                 # hub con cards → SubHero / Servicios / Logos
+      images/[category].astro       # sirve /admin/images/subhero y /admin/images/service — reemplazo por slot fijo
+      images/logos.astro            # CRUD completo (agregar/eliminar/reemplazar), no slots fijos, sin campo de nombre
+      permits.astro                  # CRUD de archivos descargables (agregar/renombrar/cambiar ícono/reemplazar archivo/eliminar)
   components/
+    admin/
+      AdminTopbar.astro    # barra superior persistente del panel (Noticias/Leads/Imágenes/Permisos + logout) — NO usar sidebar lateral, se probó y se veía roto
+      ConfirmModal.astro   # modal compartido — expone window.adminConfirm/adminAlert, ver sección "Modales del admin"
     Hero.astro, SubHero.astro, ServiceCards.astro,
     MapSection.astro, FinalCTA.astro, Navbar.astro, Footer.astro
     PageHero.astro             # internal-page hero (badge + title + subtitle, no video/photo)
@@ -90,65 +165,67 @@ src/
     isbhaModules.ts            # 6 ISBHA compliance modules para /isbah
     permits.ts                 # PERMIT_SECTIONS + DOWNLOADS para /permits-and-authorizations
     events.ts                  # event partners
-    news.ts                    # artículos de noticias (imageKey, slug, body, etc.)
+    news.ts                    # ⚠️ ya no alimenta /news — solo lo usa seed-news.ts como fuente de la migración inicial
   styles/
     tokens.css                 # CSS variables (colors, fonts, breakpoints, motion)
     global.css                 # base styles + utilities (includes the white-title shine rule)
   assets/
-    photos/                    # fotos webp/jpg (subhero-1..4, service-*, catering, founder, noticias)
+    photos/                    # fotos webp/jpg (subhero-1..4, service-*, catering, founder, noticias) — fallback si no hay override en DB
     fonts/                     # Aileron otf self-hosted
     files/                     # archivos descargables para /permits-and-authorizations
-    Logo1..8.png               # partner logos para el marquee
+    Logo1..8.png               # ⚠️ ya sin uso — logos migraron 100% a la tabla `images` (categoría "logo"), ver seed-logos.ts
     poster-hero.webp           # hero LQIP fallback
     hero-manny-final.mp4
     mannylogo.png              # logo para el flyout mobile del navbar
 ```
 
-## Mail / formulario de contacto
+## Admin CMS (`/admin`)
 
-### Arquitectura
+Panel de administración integrado en la misma app Astro (no es un proyecto/dominio separado).
 
-`mail.php` carga credenciales en este orden de prioridad:
-1. **Secrets file en el servidor** (fuera de `public_html`, nunca en git)
-2. Variables de entorno (`MANNY_SMTP_*`)
-3. Defaults hardcodeados en `mail.php`
+### Auth
+- Un solo usuario, credenciales en variables de entorno (`ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH`) — **no** en la tabla `admin_users` (esa tabla existe en el schema para una futura multi-usuario, pero no está conectada a nada todavía).
+- Login: `POST /api/auth/login` → firma JWT (`jose`, HS256, expira en 12h) → cookie `manny_admin_session` (`httpOnly`, `sameSite: lax`, `secure` en prod).
+- `src/middleware.ts` corre en cada request: si la ruta empieza con `/admin` (menos `/admin/login`) y no hay sesión válida → redirect a `/admin/login?next=...`. Si empieza con `/api/admin` y no hay sesión → 401 JSON. Deja `Astro.locals.user` disponible en toda la app.
+- Rate limit propio en `/api/auth/login` (10 intentos / 5 min por IP) separado del rate limit de los formularios públicos.
+- Para regenerar el hash de una nueva contraseña: `bcrypt.hashSync(password, 10)` — nunca commitear la contraseña en texto plano, ni siquiera en un script temporal (usar un archivo fuera del repo o pasarlo por stdin).
 
-El secrets file **siempre gana** — las otras capas son fallback. En la práctica solo existe el secrets file.
+### Noticias (`/admin/news`)
+- CRUD básico: título, categoría, fecha, extracto, cuerpo (párrafos separados por línea en blanco → se guardan como `\n\n` en `LONGTEXT`), imagen.
+- Imagen: widget de upload directo (igual patrón que logos) — botón "Subir imagen" sube a `category="news"` con un slug autogenerado (`news-${Date.now()}`) vía `/api/admin/images/upload`, y el `fileName` resultante se guarda en `imageKey`. Ya **no** es un campo de texto libre. `imageKey` sigue aceptando los 3 valores legacy (`ibac`/`fifa`/`nbaa`, mapeados a los assets originales importados por Astro) para los 3 artículos migrados — el form de edición muestra el preview correcto en ambos casos.
+- Slug se genera automáticamente del título si se deja vacío (`slugify()` en `src/lib/server/schemas/news.ts`, duplicada en el JS inline de los formularios porque corre client-side antes del submit).
 
-### Servidor de desarrollo (Engenio)
-- Path del secrets file: `/home/u676595820/manny-secrets.php`
-- SMTP: `smtp.hostinger.com:465` (SSL) con `testmanny@engeniodigital.tech`
-- Destino: `augustotturi99@gmail.com`
+### Leads (`/admin/leads`)
+- Todo submit de `/contact`, `FinalCTA` o el gate de permisos se guarda en la tabla `leads` **además de** enviar el email (si el insert falla, el email se manda igual — nunca se bloquea el envío por un problema de DB).
+- Filtros: tipo (`contact`/`gate`) y búsqueda por email. Export CSV vía `GET /api/admin/leads/export` (respeta el filtro de tipo si se pasa `?type=`).
 
-### Servidor del cliente (producción)
-- Path del secrets file: `/home/u824529850/manny-secrets.php`
-- SMTP: `smtp.office365.com:587` (STARTTLS) con `no-replay@manny.aero` (Microsoft 365)
-- Destino: `ops@manny.aero`
-- `ALLOWED_ORIGIN`: cambiar a `https://manny.aero` antes del go-live final
+### Imágenes (`/admin/images`)
+`/admin/images` es un hub con 3 cards — cada categoría tiene su propia página, no está todo junto:
 
-### Contenido del secrets file (producción)
-```php
-<?php
-define('SMTP_HOST',       'smtp.office365.com');
-define('SMTP_PORT',       587);
-define('SMTP_USER',       'no-replay@manny.aero');
-define('SMTP_PASS',       'N0R3pl4y.Manny');
-define('MAIL_FROM',       'no-replay@manny.aero');
-define('MAIL_FROM_NAME',  'Website Form');
-define('MAIL_TO_CONTACT', 'ops@manny.aero');
-define('MAIL_TO_GATE',    'ops@manny.aero');
-define('ALLOWED_ORIGIN',  'https://manny.aero');
-define('RATE_LIMIT_MAX',    15);
-define('RATE_LIMIT_WINDOW', 3600);
-```
+- **SubHero y Tarjetas de servicio** (`/admin/images/[category].astro`, ruta dinámica que sirve `/admin/images/subhero` y `/admin/images/service`) — solo **reemplazo** de imágenes fijas (así lo pidió el cliente para estas dos secciones). La lista de slots está en `src/lib/imageSlots.ts` (4 subhero + 4 service). Cada slot es un formulario real (`<input type="file">` + botón "Subir imagen", no un link disfrazado) y tiene botón "Volver a la imagen original" si hay override. Patrón en `ServiceCards.astro`/`SubHero.astro`: consultan `listImages(category)` una vez en el frontmatter y renderizan `<img>` plano si hay override en `public/uploads/<categoria>/`, o el `<Image>` optimizado de Astro con el asset original si no. **No** se puede pasar una imagen subida en runtime al componente `<Image>` de Astro (requiere un import resuelto en build time) — por eso el fallback usa `<img>` sin optimización automática de Astro; ya viene optimizada por `sharp` en el upload (resize + WebP).
+- **Logos de partners** (`/admin/images/logos.astro`) — **CRUD completo**, no slots fijos: agregar (solo imagen — sin campo de nombre, el cliente pidió quitarlo), eliminar, y reemplazar imagen. `FinalCTA.astro` ya no tiene ningún logo hardcodeado — renderiza el marquee 100% desde `listImages("logo")`; si la tabla queda vacía, la sección del marquee simplemente no se renderiza (sin fallback). Los 8 logos originales se migraron a la DB con `npm run db:seed-logos` (copia los assets a `public/uploads/logo/`, inserta filas con `title` del nombre original, aunque la UI ya no expone ese campo).
+- Subida: `POST /api/admin/images/upload` (`multipart/form-data`: `category`, `slug`, `file` opcional, `title` opcional). Si no se manda `file` pero la fila ya existe, solo actualiza `title`/`alt` (usado internamente, ya no expuesto en la UI de logos). Valida tipo/tamaño, redimensiona con `sharp` (`400px` máx para logos, `1600px` máx para fotos), convierte a WebP, borra el archivo anterior si existía. Eliminar/revertir: `DELETE /api/admin/images/:category/:slug`.
 
-### Blog / noticias
+### Permisos (`/admin/permits`)
+- CRUD de los archivos descargables que aparecen en la sección "Downloadable Templates" de `/permits-and-authorizations` (PDF/DOC/DOCX/XLS/XLSX — **no** confundir con `PERMIT_SECTIONS`, el checklist de requisitos por tipo de vuelo en `src/data/permits.ts`, que sigue hardcodeado y fuera de este CRUD).
+- Tabla `permit_downloads`: `name`, `fileUrl`, `fileType` (derivado de la extensión del archivo), `icon` (uno de 6: check/star/send/shield/plane/document), `size`.
+- Los 10 archivos originales se migraron con `npm run db:seed-permit-downloads` — a diferencia de logos/imágenes, **no se copiaron los archivos**, la migración solo crea filas en la DB apuntando a las rutas que ya existían en `public/files/*`. Los archivos nuevos que se agreguen desde el admin sí se guardan físicamente en `public/uploads/permit-files/`. El endpoint DELETE solo borra del disco los archivos bajo `/uploads/permit-files/` — nunca toca los originales de `public/files/`.
+- Endpoints: `GET /api/admin/permits` (list), `POST /api/admin/permits/upload` (crear — multipart: `name`, `icon`, `file`), `PUT /api/admin/permits/:id` (JSON — renombrar / cambiar ícono), `POST /api/admin/permits/:id/file` (multipart — reemplazar solo el archivo), `DELETE /api/admin/permits/:id`.
+- `permits-and-authorizations.astro` lee `DOWNLOADS` desde `listPermitDownloads()` en vez de `src/data/permits.ts` (ese archivo sigue exportando `PERMIT_SECTIONS`, que la página todavía usa).
 
-El sistema de noticias es **estático** — no hay CMS. Para agregar un artículo:
-1. Agregar entrada en `src/data/news.ts` con: `slug`, `title`, `category`, `date`, `excerpt`, `body[]`, `imageKey`
-2. `imageKey` solo acepta: `"ibac" | "fifa" | "nbaa"` (imágenes pre-existentes)
-3. `npm run build` + deploy manual al servidor del cliente
-4. El cliente manda el contenido al desarrollador — no puede publicar solo.
+### Modales del admin (no usar `confirm()`/`alert()` nativos)
+- `src/components/admin/ConfirmModal.astro` se monta una sola vez en `AdminLayout.astro` (solo si hay sesión) y expone dos funciones globales: `window.adminConfirm(message, opts?): Promise<boolean>` y `window.adminAlert(message, opts?): Promise<void>`. Tipos declarados en `src/env.d.ts`.
+- **Gotcha real que ya se dio acá**: el overlay tiene `display: flex` en su regla de clase — sin una regla `.overlay[hidden] { display: none }` explícita, el atributo HTML `hidden` (que solo tiene especificidad de UA stylesheet) queda sobreescrito por el `display: flex` del autor, y el modal se ve aunque `el.hidden === true`. Cualquier overlay nuevo en el admin (como el modal de detalle de leads en `leads.astro`) necesita ese `[hidden] { display: none }` explícito antes de la regla base.
+- Usar `await window.adminConfirm(...)` en vez de `confirm(...)`, y `await window.adminAlert(...)` en vez de `alert(...)`, en cualquier script nuevo del admin.
+
+## Mail / formularios
+
+`/contact` (página + `FinalCTA`) y el email gate de permisos ahora postean a `/api/contact` y `/api/gate` (endpoints Astro, no PHP). `public/mail.php` sigue en el repo pero **no lo llama ningún formulario** — no borrar todavía por si algo externo aún apunta ahí, pero es candidato a eliminar en una limpieza futura.
+
+- Mismo template HTML de email que tenía `mail.php` (replicado en `src/lib/server/mail.ts`), mismo honeypot, mismo rate limit (ahora in-memory por proceso en vez de archivos temporales).
+- Origin check (`src/lib/server/originCheck.ts`): en producción exige `ALLOWED_ORIGIN` exacto igual que antes. En dev (`NODE_ENV !== "production"`) acepta cualquier origin `localhost`/`127.0.0.1` sin importar el puerto — `astro dev` puede correr en 4321 (default), 4330 (vía el Preview tool) o el puerto que sea, y hardcodear uno en `.env.local` rompía el formulario en cualquier otro.
+- Cada submit válido hace dos cosas: `createLead()` (insert en MySQL) y `sendContactEmail()`/`sendGateEmail()` (Nodemailer). Ver sección Admin CMS → Leads.
+- Credenciales SMTP actuales (QA): `manny.cms@augustotturi.com` vía `smtp.hostinger.com:465` (SSL). Producción usará las credenciales de `no-replay@manny.aero` — pendiente confirmar si se mantiene Office 365 o se migra también a Hostinger.
 
 ## Conventions
 
@@ -212,6 +289,11 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 
 ## Things to avoid (lessons from this codebase)
 
+- **`dotenv` must stay in `dependencies`, not `devDependencies`.** `astro.config.mjs` imports it to load `.env.local` into `process.env` (Astro/Vite don't do this automatically for server-side code). That config file runs during `npm run build`, which Hostinger executes in production — if `dotenv` were dev-only and the install step skips devDependencies, the build breaks.
+- **Astro's `<Image>` component can't render a runtime-uploaded file.** It needs a build-time-resolved import (`ImageMetadata`). For CMS-replaceable images (`/admin/images`), the pattern is: query the DB for an override once per component render, and conditionally render a plain `<img src="/uploads/...">` (already optimized by `sharp` at upload time) instead of `<Image>` when an override exists. See `ServiceCards.astro`, `SubHero.astro`, `FinalCTA.astro`.
+- **Drizzle's `datetime()` column has no `.onUpdateNow()`** (that method only exists on `timestamp()`). Use `.$onUpdate(() => new Date())` instead — it's an ORM-level default applied on every Drizzle `update()`, not a DB-level trigger.
+- **Don't run `git checkout`/`reset`/`clean` etc. against the QA MySQL DB via a list-then-delete-all pattern** in scripts or one-off bash — the permission layer flags unbounded deletes on shared databases. Delete by explicit tracked IDs instead.
+- **`drizzle-kit push` puede colgarse indefinidamente** en "Pulling schema from database..." contra la QA DB (pasó más de una vez, sin patrón claro — no es falta de conectividad, una conexión `mysql2` directa a la misma DB responde en <1s). Si pasa: no reintentar en loop. Usar `drizzle-kit generate` en su lugar (no necesita introspección de la DB, solo diffea contra `drizzle/` local) para obtener el SQL, copiar el `CREATE TABLE`/`ALTER TABLE` de la tabla nueva, y ejecutarlo directo con un script `mysql2` de una sola vez. Borrar la carpeta `drizzle/` después — este proyecto no usa el flujo de migraciones versionadas de drizzle-kit, solo `push`/SQL directo.
 - **Don't introduce a separate `data-page-theme="internal"` dark gradient.** This was tried (warm dark `#252524 → #424040`, blobs/noise disabled) and reverted because the client wants internal pages to share the home's gradient. If you re-add it, expect to revert it again.
 - **Bebas Neue under ~18px** is condensed/illegible — only for display titles, never for body or labels.
 - **Inputs at `<14px`** trigger iOS auto-zoom on focus. Form inputs are `14px` minimum.
@@ -227,11 +309,10 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 
 ## Deploy / hosting specifics
 
-- `public/.htaccess` ships to `dist/.htaccess` automatically. It handles compression (Brotli + Gzip fallback), cache (1y immutable for hashed `_astro/*` assets, no-cache for HTML), MIME types, security headers, HTTPS redirect, font CORS.
-- 301 redirects activos: `/services` → `/ground-handling`, `/isbha` → `/isbah`.
-- Servidor de desarrollo: Hostinger conectado a GitHub `main`, auto-deploy al push.
-- Servidor del cliente: deploy manual (ver sección Deploy manual arriba).
-- After push/deploy, hard-refresh (Ctrl+F5) to bypass browser cache while testing.
+- ⚠️ **`public/.htaccess`** manejaba compresión, cache, MIME types, security headers y HTTPS redirect bajo el modelo static/Apache. Bajo Hostinger Business como app Node.js, no está confirmado si ese `.htaccess` sigue aplicando (depende de si Hostinger pone un proxy Apache/LiteSpeed delante del proceso Node, o si el Node app sirve directo). **Verificar en el primer deploy real** — si no aplica, esas responsabilidades (headers de seguridad, compresión, cache-control) hay que moverlas a `server.mjs` (p.ej. con `helmet` y `compression` de Express).
+- Los 301 redirects (`/services` → `/ground-handling`, `/isbha` → `/isbah`) viven en `.htaccess` — mismo caveat que arriba, verificar que sigan funcionando o migrarlos a `server.mjs`/`src/middleware.ts` si no.
+- Servidor de desarrollo (QA, cuenta `u676595820`): antes era Hostinger conectado a GitHub `main` con auto-deploy al push (modelo static). **Este flujo cambió** — ahora necesita correr como app Node.js igual que producción (ver sección Deploy arriba). Confirmar con el cliente/Hostinger si el auto-deploy por GitHub sigue funcionando para apps Node o si pasa a ser manual también en QA.
+- After deploy, hard-refresh (Ctrl+F5) to bypass browser cache while testing.
 
 ## Performance baseline
 
@@ -243,10 +324,9 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 ## Out-of-scope reminders
 
 - The "client gradient background" (4-corner gray mesh from a client mockup) is **planned but not implemented**. The user explicitly opted out — they'll handle it later. Don't apply it without being asked.
-- Pre-existing `astro check` errors (unrelated to this codebase's pages):
-  - `MapSection.astro:165` — `tap: false` not in Leaflet's `MapOptions` type.
-  - `BaseLayout.astro:220` — `ActiveLink` mismatch ("blog" vs "news") entre BaseLayout y Navbar types. El tipo en BaseLayout tiene `"blog"` en lugar de `"news"`.
-  Build still succeeds.
+- Pre-existing `astro check` error (unrelated to this codebase's pages):
+  - `MapSection.astro:161` — `tap: false` not in Leaflet's `MapOptions` type.
+  Build still succeeds. (El mismatch de `ActiveLink` "blog" vs "news" que existía antes entre `BaseLayout` y `Navbar` se corrigió en la migración a SSR — ambos tipos ahora usan `"news"`.)
 - Phases 2 (video compression, JPG/SVG/GeoJSON optimization) y 3 (font-display, blob audit) del plan de optimización están diferidas.
 
 ---

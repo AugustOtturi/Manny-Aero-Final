@@ -1,0 +1,35 @@
+---
+import "../styles/global.css";
+import AdminTopbar from "../components/admin/AdminTopbar.astro";
+import ConfirmModal from "../components/admin/ConfirmModal.astro";
+
+interface Props {
+  title: string;
+  active?: "news" | "leads" | "images" | "permits";
+}
+
+const { title, active } = Astro.props;
+const user = Astro.locals.user;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} — Manny Aero Admin</title>
+  </head>
+  <body>
+    <div class="bg-noise" aria-hidden="true"></div>
+    {user ? <AdminTopbar active={active} username={user.username} /> : null}
+    <slot />
+    {user ? <ConfirmModal /> : null}
+  </body>
+</html>
+
+<style is:global>
+  body {
+    min-height: 100vh;
+  }
+</style>

@@ -1,26 +1,14 @@
 ---
-import { Image } from "astro:assets";
 import { AIRPORT_OPTIONS } from "../data/airportOptions";
+import { listImages } from "../lib/server/repositories/images";
 
-import Logo1 from "../assets/Logo1.webp";
-import Logo2 from "../assets/Logo2.png";
-import Logo3 from "../assets/Logo3.png";
-import Logo4 from "../assets/Logo4.png";
-import Logo5 from "../assets/Logo5.png";
-import Logo6 from "../assets/Logo6.png";
-import Logo7 from "../assets/Logo7.png";
-import Logo8 from "../assets/Logo8.png";
-
-const PARTNERS = [
-  { logo: Logo1, name: "FIA World Rally Championship" },
-  { logo: Logo2, name: "World Wide Technology Championship" },
-  { logo: Logo3, name: "Event partner" },
-  { logo: Logo4, name: "Event partner" },
-  { logo: Logo5, name: "Event partner" },
-  { logo: Logo6, name: "Mexico Open at Vidanta" },
-  { logo: Logo7, name: "Event partner" },
-  { logo: Logo8, name: "FIFA World Cup" },
-];
+// Partner/event logos are a fully DB-managed list (CRUD in /admin/images/logos) —
+// no bundled fallback. If the list is empty the marquee section renders nothing.
+const logoRows = await listImages("logo");
+const PARTNERS = logoRows.map((row) => ({
+  url: `/uploads/logo/${row.fileName}`,
+  name: row.title ?? "",
+}));
 
 // Duplicate the list for seamless marquee loop
 const marqueeItems = [...PARTNERS, ...PARTNERS];
@@ -42,28 +30,28 @@ const airportOptions = AIRPORT_OPTIONS;
     </div>
   </div>
 
-  <div class="marquee reveal" aria-label="Events we support">
-    <div class="marquee__track">
-      {
-        marqueeItems.map((item, i) => (
-          <span
-            class="marquee__item"
-            aria-hidden={i >= PARTNERS.length ? "true" : "false"}
-          >
-            <Image
-              src={item.logo}
-              alt={i >= PARTNERS.length ? "" : item.name}
-              widths={[120, 200, 280]}
-              sizes="(max-width: 640px) 120px, (max-width: 1024px) 180px, 220px"
-              loading="lazy"
-              decoding="async"
-              class="marquee__logo"
-            />
-          </span>
-        ))
-      }
+  {PARTNERS.length > 0 && (
+    <div class="marquee reveal" aria-label="Events we support">
+      <div class="marquee__track">
+        {
+          marqueeItems.map((item, i) => (
+            <span
+              class="marquee__item"
+              aria-hidden={i >= PARTNERS.length ? "true" : "false"}
+            >
+              <img
+                src={item.url}
+                alt={i >= PARTNERS.length ? "" : item.name}
+                loading="lazy"
+                decoding="async"
+                class="marquee__logo"
+              />
+            </span>
+          ))
+        }
+      </div>
     </div>
-  </div>
+  )}
 
   <div class="container">
     <div class="final__form reveal">
@@ -385,7 +373,7 @@ const airportOptions = AIRPORT_OPTIONS;
     if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = "0.65"; }
 
     try {
-      const res  = await fetch("/mail.php", {
+      const res  = await fetch("/api/contact", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(payload),

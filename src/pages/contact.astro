@@ -508,7 +508,7 @@ const airportOptions = AIRPORT_OPTIONS;
       }
 
       try {
-        const res = await fetch("/mail.php", {
+        const res = await fetch("/api/contact", {
           method:  "POST",
           headers: { "Content-Type": "application/json" },
           body:    JSON.stringify(payload),

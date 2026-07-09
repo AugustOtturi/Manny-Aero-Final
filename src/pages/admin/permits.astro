@@ -1,0 +1,409 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { listPermitDownloads } from "../../lib/server/repositories/permitDownloads";
+
+export const prerender = false;
+
+const downloads = await listPermitDownloads();
+
+const ICONS = [
+  { value: "document", label: "Documento" },
+  { value: "check", label: "Check" },
+  { value: "star", label: "Estrella" },
+  { value: "send", label: "Enviar" },
+  { value: "shield", label: "Escudo" },
+  { value: "plane", label: "Avión" },
+] as const;
+---
+
+<AdminLayout title="Permisos" active="permits">
+  <main class="page">
+    <header class="page__header">
+      <h1>Archivos de Permits & Authorizations</h1>
+    </header>
+    <p class="page__lead">
+      Estos son los archivos descargables (PDF, DOCX, XLSX) que aparecen en la sección "Downloadable Templates" de la página de Permisos.
+    </p>
+
+    <section class="add-form">
+      <h2>Agregar archivo nuevo</h2>
+      <form id="add-form">
+        <label class="field">
+          <span>Nombre</span>
+          <input type="text" name="name" required placeholder="Ej. AFAC POA" />
+        </label>
+        <label class="field">
+          <span>Ícono</span>
+          <select name="icon">
+            {ICONS.map((i) => <option value={i.value}>{i.label}</option>)}
+          </select>
+        </label>
+        <label class="field">
+          <span>Archivo</span>
+          <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx" required />
+        </label>
+        <button type="submit" id="add-submit">Agregar archivo</button>
+        <p class="status" id="add-status" hidden></p>
+      </form>
+    </section>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Reemplazar</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="downloads-body">
+          {downloads.map((d) => (
+            <tr data-id={d.id}>
+              <td>
+                <form class="rename-form">
+                  <input type="text" name="name" value={d.name} />
+                  <select name="icon">
+                    {ICONS.map((i) => (
+                      <option value={i.value} selected={i.value === d.icon}>
+                        {i.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button type="submit" class="btn-small">Guardar</button>
+                </form>
+              </td>
+              <td>
+                <span class="type-badge">{d.fileType}</span>
+                <a href={d.fileUrl} target="_blank" rel="noopener" class="view-link">Ver</a>
+              </td>
+              <td>
+                <form class="replace-form">
+                  <input type="file" name="file" accept=".pdf,.doc,.docx,.xls,.xlsx" />
+                  <button type="submit" class="btn-small">Reemplazar</button>
+                </form>
+              </td>
+              <td>
+                <button class="delete-btn">Eliminar</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {downloads.length === 0 && <p class="empty">No hay archivos todavía — agrega el primero arriba.</p>}
+    </div>
+  </main>
+</AdminLayout>
+
+<script>
+  const addForm = document.getElementById("add-form") as HTMLFormElement;
+  const addStatus = document.getElementById("add-status")!;
+  const addSubmit = document.getElementById("add-submit") as HTMLButtonElement;
+
+  addForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    addStatus.hidden = true;
+    addSubmit.disabled = true;
+
+    const fd = new FormData(addForm);
+    const file = fd.get("file") as File;
+    if (!file || !file.size) {
+      addStatus.hidden = false;
+      addStatus.textContent = "Selecciona un archivo.";
+      addStatus.style.color = "#ff6b6b";
+      addSubmit.disabled = false;
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/admin/permits/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
+      window.location.reload();
+    } catch (err) {
+      addStatus.hidden = false;
+      addStatus.textContent = err instanceof Error ? err.message : "Error inesperado";
+      addStatus.style.color = "#ff6b6b";
+      addSubmit.disabled = false;
+    }
+  });
+
+  document.querySelectorAll<HTMLElement>("#downloads-body tr").forEach((tr) => {
+    const id = tr.dataset.id!;
+    const renameForm = tr.querySelector<HTMLFormElement>(".rename-form")!;
+    const replaceForm = tr.querySelector<HTMLFormElement>(".replace-form")!;
+    const deleteBtn = tr.querySelector<HTMLButtonElement>(".delete-btn")!;
+
+    renameForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(renameForm);
+      try {
+        const res = await fetch(`/api/admin/permits/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: fd.get("name"), icon: fd.get("icon") }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Error al guardar");
+      } catch (err) {
+        await window.adminAlert(err instanceof Error ? err.message : "Error inesperado");
+      }
+    });
+
+    replaceForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = (new FormData(replaceForm).get("file") as File) ?? null;
+      if (!file || !file.size) {
+        await window.adminAlert("Selecciona un archivo primero.");
+        return;
+      }
+      const fd = new FormData();
+      fd.append("file", file);
+      try {
+        const res = await fetch(`/api/admin/permits/${id}/file`, { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
+        window.location.reload();
+      } catch (err) {
+        await window.adminAlert(err instanceof Error ? err.message : "Error inesperado");
+      }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+      const ok = await window.adminConfirm("Esta acción no se puede deshacer.", {
+        title: "¿Eliminar este archivo?",
+        confirmLabel: "Eliminar",
+      });
+      if (!ok) return;
+
+      try {
+        const res = await fetch(`/api/admin/permits/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Error al eliminar");
+        tr.remove();
+      } catch (err) {
+        await window.adminAlert(err instanceof Error ? err.message : "Error inesperado");
+      }
+    });
+  });
+</script>
+
+<style>
+  .page {
+    padding: 40px 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .page__header {
+    margin-bottom: 8px;
+  }
+
+  .page__header h1 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    margin: 0;
+  }
+
+  .page__lead {
+    color: var(--color-text-muted);
+    opacity: 0.85;
+    font-size: 14px;
+    max-width: 640px;
+    margin: 0 0 32px;
+  }
+
+  .add-form {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .add-form h2 {
+    font-size: 15px;
+    margin: 0 0 16px;
+  }
+
+  .add-form form {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .field input[type="text"],
+  .field select {
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    min-width: 200px;
+    font-family: var(--font-sans);
+  }
+
+  /* The closed <select> box picks up the dark page background fine, but
+     browsers render the open option list with their own (usually opaque
+     white) styling unless `option` gets an explicit dark background too. */
+  .field select option,
+  .rename-form select option {
+    background: #26262a;
+    color: #ffffff;
+  }
+
+  .field input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .field input[type="file"] {
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+
+  #add-submit {
+    padding: 11px 22px;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: #0a0a0a;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+  }
+
+  #add-submit:disabled {
+    opacity: 0.6;
+  }
+
+  .status {
+    font-size: 12px;
+    margin: 8px 0 0;
+    width: 100%;
+  }
+
+  .table-wrap {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: auto;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+  }
+
+  .table th,
+  .table td {
+    text-align: left;
+    padding: 14px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .table th {
+    color: var(--color-text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .rename-form,
+  .replace-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .rename-form input[type="text"] {
+    font-size: 13px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    min-width: 160px;
+  }
+
+  .rename-form select {
+    font-size: 12px;
+    padding: 7px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+  }
+
+  .replace-form input[type="file"] {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    max-width: 180px;
+  }
+
+  .btn-small {
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-strong);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-small:hover {
+    border-color: var(--color-accent);
+  }
+
+  .type-badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 185, 0, 0.15);
+    color: var(--color-accent);
+  }
+
+  .view-link {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    text-decoration: underline;
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .empty {
+    padding: 32px;
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+</style>
