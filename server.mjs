@@ -38,14 +38,15 @@ app.disable("x-powered-by");
 
 // Under Hostinger Business the app runs as a Node process behind the CDN edge
 // (hcdn) — Apache/LiteSpeed never runs, so `public/.htaccess` is inert. The
-// security headers, HSTS and CSP it used to provide are re-issued here on every
-// response instead. The CSP is a faithful port of the .htaccess policy,
-// widened only so GA4 (gtag) keeps working:
-//   - script-src: self + inline (JSON-LD, loader, define:vars, gtag config) + GTM/GA
-//   - style-src:  self + inline (is:inline loader style + Astro scoped styles)
-//   - img-src:    https: so Leaflet/OpenStreetMap tiles and CMS uploads load
-//   - connect-src: GA4 endpoints + GTM + OSM tiles
-//   - media-src:  self for the hero video
+// security headers and HSTS it used to provide are re-issued here on every
+// response instead.
+//
+// NOTE on CSP: the edge OVERRIDES the response Content-Security-Policy header
+// with its own `upgrade-insecure-requests`, so this header value never reaches
+// the browser. The enforced policy is therefore delivered as a <meta> tag from
+// the layouts (see src/lib/csp.ts). This header is kept as defense-in-depth for
+// any path that bypasses the edge; it is a faithful port of the .htaccess
+// policy, widened only so GA4 (gtag) keeps working.
 const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",

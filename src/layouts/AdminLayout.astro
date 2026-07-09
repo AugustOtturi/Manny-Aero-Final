@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import AdminTopbar from "../components/admin/AdminTopbar.astro";
 import ConfirmModal from "../components/admin/ConfirmModal.astro";
+import { CSP_META } from "../lib/csp";
 
 interface Props {
   title: string;
@@ -17,6 +18,7 @@ const user = Astro.locals.user;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={CSP_META} />}
     <meta name="robots" content="noindex, nofollow" />
     <title>{title} — Manny Aero Admin</title>
   </head>

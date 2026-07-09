@@ -6,6 +6,7 @@ import FloatingContact from "../components/FloatingContact.astro";
 import bebasNeue from "@fontsource/bebas-neue/files/bebas-neue-latin-400-normal.woff2?url";
 import interBold from "@fontsource/inter/files/inter-latin-700-normal.woff2?url";
 import aileronRegular from "../assets/fonts/aileron.regular.otf?url";
+import { CSP_META } from "../lib/csp";
 
 type ActiveLink = "home" | "about" | "services" | "map" | "news" | "contact";
 
@@ -79,6 +80,9 @@ const orgJsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* CSP via meta because Hostinger's edge overrides response CSP headers.
+        Prod-only so it never interferes with the dev server's HMR. */}
+    {import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={CSP_META} />}
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#0a0a0f" />
 
