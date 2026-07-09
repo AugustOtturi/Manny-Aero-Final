@@ -33,6 +33,8 @@ Thumbs.db
 
 # claude code local tooling
 .claude/
+.superpowers/
+docs/superpowers/
 
 # PHP mailer credentials — never commit
 public/mail-config.php

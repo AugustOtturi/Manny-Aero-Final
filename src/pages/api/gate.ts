@@ -11,7 +11,7 @@ export const prerender = false;
 const gateSchema = z.object({
   type: z.literal("gate"),
   website: z.string().optional().default(""),
-  email: z.string().trim().email("Valid email is required"),
+  email: z.email("Valid email is required").trim(),
   fileName: z.string().trim().max(255).optional().default("Unknown file"),
 });
 

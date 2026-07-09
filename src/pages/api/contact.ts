@@ -15,7 +15,7 @@ const contactSchema = z.object({
   website: z.string().optional().default(""), // honeypot
   firstName: z.string().trim().min(1, "Name is required").max(1000),
   lastName: z.string().trim().min(1, "Name is required").max(1000),
-  email: z.string().trim().email("Valid email is required"),
+  email: z.email("Valid email is required").trim(),
   phone: z.string().trim().max(1000).optional().default(""),
   company: z.string().trim().max(1000).optional().default(""),
   service: z.string().trim().max(1000).optional().default(""),
