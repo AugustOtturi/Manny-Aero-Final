@@ -1,0 +1,308 @@
+<h2>¿Cómo reubicamos los filtros del mapa?</h2>
+<p class="subtitle">Las pills actuales "chocan" visualmente con el navbar. Aquí hay 3 alternativas de posicionamiento.</p>
+
+<style>
+  .map-demo {
+    position: relative;
+    background: #d8d8d8;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.15);
+    font-family: system-ui, sans-serif;
+  }
+  .map-demo-inner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+  /* Simulación del mapa de México */
+  .map-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 45% at 45% 55%, #c8c8cc 60%, #b8b8bc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .map-mexico {
+    width: 65%;
+    height: 70%;
+    background: #e2e2e6;
+    border-radius: 30% 20% 40% 25% / 20% 30% 25% 40%;
+    border: 1.5px solid rgba(60,60,80,0.3);
+    position: relative;
+  }
+  .map-pin { position: absolute; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid white; }
+  .pin-yellow { background: #ffb900; }
+  .pin-red { background: #e05252; }
+  .pin-blue { background: #5284e0; }
+  .pin-orange { background: #e07c28; }
+
+  /* Pills flotantes — Opción A */
+  .legend-float {
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    background: rgba(15,15,20,0.88);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 10;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .legend-item.active { background: rgba(255,185,0,0.18); color: #ffb900; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Panel lateral — Opción B */
+  .side-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 130px;
+    background: rgba(15,15,20,0.88);
+    backdrop-filter: blur(12px);
+    border-left: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 10px;
+    z-index: 10;
+  }
+  .side-panel-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 6px;
+    padding: 0 4px;
+  }
+  .side-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    padding: 6px 8px;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .side-item.active { background: rgba(255,185,0,0.18); color: #ffb900; }
+
+  /* Strip adherido al borde superior — Opción C */
+  .top-strip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15,15,20,0.88);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 12px;
+    z-index: 10;
+  }
+  .strip-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.75);
+    padding: 5px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .strip-btn.active { background: rgba(255,185,0,0.2); color: #ffb900; }
+  .strip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Context header above map */
+  .ctx-header {
+    text-align: center;
+    padding: 10px 0 8px;
+    color: rgba(255,255,255,0.5);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: rgba(66,64,64,0.95);
+  }
+  .ctx-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    padding: 6px 0 2px;
+    line-height: 1;
+  }
+  .ctx-sub { font-size: 10px; color: rgba(255,255,255,0.65); margin-bottom: 8px; }
+  .no-controls { height: 8px; }
+
+  .section-wrap {
+    background: linear-gradient(180deg, #b9b9b9 0%, #424040 100%);
+    border-radius: 10px;
+    padding: 10px 10px 6px;
+    margin-bottom: 0;
+  }
+</style>
+
+<div class="cards">
+
+  <!-- OPCIÓN A: Leyenda flotante sobre el mapa -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 12px 12px 0;">
+      <div class="section-wrap">
+        <div class="ctx-header">Coverage across Mexico</div>
+        <div style="background:rgba(66,64,64,0.95);text-align:center;padding:4px 0 10px;">
+          <div class="ctx-title">Coverage Across Every <span style="color:#ffb900">Key Destination</span></div>
+          <div class="ctx-sub">From major airports to strategic FBO partnerships...</div>
+        </div>
+        <div class="no-controls"></div>
+        <div class="map-demo">
+          <div class="map-demo-inner">
+            <div class="map-bg">
+              <div class="map-mexico">
+                <div class="map-pin pin-yellow" style="top:30%;left:25%"></div>
+                <div class="map-pin pin-red" style="top:45%;left:55%"></div>
+                <div class="map-pin pin-blue" style="top:55%;left:48%"></div>
+                <div class="map-pin pin-yellow" style="top:60%;left:70%"></div>
+                <div class="map-pin pin-orange" style="top:40%;left:35%"></div>
+                <div class="map-pin pin-yellow" style="top:70%;left:60%"></div>
+              </div>
+            </div>
+            <div class="legend-float">
+              <div class="legend-item active">
+                <div class="legend-dot" style="background:#8a6f2e;opacity:0.85"></div> All
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#ffb900"></div> Manny Agent
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#e05252"></div> FBO Partnership
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#5284e0"></div> Office
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:#e07c28"></div> IS-BAH
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Leyenda flotante</h3>
+      <p>Los filtros van dentro del canvas, esquina inferior-izquierda. El área entre el texto y el mapa queda limpia. Estilo "mapa real" (como Google Maps).</p>
+    </div>
+  </div>
+
+  <!-- OPCIÓN B: Panel lateral -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 12px 12px 0;">
+      <div class="section-wrap">
+        <div class="ctx-header">Coverage across Mexico</div>
+        <div style="background:rgba(66,64,64,0.95);text-align:center;padding:4px 0 10px;">
+          <div class="ctx-title">Coverage Across Every <span style="color:#ffb900">Key Destination</span></div>
+          <div class="ctx-sub">From major airports to strategic FBO partnerships...</div>
+        </div>
+        <div class="no-controls"></div>
+        <div class="map-demo">
+          <div class="map-demo-inner">
+            <div class="map-bg">
+              <div class="map-mexico" style="margin-left:-40px;">
+                <div class="map-pin pin-yellow" style="top:30%;left:25%"></div>
+                <div class="map-pin pin-red" style="top:45%;left:55%"></div>
+                <div class="map-pin pin-blue" style="top:55%;left:48%"></div>
+                <div class="map-pin pin-yellow" style="top:60%;left:70%"></div>
+                <div class="map-pin pin-orange" style="top:40%;left:35%"></div>
+              </div>
+            </div>
+            <div class="side-panel">
+              <div class="side-panel-label">Filtrar</div>
+              <div class="side-item active"><div class="legend-dot" style="background:#8a6f2e;opacity:0.85"></div>All</div>
+              <div class="side-item"><div class="legend-dot" style="background:#ffb900"></div>Agent</div>
+              <div class="side-item"><div class="legend-dot" style="background:#e05252"></div>FBO</div>
+              <div class="side-item"><div class="legend-dot" style="background:#5284e0"></div>Office</div>
+              <div class="side-item"><div class="legend-dot" style="background:#e07c28"></div>IS-BAH</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Panel lateral</h3>
+      <p>Sidebar derecho dentro del canvas. El mapa se comprime ligeramente pero los filtros son muy legibles y no flotan sobre el contenido.</p>
+    </div>
+  </div>
+
+  <!-- OPCIÓN C: Strip adherido al borde superior del canvas -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 12px 12px 0;">
+      <div class="section-wrap">
+        <div class="ctx-header">Coverage across Mexico</div>
+        <div style="background:rgba(66,64,64,0.95);text-align:center;padding:4px 0 10px;">
+          <div class="ctx-title">Coverage Across Every <span style="color:#ffb900">Key Destination</span></div>
+          <div class="ctx-sub">From major airports to strategic FBO partnerships...</div>
+        </div>
+        <div class="no-controls"></div>
+        <div class="map-demo">
+          <div class="map-demo-inner">
+            <div class="map-bg">
+              <div class="map-mexico" style="margin-top: 16px;">
+                <div class="map-pin pin-yellow" style="top:30%;left:25%"></div>
+                <div class="map-pin pin-red" style="top:45%;left:55%"></div>
+                <div class="map-pin pin-blue" style="top:55%;left:48%"></div>
+                <div class="map-pin pin-yellow" style="top:60%;left:70%"></div>
+                <div class="map-pin pin-orange" style="top:40%;left:35%"></div>
+              </div>
+            </div>
+            <div class="top-strip">
+              <div class="strip-btn active"><div class="strip-dot" style="background:#8a6f2e;opacity:0.85"></div>All</div>
+              <div class="strip-btn"><div class="strip-dot" style="background:#ffb900"></div>Agent</div>
+              <div class="strip-btn"><div class="strip-dot" style="background:#e05252"></div>FBO</div>
+              <div class="strip-btn"><div class="strip-dot" style="background:#5284e0"></div>Office</div>
+              <div class="strip-btn"><div class="strip-dot" style="background:#e07c28"></div>IS-BAH</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Strip dentro del mapa (borde superior)</h3>
+      <p>Los controles se adhieren al borde superior del canvas, formando parte visual del mapa. El espacio entre el texto y el mapa queda completamente libre.</p>
+    </div>
+  </div>
+
+</div>

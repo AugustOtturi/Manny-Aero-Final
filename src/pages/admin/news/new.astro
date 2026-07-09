@@ -68,6 +68,18 @@ const today = new Date().toISOString().slice(0, 10);
 </AdminLayout>
 
 <script>
+  function getCsrfToken() {
+    return document.querySelector('meta[name="x-astro-csrf"]')?.getAttribute('content') ?? '';
+  }
+
+  function fetchWithCsrf(url, opts = {}) {
+    const token = getCsrfToken();
+    return fetch(url, {
+      ...opts,
+      headers: { ...opts.headers, 'x-astro-csrf': token },
+    });
+  }
+
   const form = document.getElementById("news-form") as HTMLFormElement;
   const errorEl = document.getElementById("form-error")!;
   const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
@@ -107,7 +119,7 @@ const today = new Date().toISOString().slice(0, 10);
     fd.append("file", file);
 
     try {
-      const res = await fetch("/api/admin/images/upload", { method: "POST", body: fd });
+      const res = await fetchWithCsrf("/api/admin/images/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
 
@@ -142,7 +154,7 @@ const today = new Date().toISOString().slice(0, 10);
     };
 
     try {
-      const res = await fetch("/api/admin/news", {
+      const res = await fetchWithCsrf("/api/admin/news", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

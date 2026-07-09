@@ -94,6 +94,18 @@ const overrides = new Map((await listImages(category)).map((row) => [row.slug, r
 </AdminLayout>
 
 <script define:vars={{ category }}>
+  function getCsrfToken() {
+    return document.querySelector('meta[name="x-astro-csrf"]')?.getAttribute('content') ?? '';
+  }
+
+  function fetchWithCsrf(url, opts = {}) {
+    const token = getCsrfToken();
+    return fetch(url, {
+      ...opts,
+      headers: { ...opts.headers, 'x-astro-csrf': token },
+    });
+  }
+
   document.querySelectorAll(".slot").forEach((slot) => {
     const slugVal = slot.dataset.slug;
     const form = slot.querySelector(".upload-form");
@@ -122,7 +134,7 @@ const overrides = new Map((await listImages(category)).map((row) => [row.slug, r
       fd.append("file", file);
 
       try {
-        const res = await fetch("/api/admin/images/upload", { method: "POST", body: fd });
+        const res = await fetchWithCsrf("/api/admin/images/upload", { method: "POST", body: fd });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
         setStatus("Imagen actualizada.");
@@ -141,7 +153,7 @@ const overrides = new Map((await listImages(category)).map((row) => [row.slug, r
       if (!ok) return;
       setStatus("Restaurando…");
       try {
-        const res = await fetch(`/api/admin/images/${category}/${slugVal}`, { method: "DELETE" });
+        const res = await fetchWithCsrf(`/api/admin/images/${category}/${slugVal}`, { method: "DELETE" });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Error al restaurar");
         window.location.reload();

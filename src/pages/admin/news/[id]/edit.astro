@@ -97,6 +97,18 @@ const uploadedImageUrl = !legacyImage && article.imageKey ? `/uploads/news/${art
 </AdminLayout>
 
 <script>
+  function getCsrfToken() {
+    return document.querySelector('meta[name="x-astro-csrf"]')?.getAttribute('content') ?? '';
+  }
+
+  function fetchWithCsrf(url, opts = {}) {
+    const token = getCsrfToken();
+    return fetch(url, {
+      ...opts,
+      headers: { ...opts.headers, 'x-astro-csrf': token },
+    });
+  }
+
   const form = document.getElementById("news-form") as HTMLFormElement;
   const errorEl = document.getElementById("form-error")!;
   const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
@@ -137,7 +149,7 @@ const uploadedImageUrl = !legacyImage && article.imageKey ? `/uploads/news/${art
     fd.append("file", file);
 
     try {
-      const res = await fetch("/api/admin/images/upload", { method: "POST", body: fd });
+      const res = await fetchWithCsrf("/api/admin/images/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
 
@@ -169,7 +181,7 @@ const uploadedImageUrl = !legacyImage && article.imageKey ? `/uploads/news/${art
     };
 
     try {
-      const res = await fetch(`/api/admin/news/${id}`, {
+      const res = await fetchWithCsrf(`/api/admin/news/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

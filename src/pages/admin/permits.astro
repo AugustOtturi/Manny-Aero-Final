@@ -96,6 +96,18 @@ const ICONS = [
 </AdminLayout>
 
 <script>
+  function getCsrfToken() {
+    return document.querySelector('meta[name="x-astro-csrf"]')?.getAttribute('content') ?? '';
+  }
+
+  function fetchWithCsrf(url, opts = {}) {
+    const token = getCsrfToken();
+    return fetch(url, {
+      ...opts,
+      headers: { ...opts.headers, 'x-astro-csrf': token },
+    });
+  }
+
   const addForm = document.getElementById("add-form") as HTMLFormElement;
   const addStatus = document.getElementById("add-status")!;
   const addSubmit = document.getElementById("add-submit") as HTMLButtonElement;
@@ -116,7 +128,7 @@ const ICONS = [
     }
 
     try {
-      const res = await fetch("/api/admin/permits/upload", { method: "POST", body: fd });
+      const res = await fetchWithCsrf("/api/admin/permits/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
       window.location.reload();
@@ -138,7 +150,7 @@ const ICONS = [
       e.preventDefault();
       const fd = new FormData(renameForm);
       try {
-        const res = await fetch(`/api/admin/permits/${id}`, {
+        const res = await fetchWithCsrf(`/api/admin/permits/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: fd.get("name"), icon: fd.get("icon") }),
@@ -160,7 +172,7 @@ const ICONS = [
       const fd = new FormData();
       fd.append("file", file);
       try {
-        const res = await fetch(`/api/admin/permits/${id}/file`, { method: "POST", body: fd });
+        const res = await fetchWithCsrf(`/api/admin/permits/${id}/file`, { method: "POST", body: fd });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
         window.location.reload();
@@ -177,7 +189,7 @@ const ICONS = [
       if (!ok) return;
 
       try {
-        const res = await fetch(`/api/admin/permits/${id}`, { method: "DELETE" });
+        const res = await fetchWithCsrf(`/api/admin/permits/${id}`, { method: "DELETE" });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Error al eliminar");
         tr.remove();
