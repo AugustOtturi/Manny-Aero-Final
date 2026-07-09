@@ -1,12 +1,27 @@
 import { and, desc, eq, like, count } from "drizzle-orm";
 import { getDb } from "../db/client";
-import { leads, type NewLeadRow } from "../db/schema";
+import { leads, type LeadRow, type NewLeadRow } from "../db/schema";
 
 export interface LeadFilters {
   type?: "contact" | "gate";
   search?: string;
   limit?: number;
   offset?: number;
+}
+
+// The `flights` JSON column comes back from the driver as a raw JSON string
+// (not a parsed array), so every consumer (leads table, detail modal, CSV
+// export) would see a string and skip it. Normalize it to an array here so it's
+// fixed in one place.
+function normalizeLead(row: LeadRow): LeadRow {
+  if (typeof row.flights === "string") {
+    try {
+      return { ...row, flights: JSON.parse(row.flights) };
+    } catch {
+      return { ...row, flights: [] };
+    }
+  }
+  return row;
 }
 
 export async function createLead(data: NewLeadRow) {
@@ -35,13 +50,13 @@ export async function listLeads(filters: LeadFilters = {}) {
     db.select({ value: count() }).from(leads).where(where),
   ]);
 
-  return { rows, total: totalRows[0]?.value ?? 0 };
+  return { rows: rows.map(normalizeLead), total: totalRows[0]?.value ?? 0 };
 }
 
 export async function getLeadById(id: number) {
   const db = getDb();
   const rows = await db.select().from(leads).where(eq(leads.id, id)).limit(1);
-  return rows[0] ?? null;
+  return rows[0] ? normalizeLead(rows[0]) : null;
 }
 
 export async function deleteLead(id: number) {
@@ -52,5 +67,6 @@ export async function deleteLead(id: number) {
 export async function listAllLeadsForExport(type?: "contact" | "gate") {
   const db = getDb();
   const where = type ? eq(leads.type, type) : undefined;
-  return db.select().from(leads).where(where).orderBy(desc(leads.createdAt));
+  const rows = await db.select().from(leads).where(where).orderBy(desc(leads.createdAt));
+  return rows.map(normalizeLead);
 }

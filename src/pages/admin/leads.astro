@@ -39,7 +39,7 @@ const { rows, total } = await listLeads({ limit: 50 });
         <tbody id="leads-body">
           {rows.map((l) => (
             <tr data-id={l.id} data-lead={JSON.stringify(l)}>
-              <td class="muted">{new Date(l.createdAt).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })}</td>
+              <td class="muted">{new Date(l.createdAt).toLocaleString("es-MX", { timeZone: "America/Mexico_City", dateStyle: "medium", timeStyle: "short" })}</td>
               <td><span class={`badge badge--${l.type}`}>{l.type === "contact" ? "Contacto" : "Gate"}</span></td>
               <td>{[l.firstName, l.lastName].filter(Boolean).join(" ") || "—"}</td>
               <td>{l.email}</td>
@@ -113,7 +113,7 @@ const { rows, total } = await listLeads({ limit: 50 });
       leadsById.set(l.id, l);
       const tr = document.createElement("tr");
       tr.dataset.id = String(l.id);
-      const date = new Date(l.createdAt).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" });
+      const date = new Date(l.createdAt).toLocaleString("es-MX", { timeZone: "America/Mexico_City", dateStyle: "medium", timeStyle: "short" });
       const name = [l.firstName, l.lastName].filter(Boolean).join(" ") || "—";
       const detail = l.type === "gate" ? (l.fileName || "—") : (l.service || "—");
       tr.innerHTML = `
@@ -164,7 +164,7 @@ const { rows, total } = await listLeads({ limit: 50 });
 
   function openLeadModal(lead: Lead) {
     const name = [lead.firstName, lead.lastName].filter(Boolean).join(" ");
-    const date = new Date(lead.createdAt).toLocaleString("es-MX", { dateStyle: "long", timeStyle: "short" });
+    const date = new Date(lead.createdAt).toLocaleString("es-MX", { timeZone: "America/Mexico_City", dateStyle: "long", timeStyle: "short" });
 
     let flightsHtml = "";
     if (Array.isArray(lead.flights) && lead.flights.length > 0) {
