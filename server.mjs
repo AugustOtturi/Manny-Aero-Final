@@ -6,10 +6,30 @@
 // used there.
 import express from "express";
 import path from "node:path";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { handler as astroHandler } from "./dist/server/entry.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// The Astro build can land in two layouts: ./dist/* when we run
+// `npm run build` ourselves (local prod test, plain servers), or
+// flattened to ./server + ./client when Hostinger copies the contents
+// of the configured output directory into the runtime dir.
+const LAYOUTS = [
+  { entry: "dist/server/entry.mjs", client: "dist/client" },
+  { entry: "server/entry.mjs", client: "client" },
+];
+const layout = LAYOUTS.find((l) => existsSync(path.join(__dirname, l.entry)));
+if (!layout) {
+  throw new Error(
+    "Astro build output not found (looked for ./dist/server/entry.mjs and ./server/entry.mjs). Did `npm run build` run?"
+  );
+}
+console.log(`[server] using Astro build at ./${layout.entry}`);
+const { handler: astroHandler } = await import(
+  new URL(layout.entry, import.meta.url).href
+);
+
 const app = express();
 
 app.set("trust proxy", true);
@@ -22,7 +42,7 @@ app.use(
 );
 
 app.use(
-  express.static(path.join(__dirname, "dist/client"), {
+  express.static(path.join(__dirname, layout.client), {
     maxAge: "1y",
     index: false,
   })
