@@ -44,7 +44,7 @@ export async function verifyCredentials(username: string, password: string): Pro
     );
 
     if (user.length > 0) {
-      return await bcrypt.compare(password, user[0].password_hash);
+      return await bcrypt.compare(password, user[0].passwordHash);
     }
   } catch {
     // Fall back to env vars if DB is unavailable
