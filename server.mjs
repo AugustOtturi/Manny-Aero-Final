@@ -5,6 +5,7 @@
 // Local development still runs through `astro dev` — this file is never
 // used there.
 import express from "express";
+import compression from "compression";
 import path from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -33,6 +34,63 @@ const { handler: astroHandler } = await import(
 const app = express();
 
 app.set("trust proxy", true);
+app.disable("x-powered-by");
+
+// Under Hostinger Business the app runs as a Node process behind the CDN edge
+// (hcdn) — Apache/LiteSpeed never runs, so `public/.htaccess` is inert. The
+// security headers, HSTS and CSP it used to provide are re-issued here on every
+// response instead. The CSP is a faithful port of the .htaccess policy,
+// widened only so GA4 (gtag) keeps working:
+//   - script-src: self + inline (JSON-LD, loader, define:vars, gtag config) + GTM/GA
+//   - style-src:  self + inline (is:inline loader style + Astro scoped styles)
+//   - img-src:    https: so Leaflet/OpenStreetMap tiles and CMS uploads load
+//   - connect-src: GA4 endpoints + GTM + OSM tiles
+//   - media-src:  self for the hero video
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.tile.openstreetmap.org https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.googletagmanager.com",
+  "media-src 'self'",
+  "frame-ancestors 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  "upgrade-insecure-requests",
+].join("; ");
+
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  // The client always reaches us over HTTPS (TLS terminates at the edge), so
+  // HSTS is safe to send unconditionally — browsers only honor it over HTTPS.
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  res.setHeader("Content-Security-Policy", CSP);
+  next();
+});
+
+app.use(compression());
+
+// URL migrations that used to live in public/.htaccess (301 permanent). They
+// run at the Express layer — not Astro middleware — because the node adapter
+// serves the prerendered 404 for unmatched routes without invoking SSR
+// middleware, so these legacy paths (none of which are real routes) would
+// never reach it.
+const REDIRECTS = {
+  "/services": "/ground-handling",
+  "/isbha": "/isbah",
+  "/permits_and_authorizations": "/permits-and-authorizations",
+  "/our_founder": "/founder",
+};
+app.use((req, res, next) => {
+  const target = REDIRECTS[req.path] ?? REDIRECTS[req.path.replace(/\/$/, "")];
+  if (target) return res.redirect(301, target);
+  next();
+});
 
 app.use(
   "/uploads",

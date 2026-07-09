@@ -3,6 +3,7 @@ import { SESSION_COOKIE, verifySession } from "./lib/server/auth";
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
+
   const token = context.cookies.get(SESSION_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   context.locals.user = session;

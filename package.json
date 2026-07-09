@@ -25,6 +25,7 @@
     "@types/leaflet": "^1.9.21",
     "astro": "^5.1.0",
     "bcryptjs": "^3.0.3",
+    "compression": "^1.8.1",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "express": "^5.2.1",
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
     "@types/bcryptjs": "^2.4.6",
+    "@types/compression": "^1.8.1",
     "@types/express": "^5.0.6",
     "@types/nodemailer": "^8.0.1",
     "drizzle-kit": "^0.31.10",
