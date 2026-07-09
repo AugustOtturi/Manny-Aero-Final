@@ -8,7 +8,7 @@
 // output persists in the runtime dir, so this only runs once per
 // deploy.
 import { existsSync, readdirSync } from "node:fs";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 
 console.log(
   `[boot] node ${process.version} | NODE_ENV=${process.env.NODE_ENV ?? "(unset)"} | PORT=${process.env.PORT ?? "(unset)"} | cwd=${process.cwd()}`
@@ -36,8 +36,12 @@ process.on("unhandledRejection", (err) => {
 const hasBuild =
   existsSync("./dist/server/entry.mjs") || existsSync("./server/entry.mjs");
 if (!hasBuild) {
-  console.log("[boot] no Astro build output found — running `npx astro build`...");
-  execSync("npx astro build", { stdio: "inherit" });
+  // Invoke astro's CLI entry directly with the running node binary —
+  // Hostinger's runtime environment has no npx/PATH we can rely on.
+  console.log("[boot] no Astro build output found — running astro build...");
+  execFileSync(process.execPath, ["node_modules/astro/astro.js", "build"], {
+    stdio: "inherit",
+  });
   console.log("[boot] astro build finished.");
 }
 
