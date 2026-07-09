@@ -22,7 +22,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return json({ ok: false, error: "Username and password are required" }, 400);
   }
 
-  const valid = await verifyCredentials(username, password);
+  let valid = false;
+  try {
+    valid = await verifyCredentials(username, password);
+  } catch (err) {
+    console.error("[login] verifyCredentials error:", err);
+    return json({ ok: false, error: "Authentication error" }, 500);
+  }
   if (!valid) {
     return json({ ok: false, error: "Invalid credentials" }, 401);
   }
