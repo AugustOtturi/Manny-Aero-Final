@@ -44,7 +44,7 @@ export async function verifyCredentials(username: string, password: string): Pro
     );
 
     if (user.length > 0) {
-      return bcrypt.compare(password, user[0].password_hash);
+      return await bcrypt.compare(password, user[0].password_hash);
     }
   } catch {
     // Fall back to env vars if DB is unavailable
@@ -53,5 +53,5 @@ export async function verifyCredentials(username: string, password: string): Pro
   // Fallback to env vars (old method, for backwards compatibility)
   const env = getEnv();
   if (username !== env.ADMIN_USERNAME) return false;
-  return bcrypt.compare(password, env.ADMIN_PASSWORD_HASH);
+  return await bcrypt.compare(password, env.ADMIN_PASSWORD_HASH);
 }
