@@ -8,10 +8,10 @@ Marketing site + admin CMS for **Manny Aero** — premium aircraft ground handli
 
 Routes (actualizado jul 2026):
 - `/` — main landing (hero video, subhero, service cards, map, final CTA)
-- `/about` — company story, timeline, team, values
-- `/ground-handling` — servicios detallados (tabs desktop, modal bottom-sheet mobile). `/services` redirige aquí via 301 en `.htaccess`.
+- `/about` — company story, timeline, values (la sección team se eliminó en jul 2026 a pedido del cliente)
+- `/ground-handling` — servicios detallados (tabs desktop, modal bottom-sheet mobile). `/services` redirige aquí via 301 en `server.mjs` (`REDIRECTS`).
 - `/catering` — Manny's In-Flight Catering (foto hero + lista de servicios + CTA)
-- `/isbah` — IS-BAH compliance program (sticky sidebar nav + accordions). `/isbha` redirige aquí via 301 en `.htaccess`.
+- `/isbah` — IS-BAH compliance program (sticky sidebar nav + accordions). `/isbha` redirige aquí via 301 en `server.mjs`. También hay 301: `/permits_and_authorizations` → `/permits-and-authorizations` y `/our_founder` → `/founder`.
 - `/permits-and-authorizations` — permit categories (sticky sidebar nav + accordions + email-gated downloads)
 - `/contact` — flight request form + contact cards
 - `/founder` — historia del fundador (sticky photo + body texto)
@@ -23,11 +23,12 @@ Routes (actualizado jul 2026):
 
 - **Astro 5**, `output: "server"` con adapter `@astrojs/node` (modo `middleware`). **No hay páginas prerenderizadas todavía** — todo se sirve por request; es una optimización pendiente marcar con `export const prerender = true` las páginas 100% estáticas (about, catering, isbah, founder, etc.) que no leen de la DB.
 - **TypeScript** (strict)
-- **Express** (`server.mjs`, raíz del proyecto) — envuelve el handler SSR de Astro como middleware; solo agrega: servir `public/uploads/` con cache headers y `trust proxy` para IPs correctas detrás del proxy de Hostinger. Es el entry point de producción (`npm start`). **No se usa en dev** — `astro dev` corre su propio servidor y todas las rutas API (`src/pages/api/**`) funcionan igual ahí, sin Express.
-- **MySQL + Drizzle ORM** (`src/lib/server/db/`) — tablas `news`, `leads`, `images`, `admin_users` (esta última sin usar aún, ver Auth abajo). Esquema en `src/lib/server/db/schema.ts`, migraciones con `drizzle-kit`.
-- **Nodemailer** (`src/lib/server/mail.ts`) — reemplaza PHPMailer para `/contact` y el email gate. `public/mail.php` y `public/phpmailer/` **siguen en el repo pero ya no los llama ningún formulario** (legacy, no borrar sin confirmar con el cliente por si algo externo aún apunta ahí).
-- **Auth admin**: JWT (`jose`) en cookie `httpOnly`, un solo usuario configurado por variables de entorno (`ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH` con `bcryptjs`) — **no** por la tabla `admin_users`. Ver sección Admin CMS.
-- **sharp** — optimiza imágenes subidas desde `/admin/images` (resize + conversión a WebP) antes de guardarlas en `public/uploads/`.
+- **Express** (`server.mjs`, raíz del proyecto) — envuelve el handler SSR de Astro como middleware y agrega: headers de seguridad (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, HSTS, CSP como defensa en profundidad), `compression()`, los 301 redirects legacy (`REDIRECTS`), servir el directorio de uploads con cache headers, y `trust proxy` para IPs correctas detrás del edge de Hostinger. Es el server de producción (`npm start`). En Hostinger el entry point configurado es **`server.js`** (raíz), un shim que loguea el boot, hace self-build de Astro si falta `dist/`, restaura el exec bit de esbuild y luego importa `server.mjs`. **No se usa en dev** — `astro dev` corre su propio servidor y todas las rutas API (`src/pages/api/**`) funcionan igual ahí, sin Express.
+- **CSP**: el edge CDN de Hostinger (hcdn) **pisa el header** `Content-Security-Policy`, así que la política enforced real se entrega como `<meta http-equiv>` desde `src/lib/csp.ts` (`CSP_META`), inyectada en `BaseLayout.astro` y `AdminLayout.astro` solo en producción. El header de `server.mjs` queda como defensa en profundidad. La política permite GA4/gtag.
+- **MySQL + Drizzle ORM** (`src/lib/server/db/`) — tablas `news`, `leads`, `images`, `permit_downloads`, `admin_users`. Esquema en `src/lib/server/db/schema.ts`.
+- **Nodemailer** (`src/lib/server/mail.ts`) — envío de emails para `/contact` y el email gate (el viejo `mail.php`/PHPMailer se eliminó del repo en jul 2026, commit `ceb04a8`).
+- **Auth admin**: JWT (`jose`) en cookie `httpOnly`. `verifyCredentials` busca **primero en la tabla `admin_users`** (por email, hash bcrypt) y solo cae al fallback por variables de entorno (`ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH`) si no hay fila o la DB falla. Ver sección Admin CMS.
+- **sharp** — optimiza imágenes subidas desde `/admin/images` (resize + conversión a WebP) antes de guardarlas en el directorio de uploads (`UPLOADS_DIR`, ver Variables de entorno).
 - **zod** — validación de payloads en todos los endpoints (`src/pages/api/**`).
 - **Leaflet** for the map (lazy-loaded via IntersectionObserver in `MapSection.astro`)
 - **@astrojs/sitemap** for sitemap generation
@@ -60,9 +61,10 @@ npm run db:seed-permit-downloads  # registra los 10 archivos de public/files/ en
 - `DB_HOST/PORT/USER/PASS/NAME` — MySQL
 - `SMTP_HOST/PORT/SECURE/USER/PASS`, `MAIL_FROM(_NAME)`, `MAIL_TO_CONTACT`, `MAIL_TO_GATE`, `MAIL_CC` — Nodemailer
 - `JWT_SECRET` — firma de la cookie de sesión admin (32+ bytes random)
-- `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` — credenciales del único usuario admin (hash bcrypt, nunca la password en texto plano)
-- `ALLOWED_ORIGIN` — origin check en `/api/contact` y `/api/gate` (mismo mecanismo que `mail.php` tenía)
-- `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW` — rate limit in-memory (por proceso, no por archivo como antes)
+- `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` — credenciales admin de **fallback** (hash bcrypt, nunca la password en texto plano); el camino principal es la tabla `admin_users`
+- `ALLOWED_ORIGIN` — origin check (`src/lib/server/originCheck.ts`) en `/api/contact`, `/api/gate` y `/api/auth/login`
+- `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW` — rate limit in-memory (por proceso)
+- `UPLOADS_DIR` — directorio absoluto y **persistente fuera del checkout** donde se guardan los uploads del CMS en producción (sobrevive redeploys); si no está seteada cae a `public/uploads/` (dev). No la valida `env.ts` — se lee directo de `process.env` en `server.mjs` y `src/lib/server/uploads.ts` (deben coincidir)
 
 ⚠️ **`astro.config.mjs` carga `.env.local` manualmente** con `dotenv` (Astro/Vite no inyecta `.env.local` a `process.env` automáticamente para código server-side). Por esto `dotenv` está en `dependencies`, no en `devDependencies` — `astro.config.mjs` se ejecuta durante `npm run build`, que Hostinger corre en producción.
 
@@ -73,10 +75,9 @@ El sitio ya **no** se deploya como archivos estáticos. Es una app Node.js persi
 1. `npm run build` (genera `dist/client` + `dist/server`)
 2. Subir el repo completo (o `dist/`, `server.mjs`, `package.json`, `public/`) al servidor — vía Git si Hostinger lo soporta para Node apps, o File Manager/SFTP si no.
 3. En el panel de Hostinger, configurar la app Node.js:
-   - Entry point: `server.mjs`
-   - Startup command: `npm run build && npm start` (o build en un paso separado + `npm start` como startup)
+   - Entry point: `server.js` (shim que Hostinger exige con ese nombre; hace boot logging + self-build si falta `dist/` y luego importa `server.mjs`)
    - Variables de entorno: cargar todas las de `.env.example` con los valores reales de producción (**no** subir `.env.local` al servidor)
-4. Verificar que `public/uploads/` sea escribible por el proceso Node (ahí se guardan las imágenes subidas desde `/admin/images`) y que persista entre deploys (no debe limpiarse en cada build).
+4. Configurar `UPLOADS_DIR` apuntando a un directorio **fuera del checkout del deploy** y escribible por el proceso Node — ahí se guardan las imágenes/archivos subidos desde `/admin` y así sobreviven a los redeploys.
 
 > ⚠️ El flujo viejo (`npm run build` → zip de `dist/` → extraer en `public_html/`) ya no aplica — no hay backend PHP/DB en ese modelo y el CMS no funcionaría.
 
@@ -84,14 +85,14 @@ El sitio ya **no** se deploya como archivos estáticos. Es una app Node.js persi
 
 ```
 public/
-  .htaccess              # Apache config (Brotli, 1y immutable cache, MIME, security headers, HTTPS redirect, 301 redirects)
   favicon.svg, logo-manny.svg, og-default.jpg
   map/mexico-states.geojson
-  og/                    # OG images por página (catering, isbah, founder, permits, ground-handling, about, services, contact)
+  og/                    # OG images por página (catering, isbah, founder, permits, ground-handling, about, contact)
   files/                 # archivos originales de /permits-and-authorizations (no tocar/borrar — referenciados por permit_downloads)
-  uploads/               # subido desde el admin (gitignored) — subcarpetas: subhero/, service/, logo/, news/, permit-files/
-  phpmailer/, mail.php   # legacy — ya no los llama ningún formulario, ver sección Mail / formularios
-server.mjs                # entry point de producción (Express + handler SSR de Astro)
+  member-logos/          # logos de membresías del Footer
+  uploads/               # fallback dev de uploads del admin (gitignored) — en prod van a UPLOADS_DIR
+server.js                 # shim entry de Hostinger — boot logging, self-build si falta dist/, importa server.mjs
+server.mjs                # server de producción (Express: headers, CSP, compresión, 301s, uploads + handler SSR de Astro)
 drizzle.config.ts         # config de drizzle-kit (lee .env.local) — usar con cuidado, ver "Things to avoid"
 .env.example               # plantilla documentada de variables de entorno
 src/
@@ -102,11 +103,13 @@ src/
     AdminLayout.astro         # layout del panel admin (sin navbar/footer/loader públicos), monta <AdminTopbar> y <ConfirmModal> si hay sesión
   lib/
     format.ts                 # formatNewsDate, newsBodyToParagraphs
+    csp.ts                     # CSP_META — política CSP entregada como <meta> (el edge pisa el header)
     imageSlots.ts              # lista canónica de slots reemplazables en /admin/images/[category] (subhero + service — logos NO están acá, son CRUD dinámico)
     server/                    # código SOLO server-side — nunca importar desde componentes que se hidratan en cliente
       env.ts                    # getEnv() — valida process.env con zod, cachea el resultado
-      auth.ts                   # signSession/verifySession (JWT), verifyCredentials (bcrypt contra ADMIN_USERNAME/HASH)
-      mail.ts                    # Nodemailer — sendContactEmail, sendGateEmail (mismo template HTML que tenía mail.php)
+      auth.ts                   # signSession/verifySession (JWT), verifyCredentials (DB-first contra admin_users, fallback env vars)
+      uploads.ts                 # UPLOADS_ROOT — resuelve UPLOADS_DIR (prod) o public/uploads (dev)
+      mail.ts                    # Nodemailer — sendContactEmail, sendGateEmail
       rateLimit.ts                # rate limiter in-memory (checkRateLimit, getClientIp)
       originCheck.ts               # isAllowedOrigin — localhost cualquier puerto en dev, ALLOWED_ORIGIN exacto en prod
       db/
@@ -130,8 +133,8 @@ src/
       index.astro               # grid de artículos, lee de MySQL (SSR)
       [slug].astro                # artículo individual, lee de MySQL por slug (SSR, no getStaticPaths)
     api/
-      contact.ts, gate.ts        # públicos — reemplazan mail.php, validan con zod, insertan lead + envían email
-      auth/login.ts, logout.ts, me.ts
+      contact.ts, gate.ts        # públicos — validan con zod, insertan lead + envían email
+      auth/login.ts, logout.ts
       admin/                      # protegidos por middleware.ts (requieren sesión)
         news/index.ts, [id].ts
         leads/index.ts, [id].ts, export.ts
@@ -162,18 +165,16 @@ src/
     airportOptions.ts          # opciones serializadas para el select del formulario de contacto
     services.ts                # minimal data (slug, title, href, tone) para ServiceCards en el index
     servicesDetail.ts          # rich data (tag, desc, features, image) para /ground-handling
-    isbhaModules.ts            # 6 ISBHA compliance modules para /isbah
-    permits.ts                 # PERMIT_SECTIONS + DOWNLOADS para /permits-and-authorizations
-    events.ts                  # event partners
-    news.ts                    # ⚠️ ya no alimenta /news — solo lo usa seed-news.ts como fuente de la migración inicial
+    permits.ts                 # PERMIT_SECTIONS (en uso por la página) + DOWNLOADS (⚠️ solo fuente de seed-permit-downloads — conservar)
+    news.ts                    # ⚠️ ya no alimenta /news — solo fuente de seed-news.ts — conservar
   styles/
     tokens.css                 # CSS variables (colors, fonts, breakpoints, motion)
     global.css                 # base styles + utilities (includes the white-title shine rule)
   assets/
     photos/                    # fotos webp/jpg (subhero-1..4, service-*, catering, founder, noticias) — fallback si no hay override en DB
     fonts/                     # Aileron otf self-hosted
-    files/                     # archivos descargables para /permits-and-authorizations
-    Logo1..8.png               # ⚠️ ya sin uso — logos migraron 100% a la tabla `images` (categoría "logo"), ver seed-logos.ts
+    files/                     # ⚠️ copia de respaldo de public/files/ — nada lo importa, conservar como backup
+    Logo1..8.png               # ⚠️ sin uso en frontend — solo fuente de seed-logos.ts — conservar
     poster-hero.webp           # hero LQIP fallback
     hero-manny-final.mp4
     mannylogo.png              # logo para el flyout mobile del navbar
@@ -184,7 +185,7 @@ src/
 Panel de administración integrado en la misma app Astro (no es un proyecto/dominio separado).
 
 ### Auth
-- Un solo usuario, credenciales en variables de entorno (`ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH`) — **no** en la tabla `admin_users` (esa tabla existe en el schema para una futura multi-usuario, pero no está conectada a nada todavía).
+- **DB-first con fallback a env vars** (desde `81095b2`): `verifyCredentials` (`src/lib/server/auth.ts`) busca el usuario en la tabla `admin_users` por email (hash bcrypt en la columna `passwordHash`); si no hay fila o la DB falla, cae a `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH` por compatibilidad. No hay seed para `admin_users` — el alta se hace manualmente en la DB.
 - Login: `POST /api/auth/login` → firma JWT (`jose`, HS256, expira en 12h) → cookie `manny_admin_session` (`httpOnly`, `sameSite: lax`, `secure` en prod).
 - `src/middleware.ts` corre en cada request: si la ruta empieza con `/admin` (menos `/admin/login`) y no hay sesión válida → redirect a `/admin/login?next=...`. Si empieza con `/api/admin` y no hay sesión → 401 JSON. Deja `Astro.locals.user` disponible en toda la app.
 - Rate limit propio en `/api/auth/login` (10 intentos / 5 min por IP) separado del rate limit de los formularios públicos.
@@ -220,10 +221,10 @@ Panel de administración integrado en la misma app Astro (no es un proyecto/domi
 
 ## Mail / formularios
 
-`/contact` (página + `FinalCTA`) y el email gate de permisos ahora postean a `/api/contact` y `/api/gate` (endpoints Astro, no PHP). `public/mail.php` sigue en el repo pero **no lo llama ningún formulario** — no borrar todavía por si algo externo aún apunta ahí, pero es candidato a eliminar en una limpieza futura.
+`/contact` (página + `FinalCTA`) y el email gate de permisos postean a `/api/contact` y `/api/gate` (endpoints Astro). El viejo `mail.php`/PHPMailer se **eliminó del repo** (commit `ceb04a8`, jul 2026).
 
-- Mismo template HTML de email que tenía `mail.php` (replicado en `src/lib/server/mail.ts`), mismo honeypot, mismo rate limit (ahora in-memory por proceso en vez de archivos temporales).
-- Origin check (`src/lib/server/originCheck.ts`): en producción exige `ALLOWED_ORIGIN` exacto igual que antes. En dev (`NODE_ENV !== "production"`) acepta cualquier origin `localhost`/`127.0.0.1` sin importar el puerto — `astro dev` puede correr en 4321 (default), 4330 (vía el Preview tool) o el puerto que sea, y hardcodear uno en `.env.local` rompía el formulario en cualquier otro.
+- Template HTML de email en `src/lib/server/mail.ts`, honeypot silencioso, rate limit in-memory por proceso (`src/lib/server/rateLimit.ts`).
+- **No hay tokens CSRF** — se agregaron y luego se quitaron (`45c57f7`, daban 403 detrás del proxy). La protección CSRF es el **origin check** (`src/lib/server/originCheck.ts`), aplicado a `/api/contact`, `/api/gate` **y `/api/auth/login`**: en producción exige `ALLOWED_ORIGIN` exacto (con fallback same-origin por host público detrás del proxy). En dev (`NODE_ENV !== "production"`) acepta cualquier origin `localhost`/`127.0.0.1` sin importar el puerto — `astro dev` puede correr en 4321 (default), 4330 (vía el Preview tool) o el puerto que sea, y hardcodear uno en `.env.local` rompía el formulario en cualquier otro.
 - Cada submit válido hace dos cosas: `createLead()` (insert en MySQL) y `sendContactEmail()`/`sendGateEmail()` (Nodemailer). Ver sección Admin CMS → Leads.
 - Credenciales SMTP actuales (QA): `manny.cms@augustotturi.com` vía `smtp.hostinger.com:465` (SSL). Producción usará las credenciales de `no-replay@manny.aero` — pendiente confirmar si se mantiene Office 365 o se migra también a Hostinger.
 
@@ -254,7 +255,6 @@ Panel de administración integrado en la misma app Astro (no es un proyecto/domi
 - El dropdown de Services lista: Ground Handling, Permits & Authorizations, IS-BAH, Manny's In-flight Catering — todos tienen página real.
 - Majola Chauffeur ya no está en el dropdown (pendiente de confirmar con cliente).
 - Anchor links (`/#map`) prefijados con `/` para funcionar desde cualquier página.
-- CSS muerto en Navbar: `.nav__dd-item--full`, `.nav__dd-item--divider`, `.flyout__sublink--all`, `.flyout__sublink--divider` — selectores de variantes que se quitaron del HTML pero el CSS quedó.
 
 ### Hero logo positioning
 
@@ -300,7 +300,7 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 - **`background-clip: text`** with `text-fill-color: transparent` makes the element transparent → `text-shadow` won't render. Use `filter: drop-shadow()` instead, or just use plain `color` + `text-shadow` (current approach for the title shine).
 - **Heavy backdrop-filter blur on mobile** kills scroll perf. The mobile media query in `global.css` clamps all glass blurs to 8px.
 - **Adding `font-display: swap`** comes free with `@fontsource` — don't override it.
-- **Don't use Google Fonts CDN.** Self-host via `@fontsource/<font>` so the `.htaccess` 1y immutable cache rule applies and there are zero third-party requests.
+- **Don't use Google Fonts CDN.** Self-host via `@fontsource/<font>` so the hashed assets get long-lived caching and there are zero third-party requests.
 - **Don't extend `services.ts` with rich fields** — it's used by `ServiceCards.astro` on the index and only needs `slug`, `title`, `href`, `tone`. Rich data (tag, desc, features, image) lives in `servicesDetail.ts` for the `/ground-handling` page.
 - **Don't relocate the map filter pills inside the canvas.** Tried as a fix for the navbar overlap on scroll, the client rejected it. Pills stay above the map.
 - **Don't switch the body gradient to `background-attachment: fixed`** to "unify" page heights. Tried, the client rejected it. The current stretch-per-page behavior is intentional.
@@ -309,8 +309,8 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 
 ## Deploy / hosting specifics
 
-- ⚠️ **`public/.htaccess`** manejaba compresión, cache, MIME types, security headers y HTTPS redirect bajo el modelo static/Apache. Bajo Hostinger Business como app Node.js, no está confirmado si ese `.htaccess` sigue aplicando (depende de si Hostinger pone un proxy Apache/LiteSpeed delante del proceso Node, o si el Node app sirve directo). **Verificar en el primer deploy real** — si no aplica, esas responsabilidades (headers de seguridad, compresión, cache-control) hay que moverlas a `server.mjs` (p.ej. con `helmet` y `compression` de Express).
-- Los 301 redirects (`/services` → `/ground-handling`, `/isbha` → `/isbah`) viven en `.htaccess` — mismo caveat que arriba, verificar que sigan funcionando o migrarlos a `server.mjs`/`src/middleware.ts` si no.
+- **`.htaccess` ya no existe.** Confirmado en producción que Apache/LiteSpeed nunca corre (el Node app sirve directo detrás del edge CDN de Hostinger), así que era inerte y se eliminó del repo (jul 2026). Sus responsabilidades viven en `server.mjs`: headers de seguridad + HSTS, `compression()`, y los 301 redirects (`REDIRECTS`: `/services`, `/isbha`, `/permits_and_authorizations`, `/our_founder`).
+- **El edge CDN (hcdn) pisa el header CSP** con su propio `upgrade-insecure-requests` — por eso la CSP enforced se entrega como `<meta>` desde `src/lib/csp.ts` (ver Stack).
 - Servidor de desarrollo (QA, cuenta `u676595820`): antes era Hostinger conectado a GitHub `main` con auto-deploy al push (modelo static). **Este flujo cambió** — ahora necesita correr como app Node.js igual que producción (ver sección Deploy arriba). Confirmar con el cliente/Hostinger si el auto-deploy por GitHub sigue funcionando para apps Node o si pasa a ser manual también en QA.
 - After deploy, hard-refresh (Ctrl+F5) to bypass browser cache while testing.
 
@@ -318,7 +318,7 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 
 - LCP target: <2.0s (hero title in Bebas, preloaded woff2 + webp poster as LQIP)
 - Hero video (`hero-manny-final.mp4`) is currently ~4 MB unoptimized — known tech debt, not yet compressed.
-- Page weight is dominated by the video; everything else is tightly optimized via Astro Image + `.htaccess` cache.
+- Page weight is dominated by the video; everything else is tightly optimized via Astro Image + cache headers en `server.mjs`. Las OG images `og/founder.jpg` (9.6 MB), `og/catering.jpg` (6.9 MB) y `og/isbah.jpg` (5.2 MB) siguen sin optimizar (ver TODO.md).
 - Internal pages are noticeably lighter than the index (no video, no Leaflet, no marquee) — they ride the same shell but render only PageHero + StatsBand + page-specific content.
 
 ## Out-of-scope reminders
@@ -331,41 +331,33 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 
 ---
 
-## Estado de seguridad — 2026-06-04
-
-### ✅ Resuelto
-
-1. **`public/mail-config.php` eliminado** — credenciales ya no están en el repo ni en el servidor.
-2. **`debug-mail.php` eliminado** — endpoint de debug removido del repo y del servidor.
-3. **Rate limit en producción** — `RATE_LIMIT_MAX = 15`, `RATE_LIMIT_WINDOW = 3600`.
-4. **`ALLOWED_ORIGIN` ahora verificado** — `mail.php` lee la constante del secrets file y la aplica en el origin check.
-5. **Secrets file fuera de `public_html`** — credenciales SMTP nunca accesibles via web.
+## Estado de seguridad — 2026-07-09
 
 ### 🟡 Deuda técnica (post go-live)
 
-5. **`innerHTML` sin escapar en el modal de servicios** (`ground-handling.astro`)
-   - `modalFeatures.innerHTML` y `modalTitle.innerHTML` usan template literals directos.
+1. **`innerHTML` sin escapar en el modal de servicios** (`ground-handling.astro` ~274-276)
+   - `modalTitle.innerHTML` y `modalFeatures.innerHTML` usan template literals directos con datos de `servicesDetail.ts` (hoy es contenido propio hardcodeado, riesgo bajo).
 
-6. **`buildPopupHtml` en `MapSection.astro` usa `innerHTML` con datos de aeropuertos**
+2. **`buildPopupHtml` en `MapSection.astro` usa `innerHTML` con datos de aeropuertos**
    - Reemplazar con función DOM imperativa; validar scheme de `a.pdf`.
 
-7. **Rate limit usa `X-Forwarded-For` sin verificar el proxy** (`mail.php`)
-   - En Hostinger shared hosting usar `REMOTE_ADDR` directamente.
-
-8. **CSS muerto** en `contact.astro`, `catering.astro` y `Navbar.astro`.
+3. **`getClientIp` (`src/lib/server/rateLimit.ts`) confía en headers del proxy**
+   - Prefiere `x-real-ip` y cae a la primera entrada de `X-Forwarded-For`; el propio comentario del código admite que falta confirmar qué header setea el edge (hcdn) para hacerlo a prueba de spoofing.
 
 ### ✅ Lo que está bien (no tocar)
 
-- Cabeceras HTTP: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
-- HTTPS forzado con 301 en `.htaccess`.
-- Brotli + Gzip configurados correctamente.
+- Cabeceras HTTP emitidas por `server.mjs`: HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP (defensa en profundidad) — y CSP enforced vía `<meta>` (`src/lib/csp.ts`) porque el edge pisa el header.
+- Compresión vía `compression()` en `server.mjs` (+ Brotli en el edge CDN).
+- Origin check (`originCheck.ts`) en contact, gate y login — cumple el rol anti-CSRF (no hay tokens, se quitaron en `45c57f7` por 403s detrás del proxy).
+- Auth: bcrypt + JWT httpOnly 12h; rate limit propio en login (10 intentos / 5 min por IP).
+- Validación de payloads con zod en todos los endpoints (`src/pages/api/**`).
+- Uploads validados (tipo/tamaño) y re-procesados con sharp; DELETE de permits solo toca archivos bajo `uploads/permit-files/`.
 - Fuentes self-hosted sin CDN externo.
-- `Options -Indexes` activo.
 - Honeypot silencioso en formulario de contacto y email gate.
-- Sanitización PHP: `clean()` con `strip_tags + htmlspecialchars + ENT_QUOTES`.
-- Validación de email con `FILTER_VALIDATE_EMAIL` en PHP.
 - Errores SMTP loggeados server-side, nunca expuestos al cliente.
 - Todos los links `target="_blank"` en Footer usan `rel="noopener noreferrer"`.
 - JSON-LD structured data en todas las páginas internas.
 - OG images específicas por página.
 - Google Search Console verificado con meta tag en `BaseLayout.astro`.
+
+> Historial: los items del modelo PHP (mail-config.php, debug-mail.php, secrets file, mail.php) quedaron obsoletos al eliminarse todo el backend PHP en la migración SSR (jul 2026). El CSS muerto de contact/catering/Navbar se limpió el 2026-07-09.
