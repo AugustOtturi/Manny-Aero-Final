@@ -281,14 +281,17 @@ const offices = [
     text-align: center;
   }
   .footer__members-logos {
-    display: flex;
+    /* Fixed 3-per-row grid on desktop (2 rows of 3) — reads as an intentional
+       layout and doesn't depend on all six fitting one line. Collapses to 2
+       columns on tablet and 1 on mobile below. */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
     align-items: center;
-    justify-content: center;
-    gap: 34px;
-    flex-wrap: wrap;
-    /* Use the full container width instead of shrink-to-fit, so the row lays
-       out on a single line on desktop (it still wraps on narrow viewports). */
+    gap: 34px 48px;
     width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
   }
   .footer__member-logo {
     /* Fit each logo inside a box instead of fixing only the height — logos have
@@ -305,13 +308,20 @@ const offices = [
   .footer__member-logo:hover {
     opacity: 1;
   }
+  @media (max-width: 820px) {
+    .footer__members-logos {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 460px;
+    }
+  }
   @media (max-width: 480px) {
     .footer__members-logos {
-      gap: 24px 32px;
+      gap: 24px 28px;
+      max-width: 340px;
     }
     .footer__member-logo {
       max-height: 70px;
-      max-width: 140px;
+      max-width: 130px;
     }
   }
 
