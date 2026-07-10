@@ -531,45 +531,6 @@ const airportOptions = AIRPORT_OPTIONS;
 </script>
 
 <style>
-  /* Availability badge under hero title */
-  .hero-avail {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 28px;
-    padding: 10px 18px;
-    border-radius: var(--radius-pill);
-    background: var(--color-accent);
-    border: 1px solid var(--color-accent);
-    box-shadow: 0 6px 20px rgba(255, 185, 0, 0.35);
-  }
-  .hero-avail-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #5ed19a;
-    flex-shrink: 0;
-    box-shadow: 0 0 0 3px rgba(94, 209, 154, 0.25);
-    animation: availPulse 2s infinite var(--ease-in-out);
-  }
-  @keyframes availPulse {
-    0%, 100% { box-shadow: 0 0 0 3px rgba(94, 209, 154, 0.25); }
-    50%      { box-shadow: 0 0 0 7px rgba(94, 209, 154, 0); }
-  }
-  .hero-avail-text {
-    font-size: 13px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .hero-avail-sep { color: rgba(255, 255, 255, 0.6); }
-  .hero-avail-sub {
-    font-size: 13px;
-    font-weight: 500;
-    color: #ffffff;
-  }
-
   /* Layout */
   .page-layout {
     display: grid;
@@ -1158,75 +1119,6 @@ const airportOptions = AIRPORT_OPTIONS;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--color-text-muted);
-  }
-
-  .map-placeholder {
-    position: relative;
-    height: 180px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    background: var(--color-surface);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-  }
-  .map-placeholder::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 12px,
-      rgba(255, 255, 255, 0.04) 12px,
-      rgba(255, 255, 255, 0.04) 13px
-    );
-  }
-  .map-placeholder-label {
-    font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--color-text-muted);
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    text-align: center;
-    position: relative;
-    line-height: 1.6;
-  }
-
-  .response-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background: var(--color-border);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-  }
-  .response-item {
-    background: var(--color-surface);
-    padding: 18px 22px;
-  }
-  .response-num {
-    font-family: var(--font-display);
-    font-size: 32px;
-    font-weight: 400;
-    color: var(--color-accent);
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-  .response-lbl {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    margin-top: 6px;
   }
 
   /* ── Flights repeater ── */
