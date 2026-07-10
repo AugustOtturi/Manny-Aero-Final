@@ -9,7 +9,7 @@
 ## Performance
 3. ~~Comprimir hero video~~ — **decisión del cliente (2026-07-09): el video se queda como está** (~4 MB). No tocar sin nueva indicación.
 4. ~~Optimizar OG images~~ — **hecho 2026-07-09**: todas las `public/og/*.jpg` optimizadas a ≤1200px / <200 KB con sharp.
-5. **`export const prerender = true`** en las páginas 100% estáticas que no leen de la DB (about, catering, isbah, founder, ground-handling, contact, 404).
+5. ~~Prerender~~ — **hecho 2026-07-09**: las 7 páginas estáticas (about, catering, isbah, founder, ground-handling, contact, 404) se prerenderizan en el build.
 
 ## Contenido / SEO
 6. **SEO description de `/about`** — `src/pages/about.astro` aún dice "Meet the team behind every operation" pero la sección team se eliminó.

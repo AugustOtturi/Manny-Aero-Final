@@ -4,6 +4,8 @@ import PageHero from "../components/PageHero.astro";
 import StatsBand from "../components/StatsBand.astro";
 import GlassButton from "../components/ui/GlassButton.astro";
 
+export const prerender = true;
+
 const stats = [
   { value: "25+", label: "Years in operation" },
   { value: "70+", label: "Airports covered" },

@@ -93,6 +93,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Canonical URLs have no trailing slash. Prerendered pages only exist as
+// flat `about.html` files, so `/about/` would otherwise fall through to the
+// SSR handler and 500 — fold it onto `/about` (also normalizes SSR routes).
+app.use((req, res, next) => {
+  if (req.path.length > 1 && req.path.endsWith("/")) {
+    const target = req.path.replace(/\/+$/, "");
+    return res.redirect(301, target + req.originalUrl.slice(req.path.length));
+  }
+  next();
+});
+
 // CMS uploads live in an absolute directory OUTSIDE the deploy checkout in
 // production (UPLOADS_DIR) so they survive redeploys; falls back to
 // public/uploads locally. Must match src/lib/server/uploads.ts.
@@ -112,6 +123,18 @@ app.use(
   express.static(path.join(__dirname, layout.client), {
     maxAge: "1y",
     index: false,
+    // Prerendered pages are emitted as flat `about.html` files (build.format
+    // "file" in astro.config.mjs) — this maps `/about` to `about.html` here,
+    // before the request would fall through to the SSR handler (which no
+    // longer knows those routes).
+    extensions: ["html"],
+    setHeaders(res, filePath) {
+      // Prerendered HTML must revalidate on every visit (it changes on each
+      // deploy); only the hashed /_astro assets are safe to cache for a year.
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache");
+      }
+    },
   })
 );
 

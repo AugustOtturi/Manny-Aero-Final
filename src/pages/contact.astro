@@ -3,6 +3,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import { AIRPORT_OPTIONS } from "../data/airportOptions";
 
+export const prerender = true;
+
 const airportOptions = AIRPORT_OPTIONS;
 ---
 

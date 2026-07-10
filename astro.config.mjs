@@ -36,6 +36,10 @@ export default defineConfig({
   build: {
     inlineStylesheets: "auto",
     assets: "_astro",
+    // Prerendered pages emit `about.html` (not `about/index.html`) so the
+    // node adapter serves `/about` directly with 200 instead of 301ing to
+    // `/about/` — keeps the public URLs exactly as they were under full SSR.
+    format: "file",
   },
   compressHTML: true,
   server: {

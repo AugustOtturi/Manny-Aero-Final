@@ -2,6 +2,10 @@ import { defineMiddleware } from "astro:middleware";
 import { SESSION_COOKIE, verifySession } from "./lib/server/auth";
 
 export const onRequest = defineMiddleware(async (context, next) => {
+  // Prerendered routes are always public and render at build time, where
+  // there is no request cookie to read (touching it triggers an Astro warn).
+  if (context.isPrerendered) return next();
+
   const { pathname } = context.url;
 
   const token = context.cookies.get(SESSION_COOKIE)?.value;
