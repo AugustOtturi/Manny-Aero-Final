@@ -123,19 +123,58 @@ const categoryEntries = Object.entries(CATEGORIES) as [
 
     function buildPopupHtml(a: Airport) {
       const cat = CATEGORIES[String(a.categoria) as CatKey];
-      return `
-        <div class="map-popup">
-          <span class="map-popup__tag" style="--tag:${cat.color}">${cat.short}</span>
-          <h3 class="map-popup__title">${a.nombre}</h3>
-          <p class="map-popup__info">${a.info}</p>
-          <a class="map-popup__btn" href="${a.pdf}" target="_blank" rel="noopener" download>
-            Download Now
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M6 1v7m0 0l-3-3m3 3l3-3M2 10h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </a>
-        </div>
-      `;
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "map-popup";
+
+      const tag = document.createElement("span");
+      tag.className = "map-popup__tag";
+      tag.style.setProperty("--tag", cat.color);
+      tag.textContent = cat.short;
+      wrapper.appendChild(tag);
+
+      const title = document.createElement("h3");
+      title.className = "map-popup__title";
+      title.textContent = a.nombre;
+      wrapper.appendChild(title);
+
+      const info = document.createElement("p");
+      info.className = "map-popup__info";
+      info.textContent = a.info;
+      wrapper.appendChild(info);
+
+      // Only same-origin relative paths are trusted as a download link.
+      // Airport data is hardcoded today, but this guards against a
+      // "javascript:" scheme if it's ever moved to an editable source.
+      if (a.pdf.startsWith("/")) {
+        const link = document.createElement("a");
+        link.className = "map-popup__btn";
+        link.href = a.pdf;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.setAttribute("download", "");
+        link.append("Download Now");
+
+        const svgNS = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("width", "12");
+        svg.setAttribute("height", "12");
+        svg.setAttribute("viewBox", "0 0 12 12");
+        svg.setAttribute("fill", "none");
+        svg.setAttribute("aria-hidden", "true");
+        const path = document.createElementNS(svgNS, "path");
+        path.setAttribute("d", "M6 1v7m0 0l-3-3m3 3l3-3M2 10h8");
+        path.setAttribute("stroke", "currentColor");
+        path.setAttribute("stroke-width", "1.6");
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("stroke-linejoin", "round");
+        svg.appendChild(path);
+        link.appendChild(svg);
+
+        wrapper.appendChild(link);
+      }
+
+      return wrapper;
     }
 
     const isMobile = window.matchMedia("(max-width: 1024px)").matches;
@@ -240,7 +279,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     function openModal(a: Airport) {
       if (!modal || !modalBody) return;
       lastFocused = document.activeElement as HTMLElement;
-      modalBody.innerHTML = buildPopupHtml(a);
+      modalBody.replaceChildren(buildPopupHtml(a));
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
       document.documentElement.style.overflow = "hidden";
@@ -839,7 +878,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     display: none;
   }
 
-  /* Popup content (injected via innerHTML) */
+  /* Popup content (built via buildPopupHtml, DOM API) */
   .map-popup {
     padding: 16px 18px;
     min-width: 180px;

@@ -329,18 +329,16 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 
 ---
 
-## Estado de seguridad — 2026-07-09
+## Estado de seguridad — 2026-07-10
 
 ### 🟡 Deuda técnica (post go-live)
 
-1. **`innerHTML` sin escapar en el modal de servicios** (`ground-handling.astro` ~274-276)
-   - `modalTitle.innerHTML` y `modalFeatures.innerHTML` usan template literals directos con datos de `servicesDetail.ts` (hoy es contenido propio hardcodeado, riesgo bajo).
-
-2. **`buildPopupHtml` en `MapSection.astro` usa `innerHTML` con datos de aeropuertos**
-   - Reemplazar con función DOM imperativa; validar scheme de `a.pdf`.
-
-3. **`getClientIp` (`src/lib/server/rateLimit.ts`) confía en headers del proxy**
+1. **`getClientIp` (`src/lib/server/rateLimit.ts`) confía en headers del proxy**
    - Prefiere `x-real-ip` y cae a la primera entrada de `X-Forwarded-For`; el propio comentario del código admite que falta confirmar qué header setea el edge (hcdn) para hacerlo a prueba de spoofing.
+
+### ✅ Resuelto 2026-07-10
+
+- **`innerHTML` en el modal de servicios y en el popup del mapa** — `ground-handling.astro` (`openModal`) y `MapSection.astro` (`buildPopupHtml`) ya no interpolan strings en HTML: construyen el DOM con `createElement`/`textContent`/`replaceChildren`. El link de descarga del popup del mapa además valida que `a.pdf` sea una ruta relativa (`startsWith("/")`) antes de crear el `<a>`, como defensa si esos datos alguna vez se editan desde un admin.
 
 ### ✅ Lo que está bien (no tocar)
 

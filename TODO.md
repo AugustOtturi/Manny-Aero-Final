@@ -3,7 +3,7 @@
 > Actualizado 2026-07-09. Los pendientes viejos (conectar formularios, email gate, archivos de permits, datos del FloatingContact, GSC) ya se completaron con la migración SSR + CMS.
 
 ## Seguridad (deuda técnica, ver CLAUDE.md → Estado de seguridad)
-1. **`innerHTML` sin escapar** en el modal de servicios (`src/pages/ground-handling.astro`) y en `buildPopupHtml` (`src/components/MapSection.astro`). Reemplazar por construcción DOM imperativa; validar scheme de `a.pdf` en los popups del mapa.
+1. ~~`innerHTML` sin escapar~~ — **hecho 2026-07-10**: el modal de servicios (`ground-handling.astro`) y `buildPopupHtml` (`MapSection.astro`) ahora construyen el DOM de forma imperativa (`textContent`/`createElement`, sin interpolar strings en HTML); el link de descarga del popup del mapa además valida que `a.pdf` sea una ruta relativa (`startsWith("/")`) antes de crear el `<a>`.
 2. **`getClientIp`** (`src/lib/server/rateLimit.ts`) — confirmar qué header de IP real setea el edge de Hostinger (hcdn) para que el rate limit no sea spoofeable.
 
 ## Performance

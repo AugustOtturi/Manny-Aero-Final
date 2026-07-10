@@ -273,11 +273,20 @@ const stats = [
     modalImg.src = trigger?.dataset.img ?? s.image;
     modalImg.alt = s.name;
     modalTag.textContent = s.tag;
-    modalTitle.innerHTML = s.title.replace("\n", "<br>");
+    modalTitle.replaceChildren();
+    s.title.split("\n").forEach((line, i) => {
+      if (i > 0) modalTitle.appendChild(document.createElement("br"));
+      modalTitle.appendChild(document.createTextNode(line));
+    });
     modalDesc.textContent = s.desc;
-    modalFeatures.innerHTML = s.features
-      .map((f) => `<div class="modal-feature">${f}</div>`)
-      .join("");
+    modalFeatures.replaceChildren(
+      ...s.features.map((f) => {
+        const el = document.createElement("div");
+        el.className = "modal-feature";
+        el.textContent = f;
+        return el;
+      })
+    );
     const body = sheet.querySelector<HTMLElement>(".modal-body");
     if (body) body.scrollTop = 0;
     overlay.classList.add("open");
