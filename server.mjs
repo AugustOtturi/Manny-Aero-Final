@@ -37,15 +37,15 @@ app.set("trust proxy", true);
 app.disable("x-powered-by");
 
 // Under Hostinger Business the app runs as a Node process behind the CDN edge
-// (hcdn) — Apache/LiteSpeed never runs, so `public/.htaccess` is inert. The
-// security headers and HSTS it used to provide are re-issued here on every
-// response instead.
+// (hcdn) — Apache/LiteSpeed never runs, so the legacy `public/.htaccess` was
+// inert (and has since been removed from the repo). The security headers and
+// HSTS it used to provide are re-issued here on every response instead.
 //
 // NOTE on CSP: the edge OVERRIDES the response Content-Security-Policy header
 // with its own `upgrade-insecure-requests`, so this header value never reaches
 // the browser. The enforced policy is therefore delivered as a <meta> tag from
 // the layouts (see src/lib/csp.ts). This header is kept as defense-in-depth for
-// any path that bypasses the edge; it is a faithful port of the .htaccess
+// any path that bypasses the edge; it is a faithful port of the old .htaccess
 // policy, widened only so GA4 (gtag) keeps working.
 const CSP = [
   "default-src 'self'",
