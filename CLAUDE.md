@@ -324,9 +324,7 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 ## Out-of-scope reminders
 
 - The "client gradient background" (4-corner gray mesh from a client mockup) is **planned but not implemented**. The user explicitly opted out — they'll handle it later. Don't apply it without being asked.
-- Pre-existing `astro check` error (unrelated to this codebase's pages):
-  - `MapSection.astro:161` — `tap: false` not in Leaflet's `MapOptions` type.
-  Build still succeeds. (El mismatch de `ActiveLink` "blog" vs "news" que existía antes entre `BaseLayout` y `Navbar` se corrigió en la migración a SSR — ambos tipos ahora usan `"news"`.)
+- `astro check` pasa con 0 errores desde `3e6f4e4` (el viejo error de `tap: false` en `MapSection.astro` se corrigió). Solo quedan hints informativos (scripts `is:inline`, variables sin usar).
 - Phases 2 (video compression, JPG/SVG/GeoJSON optimization) y 3 (font-display, blob audit) del plan de optimización están diferidas.
 
 ---
