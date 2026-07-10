@@ -288,8 +288,13 @@ const offices = [
     flex-wrap: wrap;
   }
   .footer__member-logo {
-    height: 90px;
+    /* Fit each logo inside a box instead of fixing only the height — logos have
+       different aspect ratios and internal padding, so height-only made the
+       wider / tightly-cropped ones (MGAA, ACA) read as larger. */
+    max-height: 90px;
+    max-width: 180px;
     width: auto;
+    height: auto;
     opacity: 0.6;
     filter: brightness(0) invert(1);
     transition: opacity 0.2s var(--ease-out);
@@ -302,7 +307,8 @@ const offices = [
       gap: 24px 32px;
     }
     .footer__member-logo {
-      height: 70px;
+      max-height: 70px;
+      max-width: 140px;
     }
   }
 
