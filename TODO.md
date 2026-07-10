@@ -7,8 +7,8 @@
 2. **`getClientIp`** (`src/lib/server/rateLimit.ts`) — confirmar qué header de IP real setea el edge de Hostinger (hcdn) para que el rate limit no sea spoofeable.
 
 ## Performance
-3. **Comprimir hero video** — `src/assets/hero-manny-final.mp4` pesa ~4 MB. Comprimir a <1.5 MB mejora LCP notablemente.
-4. **Optimizar OG images** — `public/og/founder.jpg` (9.6 MB), `public/og/catering.jpg` (6.9 MB), `public/og/isbah.jpg` (5.2 MB). Bajarlas a <300 KB c/u (1200×630).
+3. ~~Comprimir hero video~~ — **decisión del cliente (2026-07-09): el video se queda como está** (~4 MB). No tocar sin nueva indicación.
+4. ~~Optimizar OG images~~ — **hecho 2026-07-09**: todas las `public/og/*.jpg` optimizadas a ≤1200px / <200 KB con sharp.
 5. **`export const prerender = true`** en las páginas 100% estáticas que no leen de la DB (about, catering, isbah, founder, ground-handling, contact, 404).
 
 ## Contenido / SEO
