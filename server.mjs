@@ -93,9 +93,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// CMS uploads live in an absolute directory OUTSIDE the deploy checkout in
+// production (UPLOADS_DIR) so they survive redeploys; falls back to
+// public/uploads locally. Must match src/lib/server/uploads.ts.
+const UPLOADS_DIR =
+  process.env.UPLOADS_DIR && process.env.UPLOADS_DIR.trim()
+    ? path.resolve(process.env.UPLOADS_DIR.trim())
+    : path.join(__dirname, "public/uploads");
+
 app.use(
   "/uploads",
-  express.static(path.join(__dirname, "public/uploads"), {
+  express.static(UPLOADS_DIR, {
     maxAge: "30d",
   })
 );

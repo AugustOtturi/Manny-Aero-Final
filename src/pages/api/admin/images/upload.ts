@@ -3,6 +3,7 @@ import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import { getImage, upsertImage } from "../../../../lib/server/repositories/images";
+import { UPLOADS_ROOT } from "../../../../lib/server/uploads";
 
 export const prerender = false;
 
@@ -11,8 +12,6 @@ const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_SIZE = 8 * 1024 * 1024; // 8MB
 const LOGO_MAX_WIDTH = 400;
 const PHOTO_MAX_WIDTH = 1600;
-
-const UPLOADS_ROOT = path.join(process.cwd(), "public", "uploads");
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {

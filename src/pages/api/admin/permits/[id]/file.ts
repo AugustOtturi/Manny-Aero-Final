@@ -5,6 +5,7 @@ import {
   getPermitDownloadById,
   updatePermitDownload,
 } from "../../../../../lib/server/repositories/permitDownloads";
+import { uploadsPath } from "../../../../../lib/server/uploads";
 
 export const prerender = false;
 
@@ -16,7 +17,7 @@ const ALLOWED_EXTENSIONS: Record<string, string> = {
   ".xlsx": "XLSX",
 };
 const MAX_SIZE = 15 * 1024 * 1024;
-const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads", "permit-files");
+const UPLOADS_DIR = uploadsPath("permit-files");
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -104,7 +105,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   });
 
   if (existing.fileUrl.startsWith("/uploads/permit-files/")) {
-    await unlink(path.join(process.cwd(), "public", existing.fileUrl)).catch(() => {});
+    await unlink(uploadsPath(existing.fileUrl.replace("/uploads/", ""))).catch(() => {});
   }
 
   return json({ ok: true, download: updated });

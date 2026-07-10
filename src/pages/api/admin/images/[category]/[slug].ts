@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { unlink } from "node:fs/promises";
-import path from "node:path";
 import { deleteImage, getImage } from "../../../../../lib/server/repositories/images";
+import { uploadsPath } from "../../../../../lib/server/uploads";
 
 export const prerender = false;
 
@@ -28,7 +28,7 @@ export const DELETE: APIRoute = async ({ params }) => {
   }
 
   await deleteImage(category, slug);
-  const filePath = path.join(process.cwd(), "public", "uploads", category, existing.fileName);
+  const filePath = uploadsPath(category, existing.fileName);
   await unlink(filePath).catch(() => {});
 
   return new Response(JSON.stringify({ ok: true }), {
