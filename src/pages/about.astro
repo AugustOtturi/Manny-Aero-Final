@@ -1,12 +1,8 @@
 ---
-import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import StatsBand from "../components/StatsBand.astro";
 import GlassButton from "../components/ui/GlassButton.astro";
-import manuelImg from "../assets/photos/manuelceo.jpg";
-import mariaImg from "../assets/photos/mariajosemannyscatering.jpg";
-import emilioImg from "../assets/photos/emiliogerente.jpg";
 
 const stats = [
   { value: "25+", label: "Years in operation" },
@@ -35,28 +31,6 @@ const timeline = [
     year: "2026",
     event: "10 Years of IS-BAH",
     desc: "Manny proudly celebrates a decade of IS-BAH certification, reaffirming its commitment to the highest international standards of safety and operational excellence.",
-  },
-];
-
-const team = [
-  {
-    name: "Manuel RomeroVargas",
-    role: "CEO",
-    bio: "Aviation industry leader with more than 30 years of experience in business aviation, recognized for driving operational excellence, safety, and world-class aviation support services throughout Mexico.",
-    img: manuelImg,
-    link: "/founder",
-  },
-  {
-    name: "María Lardizábal",
-    role: "Head Chef & Executive",
-    bio: "Culinary leader behind Manny's Catering, creating premium in-flight dining experiences with exceptional quality, creativity, and attention to detail tailored for private and corporate aviation.",
-    img: mariaImg,
-  },
-  {
-    name: "Emilio Padilla",
-    role: "Operations Manager & Key Account",
-    bio: "Dedicated aviation operations professional passionate about ensuring every Manny client receives exceptional service while their travel needs are handled efficiently, safely, and seamlessly across Mexico.",
-    img: emilioImg,
   },
 ];
 
@@ -153,35 +127,6 @@ const values = [
               <div class="timeline-event">{item.event}</div>
               <div class="timeline-desc">{item.desc}</div>
             </div>
-          ))
-        }
-      </div>
-    </div>
-  </section>
-
-  <!-- TEAM -->
-  <section class="team-section section">
-    <div class="container">
-      <div class="team-header reveal">
-        <div class="section-label">The team</div>
-        <h2 class="section-title">The Experts Behind Every <span class="accent">Operation in Mexico</span></h2>
-      </div>
-      <div class="team-grid stagger">
-        {
-          team.map((m) => (
-            <article class="team-card">
-              <div class="team-img">
-                <Image src={m.img} alt={m.name} width={480} height={400} class="team-photo" />
-              </div>
-              <div class="team-body">
-                <div class="team-name">{m.name}</div>
-                <div class="team-role">{m.role}</div>
-                <div class="team-bio">{m.bio}</div>
-                {m.link && (
-                  <a href={m.link} class="team-founder-link">Meet our founder →</a>
-                )}
-              </div>
-            </article>
           ))
         }
       </div>
@@ -338,84 +283,6 @@ const values = [
     line-height: 1.7;
   }
 
-  /* TEAM */
-  .team-header {
-    margin-bottom: 48px;
-  }
-  .team-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-  .team-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    transition:
-      transform 0.3s var(--ease-out),
-      border-color 0.3s var(--ease-out);
-  }
-  .team-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--color-border-strong);
-  }
-  .team-img {
-    height: 400px;
-    position: relative;
-    border-bottom: 1px solid var(--color-border);
-    overflow: hidden;
-  }
-  .team-photo {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-    display: block;
-  }
-  .team-body {
-    padding: 28px;
-  }
-  .team-name {
-    font-size: var(--fs-h3);
-    font-family: var(--font-display);
-    font-weight: 400;
-    color: var(--color-text);
-    margin-bottom: 4px;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
-  }
-  .team-role {
-    font-size: var(--fs-label);
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--color-accent);
-    margin-bottom: 14px;
-  }
-  .team-bio {
-    font-size: 15px;
-    font-weight: 400;
-    color: var(--color-text-muted);
-    line-height: 1.75;
-  }
-  .team-founder-link {
-    display: inline-block;
-    margin-top: 16px;
-    font-size: var(--fs-label);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-accent);
-    text-decoration: none;
-    transition: opacity 0.2s;
-  }
-  .team-founder-link:hover {
-    opacity: 0.75;
-  }
-
   /* VALUES */
   .values-header {
     margin-bottom: 48px;
@@ -505,18 +372,12 @@ const values = [
     .timeline {
       grid-template-columns: repeat(2, 1fr);
     }
-    .team-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
     .values-grid {
       grid-template-columns: 1fr;
     }
   }
   @media (max-width: 640px) {
     .timeline {
-      grid-template-columns: 1fr;
-    }
-    .team-grid {
       grid-template-columns: 1fr;
     }
   }
