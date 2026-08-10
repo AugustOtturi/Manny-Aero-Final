@@ -1,12 +1,15 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
+import { AIRPORT_OPTIONS } from "../data/airportOptions";
 
 export const prerender = true;
+
+const airportOptions = AIRPORT_OPTIONS;
 ---
 
 <BaseLayout
-  title="Contact Manny Aero â€” 24/7 Ground Handling Support Mexico"
+  title="Contact Manny Aero — 24/7 Ground Handling Support Mexico"
   description="Reach Manny Aero's operations team 24/7 for ground handling, permits, and flight coordination across Mexico. US toll-free: +1-877-506-2669 | Mexico: +52-722-273-0981."
   ogImage="/og/contact.jpg"
   ogImageAlt="Manny Aero 24/7 operations support team for aviation services in Mexico"
@@ -24,7 +27,7 @@ export const prerender = true;
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Toluca",
-        "addressRegion": "Estado de MÃ©xico",
+        "addressRegion": "Estado de México",
         "addressCountry": "MX",
         "postalCode": "50000"
       },
@@ -81,59 +84,144 @@ export const prerender = true;
         </div>
 
         <div class="form-card reveal">
-          {/* Formulario embebido de Zoho Forms (decisiÃ³n del cliente, ago 2026).
-              El formulario propio original estÃ¡ respaldado en src/backup/contact-original.astro
-              â€” para volver atrÃ¡s, restaurar ese archivo y quitar forms.zohopublic.com de la CSP. */}
-          <div id="zf_div_d3PIErlPDjZn9mkKA6OiUMvZBbxkSaAG3fVDU6KSMiA" class="zoho-embed"></div>
-          <script is:inline>
-            (function () {
-              try {
-                var f = document.createElement("iframe");
-                f.src =
-                  "https://forms.zohopublic.com/mannyhandlingsupport1/form/YOURINFORMATION/formperma/d3PIErlPDjZn9mkKA6OiUMvZBbxkSaAG3fVDU6KSMiA?zf_rszfm=1";
-                f.style.border = "none";
-                f.style.height = "1906px";
-                f.style.width = "100%";
-                f.style.transition = "all 0.5s ease";
-                f.setAttribute("aria-label", "Contact form");
-                f.setAttribute("title", "Contact form");
-                document
-                  .getElementById("zf_div_d3PIErlPDjZn9mkKA6OiUMvZBbxkSaAG3fVDU6KSMiA")
-                  .appendChild(f);
-                window.addEventListener(
-                  "message",
-                  function (event) {
-                    var evntData = event.data;
-                    if (evntData && evntData.constructor == String) {
-                      var zf_ifrm_data = evntData.split("|");
-                      if (zf_ifrm_data.length == 2 || zf_ifrm_data.length == 3) {
-                        var zf_perma = zf_ifrm_data[0];
-                        var zf_ifrm_ht_nw = parseInt(zf_ifrm_data[1], 10) + 15 + "px";
-                        var iframe = document
-                          .getElementById("zf_div_d3PIErlPDjZn9mkKA6OiUMvZBbxkSaAG3fVDU6KSMiA")
-                          .getElementsByTagName("iframe")[0];
-                        if (
-                          iframe.src.indexOf("formperma") > 0 &&
-                          iframe.src.indexOf(zf_perma) > 0 &&
-                          iframe.style.height != zf_ifrm_ht_nw
-                        ) {
-                          if (zf_ifrm_data.length == 3) {
-                            iframe.scrollIntoView();
-                            setTimeout(function () {
-                              iframe.style.height = zf_ifrm_ht_nw;
-                            }, 500);
-                          } else {
-                            iframe.style.height = zf_ifrm_ht_nw;
-                          }
-                        }
-                      }
-                    }
-                  },
-                  false
-                );
-              } catch (e) {}
-            })();
-          </script>
+          <form class="contact-form" id="contactForm" novalidate>
+            {/* Honeypot — hidden from humans, bots fill it automatically */}
+            <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true" />
+            <div class="form-divider">Your Information</div>
+            <div class="form-row">
+              <label class="field">
+                <span>First Name</span>
+                <input type="text" name="firstName" placeholder="John" required />
+              </label>
+              <label class="field">
+                <span>Last Name</span>
+                <input type="text" name="lastName" placeholder="Smith" required />
+              </label>
+            </div>
+            <div class="form-row">
+              <label class="field">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="john@operator.com" required />
+              </label>
+              <label class="field">
+                <span>Phone / WhatsApp</span>
+                <input type="tel" name="phone" placeholder="+1 555 000 0000" />
+              </label>
+            </div>
+            <label class="field field--full">
+              <span>Company / Operator</span>
+              <input type="text" name="company" placeholder="Aviation Company LLC" />
+            </label>
+
+            <div class="form-divider">Mission Details</div>
+            <label class="field field--full">
+              <span>Service Required</span>
+              <select name="service">
+                <option value="">Select a service…</option>
+                <option>Ground Handling</option>
+                <option>Landing / Overflight Permit</option>
+                <option>Flight Planning &amp; Filing</option>
+                <option>Jet Fuel Facilitation</option>
+                <option>VIP Ground Transportation</option>
+                <option>Gourmet In-flight Catering</option>
+                <option>Crew Accommodation</option>
+              </select>
+            </label>
+            <div class="flights" data-flights>
+              <button type="button" class="flights__add" data-flights-add>
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M9 3V15M3 9H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Add Mission Information
+              </button>
+              <p class="flights__hint">
+                Optional — share flight details so we can prepare everything in advance.
+              </p>
+              <div class="flights__list" data-flights-list></div>
+            </div>
+            <label class="field field--full">
+              <span>Additional Notes</span>
+              <textarea
+                name="notes"
+                rows="5"
+                placeholder="Any special requirements, passenger count, crew details, or other information…"
+              ></textarea>
+            </label>
+
+            <div class="form-footer field--full">
+              <button type="submit" class="form-submit">
+                Send Request
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path
+                    d="M3 9H15M15 9L10 4M15 9L10 14"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <p class="form-note">
+                For urgent requests:<br />
+                US &amp; CAN <a href="tel:+18775062669">1 877 50 MANNY</a><br />
+                MEX <a href="tel:+527222730981">+52 722 273 0981</a>
+              </p>
+            </div>
+          </form>
+        </div>
+
+        <div class="form-success" id="formSuccess" aria-live="polite">
+          <div class="success-inner">
+            <div class="success-check">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <div class="success-title">Request received</div>
+            <p class="success-desc">
+              Thank you — your flight request has been sent to our operations team.
+            </p>
+            <div class="success-timeline">
+              <div class="timeline-item">
+                <span class="timeline-label">Contact</span>
+                <span class="timeline-value"><a href="tel:+527222730981">MEX +52 722 273 0981</a> · <a href="tel:+18775062669">US 1 877 50 MANNY</a></span>
+              </div>
+            </div>
+            <a href="/" class="success-cta">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              Back to Home
+            </a>
+          </div>
+        </div>
+
+        <div class="form-error" id="formError" aria-live="assertive">
+          <div class="error-inner">
+            <div class="error-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </div>
+            <div class="error-title">Request failed</div>
+            <p class="error-desc" id="errorDesc">
+              We couldn't send your request. Please try again or contact us directly.
+            </p>
+            <div class="error-timeline">
+              <div class="timeline-item">
+                <span class="timeline-label">Direct Phone</span>
+                <span class="timeline-value"><a href="tel:+527222730981">MEX +52 722 273 0981</a> · <a href="tel:+18775062669">US 1 877 50 MANNY</a></span>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-label">Email</span>
+                <span class="timeline-value"><a href="mailto:ops@manny.aero">ops@manny.aero</a></span>
+              </div>
+            </div>
+            <div class="error-actions">
+              <button type="button" class="error-cta error-cta--primary" id="errorRetry">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                Try again
+              </button>
+              <a href="tel:+527222730981" class="error-cta error-cta--secondary">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                Call us directly
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -186,49 +274,49 @@ export const prerender = true;
           <div class="contact-card-label">Our Offices</div>
           <div class="office-list">
             <div>
-              <div class="office-item-name">Toluca, MÃ©xico</div>
+              <div class="office-item-name">Toluca, México</div>
               <div class="office-item-addr">
-                Boulevard Miguel AlemÃ¡n S/N San Pedro Totoltepec, Toluca, MÃ©xico. C.P. 50226
+                Boulevard Miguel Alemán S/N San Pedro Totoltepec, Toluca, México. C.P. 50226
               </div>
             </div>
             <div>
-              <div class="office-item-name">QuerÃ©taro, MÃ©xico</div>
+              <div class="office-item-name">Querétaro, México</div>
               <div class="office-item-addr">
-                Carretera No 200, KM. 13.5 QuerÃ©taro-Tequisquiapan, ColÃ³n, QuerÃ©taro. C.P. 76295
+                Carretera No 200, KM. 13.5 Querétaro-Tequisquiapan, Colón, Querétaro. C.P. 76295
               </div>
             </div>
             <div>
-              <div class="office-item-name">Felipe Carrillo Puerto, MÃ©xico</div>
+              <div class="office-item-name">Felipe Carrillo Puerto, México</div>
               <div class="office-item-addr">
-                Carretera federal 307, Km 201. Ejido de ChunyaxchÃ©, Felipe Carrillo Puerto, Quintana Roo
+                Carretera federal 307, Km 201. Ejido de Chunyaxché, Felipe Carrillo Puerto, Quintana Roo
               </div>
             </div>
             <div>
-              <div class="office-item-name">Cozumel, MÃ©xico</div>
+              <div class="office-item-name">Cozumel, México</div>
               <div class="office-item-addr">
                 Carretera Aeropuerto Internacional de Cozumel. C.P. 77600, Cozumel, Quintana Roo
               </div>
             </div>
             <div>
-              <div class="office-item-name">CancÃºn, MÃ©xico</div>
+              <div class="office-item-name">Cancún, México</div>
               <div class="office-item-addr">
-                Carretera CancÃºnâ€“Chetumal, Km. 22. C.P. 77569, CancÃºn, Quintana Roo
+                Carretera Cancún–Chetumal, Km. 22. C.P. 77569, Cancún, Quintana Roo
               </div>
             </div>
             <div>
-              <div class="office-item-name">Guadalajara, MÃ©xico</div>
+              <div class="office-item-name">Guadalajara, México</div>
               <div class="office-item-addr">
-                Carretera Guadalajara a Chapala, Km 17.5. C.P. 45659, Tlajomulco de ZÃºÃ±iga, Jalisco
+                Carretera Guadalajara a Chapala, Km 17.5. C.P. 45659, Tlajomulco de Zúñiga, Jalisco
               </div>
             </div>
             <div>
-              <div class="office-item-name">MÃ©rida, MÃ©xico</div>
+              <div class="office-item-name">Mérida, México</div>
               <div class="office-item-addr">
-                Carretera MÃ©ridaâ€“UmÃ¡n, Km. 4.5. C.P. 97291, MÃ©rida, YucatÃ¡n
+                Carretera Mérida–Umán, Km. 4.5. C.P. 97291, Mérida, Yucatán
               </div>
             </div>
             <div>
-              <div class="office-item-name">Tapachula, MÃ©xico</div>
+              <div class="office-item-name">Tapachula, México</div>
               <div class="office-item-addr">
                 Puerto Madero, Km 18.5. C.P. 30830, Tapachula, Chiapas
               </div>
@@ -290,7 +378,7 @@ export const prerender = true;
       <label class="field field--select field--full">
         <span>Airport</span>
         <select data-key="AIRPORT">
-          <option value="">Select an airportâ€¦</option>
+          <option value="">Select an airport…</option>
         </select>
       </label>
     </div>
@@ -298,6 +386,151 @@ export const prerender = true;
 </template>
 </BaseLayout>
 
+<script define:vars={{ airportOptions }}>
+  const contactForm = document.getElementById("contactForm");
+  const list = contactForm?.querySelector("[data-flights-list]");
+  const addBtn = contactForm?.querySelector("[data-flights-add]");
+  const template = document.getElementById("flight-template-contact");
+
+  function reindex() {
+    list?.querySelectorAll(".flight").forEach((flight, i) => {
+      const title = flight.querySelector("[data-flight-title]");
+      if (title) title.textContent = `Flight ${i + 1}`;
+    });
+  }
+
+  function addFlight() {
+    if (!template || !list) return;
+    const node = template.content.cloneNode(true);
+    const select = node.querySelector('select[data-key="AIRPORT"]');
+    for (const opt of airportOptions) {
+      const o = document.createElement("option");
+      o.value = opt.value;
+      o.textContent = opt.label;
+      select.appendChild(o);
+    }
+    const other = document.createElement("option");
+    other.value = "Other";
+    other.textContent = "Other";
+    select.appendChild(other);
+    list.querySelectorAll(".flight").forEach((f) => { f.open = false; });
+    list.appendChild(node);
+    reindex();
+  }
+
+  if (addBtn) addBtn.addEventListener("click", addFlight);
+
+  if (list) {
+    list.addEventListener("click", (e) => {
+      const removeBtn = e.target.closest("[data-flight-remove]");
+      if (removeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        removeBtn.closest(".flight")?.remove();
+        reindex();
+      }
+    });
+  }
+</script>
+
+<script>
+  const form    = document.getElementById("contactForm") as HTMLFormElement | null;
+  const success = document.getElementById("formSuccess");
+  const errorUI = document.getElementById("formError");
+  const errorDesc = document.getElementById("errorDesc");
+  const errorRetry = document.getElementById("errorRetry");
+  const intro   = document.querySelector<HTMLElement>(".form-intro");
+  const card    = document.querySelector<HTMLElement>(".form-card");
+  const submitBtn = form?.querySelector<HTMLButtonElement>(".form-submit");
+
+  function showError(msg: string) {
+    if (!errorUI) return;
+    if (errorDesc) {
+      errorDesc.textContent = msg
+        ? `We couldn't send your request: ${msg}. Please try again or contact us directly.`
+        : "We couldn't send your request. Please try again or contact us directly.";
+    }
+    if (card)  card.style.display  = "none";
+    if (intro) intro.style.display = "none";
+    errorUI.classList.add("show");
+  }
+
+  function hideError() {
+    if (!errorUI) return;
+    errorUI.classList.remove("show");
+    if (card)  card.style.display  = "";
+    if (intro) intro.style.display = "";
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = "";
+    }
+  }
+
+  errorRetry?.addEventListener("click", () => {
+    hideError();
+    card?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  if (form && success) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+
+      // Collect standard fields
+      const fd = new FormData(form);
+      const payload: Record<string, unknown> = {
+        type:      "contact",
+        website:   (fd.get("website") as string) ?? "", // honeypot
+        firstName: fd.get("firstName") ?? "",
+        lastName:  fd.get("lastName")  ?? "",
+        email:     fd.get("email")     ?? "",
+        phone:     fd.get("phone")     ?? "",
+        company:   fd.get("company")   ?? "",
+        service:   fd.get("service")   ?? "",
+        notes:     fd.get("notes")     ?? "",
+      };
+
+      // Collect flight repeater blocks
+      const flightEls = form.querySelectorAll<HTMLElement>(".flight");
+      const flights: Record<string, string>[] = [];
+      flightEls.forEach((el) => {
+        const block: Record<string, string> = {};
+        el.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-key]").forEach((inp) => {
+          const key = inp.dataset.key ?? "";
+          if (key && inp.value.trim()) block[key] = inp.value.trim();
+        });
+        if (Object.keys(block).length > 0) flights.push(block);
+      });
+      payload.flights = flights;
+
+      // Loading state
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.65";
+      }
+
+      try {
+        const res = await fetch("/api/contact", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify(payload),
+        });
+        const json = await res.json();
+
+        if (json.ok) {
+          if (card)  card.style.display  = "none";
+          if (intro) intro.style.display = "none";
+          success.classList.add("show");
+        } else {
+          throw new Error(json.error ?? "Server error");
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Unexpected error";
+        showError(msg);
+      }
+    });
+  }
+</script>
 
 <style>
   /* Layout */
@@ -890,7 +1123,7 @@ export const prerender = true;
     color: var(--color-text-muted);
   }
 
-  /* â”€â”€ Flights repeater â”€â”€ */
+  /* ── Flights repeater ── */
   .flights {
     display: flex;
     flex-direction: column;

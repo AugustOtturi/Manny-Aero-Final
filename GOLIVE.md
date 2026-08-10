@@ -1,5 +1,7 @@
 # Guía de go-live — manny.aero (cuenta del cliente `u824529850`)
 
+> ✅ **GO-LIVE COMPLETADO — 2026-08-10.** El sitio ya corre en producción en `manny.aero` (cuenta del cliente) como app Node.js. Este documento queda como referencia histórica y guía de redeploy.
+>
 > Actualizado 2026-07-09. El sitio está verificado en QA (`manny.augustotturi.com`, cuenta `u676595820`).
 > Producción se instala **por zip** (sin GitHub) como app Node.js en Hostinger Business.
 
@@ -22,11 +24,11 @@ Cargar **todas** — la app valida con zod al arrancar y truena si falta alguna.
 | `NODE_ENV` | `production` | ⚠️ **Crítico.** (1) omite devDependencies en `npm install` — evita el error de esbuild ("Expected X but got Y") que cuelga los builds; (2) activa el modo estricto del origin check (en dev acepta cualquier localhost). |
 | `PORT` | (lo asigna Hostinger, normalmente no se setea) | |
 | `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASS` / `DB_NAME` | Los de la **nueva DB** creada en la cuenta del cliente | hPanel → Databases → crear DB MySQL. Hostinger da host tipo `srvXXXX.hstgr.io`. **No reusar la DB de QA.** |
-| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` | Según el proveedor del correo del cliente | Office 365: `smtp.office365.com` / `587` / `false`. Hostinger: `smtp.hostinger.com` / `465` / `true`. **Ver sección 2 — debe coincidir con donde vive el buzón.** |
-| `SMTP_USER` / `SMTP_PASS` | Credenciales del buzón emisor (ej. `no-replay@manny.aero`) | El cliente debe crear/prestar este buzón. Con Office 365 puede requerir "app password" o habilitar SMTP AUTH. |
-| `MAIL_FROM` / `MAIL_FROM_NAME` | `no-replay@manny.aero` / `Website Form` | `MAIL_FROM` debe ser el mismo buzón (o uno autorizado) de `SMTP_USER`, si no, SPF/DMARC lo manda a spam. |
-| `MAIL_TO_CONTACT` / `MAIL_TO_GATE` | `ops@manny.aero` (confirmar con cliente) | Destinatarios de los forms y del email gate. |
-| `MAIL_CC` | Opcional, puede ir vacío | |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` | `smtp.office365.com` / `587` / `false` | ✅ **Confirmado** (2026-07-10, `manny-secrets.php` legacy) — producción se queda en Office 365, no migra a Hostinger Mail. |
+| `SMTP_USER` / `SMTP_PASS` | `no-replay@manny.aero` / *(provista por el cliente — NO está en este repo ni en memoria, solo va directo al panel de env vars de Hostinger)* | ✅ Confirmado. |
+| `MAIL_FROM` / `MAIL_FROM_NAME` | `no-replay@manny.aero` / `Website Form` | ✅ Confirmado. `MAIL_FROM` debe ser el mismo buzón (o uno autorizado) de `SMTP_USER`, si no, SPF/DMARC lo manda a spam. |
+| `MAIL_TO_CONTACT` / `MAIL_TO_GATE` | `ops@manny.aero` | ✅ Confirmado. Destinatarios de los forms y del email gate. |
+| `MAIL_CC` | `marcia.alvarado@manny.aero` | ✅ Confirmado (2026-07-10). |
 | `JWT_SECRET` | **Nuevo** — 32+ bytes random (`openssl rand -base64 48` o similar) | ⚠️ Rotar: no reusar el de QA. |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH` | **Nuevos** — usuario y hash bcrypt de una contraseña nueva | ⚠️ Rotar. Hash: `bcrypt.hashSync(password, 10)` — nunca la password en texto plano. (La auth también acepta usuarios en la tabla `admin_users`; el env var es el fallback.) |
 | `ALLOWED_ORIGIN` | `https://manny.aero` | Exacto, con `https://`, sin barra final. Si queda mal, **los formularios devuelven 403**. |
@@ -120,5 +122,10 @@ El sitio estático actual deja de servirse cuando la app Node toma el vhost — 
 ## Pendientes conocidos no bloqueantes
 
 - Vulnerabilidad HIGH reportada por `npm audit` en `astro` — el cliente pidió no actualizar todavía; hacer update controlado + re-test después del go-live.
-- SMTP definitivo: confirmar Office 365 vs Hostinger para `no-replay@manny.aero` (sección 2).
-- Deuda `innerHTML` y header de IP del rate limit — ver TODO.md.
+- Deuda del header de IP del rate limit — ver TODO.md.
+
+## Aún faltan por definir (bloqueantes para el paso 1)
+
+- `JWT_SECRET` nuevo — lo genero yo cuando se pida.
+- `ADMIN_USERNAME` + contraseña nueva del admin — la contraseña la elige el cliente/tú, yo genero el hash bcrypt (nunca en texto plano en el repo).
+- Credenciales de la nueva DB — se crean en el panel de Hostinger al momento (paso 1, sección DB).

@@ -23,6 +23,9 @@ export const CSP_META = [
   "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https:",
+  // Zoho Forms embed on /contact (client decision, aug 2026). Without this the
+  // iframe falls back to default-src 'self' and renders blank in production.
+  "frame-src 'self' https://forms.zohopublic.com",
   "font-src 'self' data:",
   "connect-src 'self' https://*.tile.openstreetmap.org https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.googletagmanager.com",
   "media-src 'self'",
