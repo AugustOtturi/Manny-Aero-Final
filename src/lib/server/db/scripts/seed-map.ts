@@ -2,7 +2,8 @@
 // into `map_categories` and `airports`. PDFs stay where they are under
 // public/files/airports/ — only the DB rows are created, pointing at the
 // existing URLs. Safe to re-run: categories are only seeded when the table
-// is empty; airports are skipped by name.
+// is empty; airports are skipped by (name, categoryId) — name alone is not
+// unique, 24 airports repeat the same name across categories.
 //
 // Usage: npm run db:seed-map   (run npm run db:create-map-tables first)
 import { config } from "dotenv";
@@ -14,7 +15,7 @@ import { stat } from "node:fs/promises";
 import path from "node:path";
 import { getDb } from "../client";
 import { airports, mapCategories } from "../schema";
-import { airportRows, categoryRows } from "./seed-map.rows";
+import { airportKey, airportRows, categoryRows, planAirportInserts } from "./seed-map.rows";
 
 async function main() {
   const db = getDb();
@@ -28,17 +29,14 @@ async function main() {
     console.log(`Skipped categories (table already has ${existingCategories.length})`);
   }
 
-  const existingAirports = await db.select({ name: airports.name }).from(airports);
-  const existingNames = new Set(existingAirports.map((r) => r.name));
+  const existingAirports = await db.select({ name: airports.name, categoryId: airports.categoryId }).from(airports);
+  const existingKeys = existingAirports.map(airportKey);
 
-  let created = 0;
-  let skipped = 0;
+  const allRows = airportRows();
+  const toInsert = planAirportInserts(allRows, existingKeys);
+
   let missingPdfs = 0;
-  for (const row of airportRows()) {
-    if (existingNames.has(row.name)) {
-      skipped++;
-      continue;
-    }
+  for (const row of toInsert) {
     if (row.pdfUrl) {
       try {
         await stat(path.join(process.cwd(), "public", row.pdfUrl));
@@ -48,10 +46,10 @@ async function main() {
       }
     }
     await db.insert(airports).values(row);
-    existingNames.add(row.name);
-    created++;
   }
 
+  const created = toInsert.length;
+  const skipped = allRows.length - created;
   console.log(`Done — ${created} airport(s) created, ${skipped} already existed, ${missingPdfs} PDF(s) missing on disk.`);
   process.exit(0);
 }
