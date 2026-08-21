@@ -69,6 +69,15 @@ test("airport update: keeps Spanish message for too-long info", () => {
   if (!r.success) assert.match(firstIssue(r.error), /demasiado larga/);
 });
 
+test("category update: rejects explicit null sortOrder, omitted key stays undefined", () => {
+  const bad = mapCategoryUpdateSchema.safeParse({ sortOrder: null });
+  assert.equal(bad.success, false);
+  if (!bad.success) assert.match(firstIssue(bad.error), /orden es obligatorio/i);
+  const ok = mapCategoryUpdateSchema.safeParse({});
+  assert.ok(ok.success);
+  if (ok.success) assert.equal(ok.data.sortOrder, undefined);
+});
+
 test("stripUndefined removes undefined keys only", () => {
   assert.deepEqual(stripUndefined({ a: 1, b: undefined, c: "" }), { a: 1, c: "" });
 });

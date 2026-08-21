@@ -10,6 +10,17 @@ const sortOrderField = z.coerce
 
 const infoField = z.string().trim().max(2000, "La descripción es demasiado larga");
 
+// sortOrder is optional when updating (omit the key to leave the value
+// unchanged), but an explicit `null`/"" is not a valid "leave unchanged"
+// signal — without this, z.coerce.number() would silently coerce `null` to
+// `0` and accept it. Same preprocess + refine shape as requiredCoordinate
+// below, just chained with .optional() so a genuinely missing key still
+// short-circuits to `undefined` before ever reaching this schema.
+const sortOrderRequiredField = z
+  .preprocess((v) => (v === null || v === "" ? undefined : v), sortOrderField.optional())
+  .refine((v) => v !== undefined, { message: "El orden es obligatorio" })
+  .transform((v) => v as number);
+
 // lat/lng arrive as FormData values (string | null, "" when the field is
 // present but empty) on create, and as JSON values (number | null | undefined)
 // on update. Plain z.coerce.number() coerces `null` (and `""`) to `0`, which
@@ -44,7 +55,7 @@ export const mapCategoryUpdateSchema = z.object({
   name: mapCategoryInputSchema.shape.name.optional(),
   short: mapCategoryInputSchema.shape.short.optional(),
   color: mapCategoryInputSchema.shape.color.optional(),
-  sortOrder: sortOrderField.optional(),
+  sortOrder: sortOrderRequiredField.optional(),
 });
 
 export const airportInputSchema = z.object({
