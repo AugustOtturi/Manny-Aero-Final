@@ -16,14 +16,6 @@ export interface Category {
   description: string;
 }
 
-export const LEGENDS: Record<"all" | "1" | "2" | "3" | "4", string> = {
-  all: "Every major airport, FBO, office and IS-BAH certified site — Mexico covered end to end.",
-  "1": "Ground handling agents delivering full aviation support at each gateway.",
-  "2": "FBO partnerships for premium fueling, maintenance, and executive amenities.",
-  "3": "Corporate offices coordinating nationwide operations from regional hubs.",
-  "4": "IS-BAH certified locations meeting the highest ground-handling safety standards.",
-};
-
 export const CATEGORIES: Record<"1" | "2" | "3" | "4", Category> = {
   "1": {
     name: "Manny Agent",
@@ -55,6 +47,8 @@ export const CATEGORIES: Record<"1" | "2" | "3" | "4", Category> = {
   },
 };
 
+// ⚠️ Ya no alimenta el mapa — el home lee de MySQL (tablas map_categories y
+// airports). Este archivo es solo la fuente de seed-map.ts. Conservar.
 // 101 airports — migrated from WordPress GeoMaps (manny.aero)
 // PDFs served locally from /files/airports/ (copied via download-airport-pdfs.js).
 // Categories: 1=Agent (73) | 2=FBO (18) | 3=Office (8) | 4=IS-BAH (2)
