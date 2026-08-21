@@ -1,0 +1,388 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import {
+  countAirportsByCategory,
+  listMapCategories,
+} from "../../../lib/server/repositories/mapCategories";
+
+export const prerender = false;
+
+const [categories, counts] = await Promise.all([listMapCategories(), countAirportsByCategory()]);
+---
+
+<AdminLayout title="Categorías del mapa" active="map">
+  <main class="page">
+    <header class="page__header">
+      <h1>Categorías del mapa</h1>
+      <a href="/admin/map" class="back-link">← Aeropuertos</a>
+    </header>
+    <p class="page__lead">
+      Cada categoría define el color de los pins, el filtro que aparece sobre el mapa y la etiqueta del popup. El orden determina cómo se listan los filtros; si dos pins comparten ubicación, se dibuja encima el de mayor orden.
+    </p>
+
+    <section class="add-form">
+      <h2>Agregar categoría</h2>
+      <form id="add-form">
+        <label class="field">
+          <span>Nombre</span>
+          <input type="text" name="name" required maxlength="100" placeholder="Ej. Manny Agent" />
+        </label>
+        <label class="field">
+          <span>Nombre corto</span>
+          <input type="text" name="short" required maxlength="50" placeholder="Ej. Agent" />
+        </label>
+        <label class="field">
+          <span>Color</span>
+          <input type="color" name="color" value="#ffb900" />
+        </label>
+        <label class="field">
+          <span>Orden</span>
+          <input type="number" name="sortOrder" min="0" step="1" value={String(categories.length + 1)} />
+        </label>
+        <button type="submit" id="add-submit">Agregar categoría</button>
+        <p class="status" id="add-status" hidden></p>
+      </form>
+    </section>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Color</th>
+            <th>Nombre</th>
+            <th>Nombre corto</th>
+            <th>Orden</th>
+            <th>Aeropuertos</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="categories-body">
+          {categories.map((c) => {
+            const n = counts.get(c.id) ?? 0;
+            return (
+              <tr data-id={c.id}>
+                <td><input type="color" name="color" value={c.color} form={`edit-${c.id}`} /></td>
+                <td>
+                  <form class="edit-form" id={`edit-${c.id}`}>
+                    <input type="text" name="name" value={c.name} required maxlength="100" />
+                  </form>
+                </td>
+                <td><input type="text" name="short" value={c.short} required maxlength="50" form={`edit-${c.id}`} /></td>
+                <td><input type="number" name="sortOrder" value={c.sortOrder} min="0" step="1" form={`edit-${c.id}`} class="num" /></td>
+                <td><span class="type-badge">{n}</span></td>
+                <td class="actions">
+                  <button type="submit" class="btn-small" form={`edit-${c.id}`}>Guardar</button>
+                  <button
+                    class="delete-btn"
+                    disabled={n > 0}
+                    title={n > 0 ? "Reasigná primero sus aeropuertos" : "Eliminar categoría"}
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {categories.length === 0 && <p class="empty">No hay categorías — agrega la primera arriba.</p>}
+    </div>
+  </main>
+</AdminLayout>
+
+<script>
+  const addForm = document.getElementById("add-form") as HTMLFormElement;
+  const addStatus = document.getElementById("add-status")!;
+  const addSubmit = document.getElementById("add-submit") as HTMLButtonElement;
+
+  function formJson(form: HTMLFormElement) {
+    const fd = new FormData(form);
+    return {
+      name: fd.get("name"),
+      short: fd.get("short"),
+      color: fd.get("color"),
+      sortOrder: fd.get("sortOrder"),
+    };
+  }
+
+  addForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    addStatus.hidden = true;
+    addSubmit.disabled = true;
+    try {
+      const res = await fetch("/api/admin/map/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formJson(addForm)),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Error al crear");
+      window.location.reload();
+    } catch (err) {
+      addStatus.hidden = false;
+      addStatus.textContent = err instanceof Error ? err.message : "Error inesperado";
+      addStatus.style.color = "#ff6b6b";
+      addSubmit.disabled = false;
+    }
+  });
+
+  document.querySelectorAll<HTMLElement>("#categories-body tr").forEach((tr) => {
+    const id = tr.dataset.id!;
+    const editForm = tr.querySelector<HTMLFormElement>(".edit-form")!;
+    const deleteBtn = tr.querySelector<HTMLButtonElement>(".delete-btn")!;
+
+    editForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        const res = await fetch(`/api/admin/map/categories/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formJson(editForm)),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Error al guardar");
+        window.location.reload();
+      } catch (err) {
+        await window.adminAlert(err instanceof Error ? err.message : "Error inesperado");
+      }
+    });
+
+    deleteBtn.addEventListener("click", async () => {
+      const ok = await window.adminConfirm("Esta acción no se puede deshacer.", {
+        title: "¿Eliminar esta categoría?",
+        confirmLabel: "Eliminar",
+        danger: true,
+      });
+      if (!ok) return;
+      try {
+        const res = await fetch(`/api/admin/map/categories/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Error al eliminar");
+        tr.remove();
+      } catch (err) {
+        await window.adminAlert(err instanceof Error ? err.message : "Error inesperado");
+      }
+    });
+  });
+</script>
+
+<style>
+  .page {
+    padding: 40px 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .page__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .page__header h1 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    margin: 0;
+  }
+
+  .back-link {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    color: var(--color-accent);
+  }
+
+  .page__lead {
+    color: var(--color-text-muted);
+    opacity: 0.85;
+    font-size: 14px;
+    max-width: 720px;
+    margin: 0 0 32px;
+  }
+
+  .add-form {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+
+  .add-form h2 {
+    font-size: 15px;
+    margin: 0 0 16px;
+  }
+
+  .add-form form {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .field input[type="text"],
+  .field input[type="number"] {
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    min-width: 160px;
+    font-family: var(--font-sans);
+  }
+
+  .field input[type="number"] {
+    min-width: 90px;
+  }
+
+  input[type="color"] {
+    width: 44px;
+    height: 38px;
+    padding: 2px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+  }
+
+  .field input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  #add-submit {
+    padding: 11px 22px;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: #0a0a0a;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+  }
+
+  #add-submit:disabled {
+    opacity: 0.6;
+  }
+
+  .status {
+    font-size: 12px;
+    margin: 8px 0 0;
+    width: 100%;
+  }
+
+  .table-wrap {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: auto;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+  }
+
+  .table th,
+  .table td {
+    text-align: left;
+    padding: 14px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .table th {
+    color: var(--color-text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .table input[type="text"],
+  .table input[type="number"] {
+    font-size: 14px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    min-width: 140px;
+    font-family: var(--font-sans);
+  }
+
+  .table input.num {
+    min-width: 70px;
+    width: 70px;
+  }
+
+  .actions {
+    white-space: nowrap;
+  }
+
+  .actions > * + * {
+    margin-left: 12px;
+  }
+
+  .btn-small {
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-strong);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-small:hover {
+    border-color: var(--color-accent);
+  }
+
+  .type-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 185, 0, 0.15);
+    color: var(--color-accent);
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .delete-btn:disabled {
+    color: rgba(255, 255, 255, 0.3);
+    cursor: not-allowed;
+  }
+
+  .empty {
+    padding: 32px;
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+</style>
