@@ -1,11 +1,11 @@
 ---
-import { AIRPORTS, CATEGORIES } from "../data/airports";
+import { listMapCategories } from "../lib/server/repositories/mapCategories";
+import { listAirports } from "../lib/server/repositories/airports";
+import { serializeMapData, toMapData } from "../lib/mapData";
 
-const totalLocations = AIRPORTS.length;
-const categoryEntries = Object.entries(CATEGORIES) as [
-  "1" | "2" | "3" | "4",
-  (typeof CATEGORIES)["1"],
-][];
+const [categoryRows, airportRows] = await Promise.all([listMapCategories(), listAirports()]);
+const mapData = toMapData(categoryRows, airportRows);
+const categories = mapData.categories;
 ---
 
 <section class="map-section section" id="map" aria-labelledby="map-title">
@@ -26,11 +26,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         class="map__select"
         aria-label="Filter locations by category"
       >
-        {
-          categoryEntries.map(([key, cat]) => (
-            <option value={key}>{cat.name}</option>
-          ))
-        }
+        {categories.map((cat) => <option value={String(cat.id)}>{cat.name}</option>)}
       </select>
     </div>
 
@@ -43,11 +39,11 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       >
         <span class="map__legend-header">Select a category</span>
         {
-          categoryEntries.map(([key, cat]) => (
+          categories.map((cat, i) => (
             <button
               type="button"
-              class={`map__pill${key === "1" ? " is-active" : ""}`}
-              data-filter={key}
+              class={`map__pill${i === 0 ? " is-active" : ""}`}
+              data-filter={String(cat.id)}
               style={`--pill-color:${cat.color}`}
             >
               <span class="map__pill-dot" aria-hidden="true" />
@@ -57,6 +53,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         }
       </div>
 
+      <script type="application/json" id="map-data" set:html={serializeMapData(mapData)} />
       <div id="map-container" aria-label="Interactive map of Manny Aero locations across Mexico" role="region"></div>
       <div class="map__loader" id="map-loader" aria-hidden="true">
         <span></span><span></span><span></span>
@@ -93,10 +90,24 @@ const categoryEntries = Object.entries(CATEGORIES) as [
 </section>
 
 <script>
-  import { AIRPORTS, CATEGORIES } from "../data/airports";
+  import type { MapAirportDTO as Airport, MapCategoryDTO as Category, MapData } from "../lib/mapData";
 
-  type Airport = (typeof AIRPORTS)[number];
-  type CatKey = "1" | "2" | "3" | "4";
+  const FALLBACK_CATEGORY: Category = { id: 0, name: "", short: "", color: "#999999", sortOrder: 0 };
+
+  function readMapData(): MapData {
+    const el = document.getElementById("map-data");
+    try {
+      return el ? (JSON.parse(el.textContent || "") as MapData) : { categories: [], airports: [] };
+    } catch {
+      return { categories: [], airports: [] };
+    }
+  }
+
+  const MAP_DATA = readMapData();
+  const AIRPORTS = MAP_DATA.airports;
+  const CATEGORY_BY_ID = new Map<number, Category>(MAP_DATA.categories.map((c) => [c.id, c]));
+  const catOf = (a: Airport): Category => CATEGORY_BY_ID.get(a.categoryId) ?? FALLBACK_CATEGORY;
+  const DEFAULT_FILTER = MAP_DATA.categories[0] ? String(MAP_DATA.categories[0].id) : "all";
 
   async function initMap() {
     const container = document.getElementById("map-container");
@@ -122,7 +133,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
     }
 
     function buildPopupHtml(a: Airport) {
-      const cat = CATEGORIES[String(a.categoria) as CatKey];
+      const cat = catOf(a);
 
       const wrapper = document.createElement("div");
       wrapper.className = "map-popup";
@@ -135,7 +146,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
 
       const title = document.createElement("h3");
       title.className = "map-popup__title";
-      title.textContent = a.nombre;
+      title.textContent = a.name;
       wrapper.appendChild(title);
 
       const info = document.createElement("p");
@@ -143,13 +154,12 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       info.textContent = a.info;
       wrapper.appendChild(info);
 
-      // Only same-origin relative paths are trusted as a download link.
-      // Airport data is hardcoded today, but this guards against a
-      // "javascript:" scheme if it's ever moved to an editable source.
-      if (a.pdf.startsWith("/")) {
+      // Only same-origin relative paths are trusted as a download link —
+      // airport data is editable from /admin, so never trust the scheme.
+      if (a.pdfUrl && a.pdfUrl.startsWith("/")) {
         const link = document.createElement("a");
         link.className = "map-popup__btn";
-        link.href = a.pdf;
+        link.href = a.pdfUrl;
         link.target = "_blank";
         link.rel = "noopener";
         link.setAttribute("download", "");
@@ -257,11 +267,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
 
     // Higher-priority pins added last so they draw on top when they overlap.
     // On canvas this is literal (draw order); on SVG we still set z-index below.
-    const sortedAirports = [...AIRPORTS].sort((a, b) => {
-      const pa = CATEGORIES[String(a.categoria) as CatKey].priority;
-      const pb = CATEGORIES[String(b.categoria) as CatKey].priority;
-      return pa - pb;
-    });
+    const sortedAirports = [...AIRPORTS].sort((a, b) => catOf(a).sortOrder - catOf(b).sortOrder);
 
     const popupOpts = {
       className: "map-popup-wrapper",
@@ -304,7 +310,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
 
     if (isMobile) {
       for (const a of sortedAirports) {
-        const cat = CATEGORIES[String(a.categoria) as CatKey];
+        const cat = catOf(a);
         const marker = L.circleMarker([a.lat, a.lng], {
           radius: 7,
           color: "#ffffff",
@@ -329,7 +335,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       };
 
       for (const a of sortedAirports) {
-        const cat = CATEGORIES[String(a.categoria) as CatKey];
+        const cat = catOf(a);
         const marker = L.marker([a.lat, a.lng], {
           icon: buildIcon(cat.color, 20),
           riseOnHover: true,
@@ -349,7 +355,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
 
         const el = marker.getElement();
         if (el) {
-          el.style.zIndex = String(500 + cat.priority * 10);
+          el.style.zIndex = String(500 + cat.sortOrder * 10);
         }
 
         markers.push({ airport: a, marker });
@@ -376,10 +382,8 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         for (const a of AIRPORTS) {
           const key = `${a.lat.toFixed(4)},${a.lng.toFixed(4)}`;
           const existing = byCoord.get(key);
-          const prio = CATEGORIES[String(a.categoria) as CatKey].priority;
-          const existingPrio = existing
-            ? CATEGORIES[String(existing.categoria) as CatKey].priority
-            : -1;
+          const prio = catOf(a).sortOrder;
+          const existingPrio = existing ? catOf(existing).sortOrder : -1;
           if (!existing || prio > existingPrio) byCoord.set(key, a);
         }
         const visible = new Set(
@@ -390,7 +394,7 @@ const categoryEntries = Object.entries(CATEGORIES) as [
         }
       } else {
         for (const { airport, marker } of markers) {
-          setMarkerVisible(marker, String(airport.categoria) === filter);
+          setMarkerVisible(marker, String(airport.categoryId) === filter);
         }
       }
     }
@@ -415,8 +419,8 @@ const categoryEntries = Object.entries(CATEGORIES) as [
       applyFilter(filter);
     });
 
-    applyFilter("1");
-    if (sel) sel.value = "1";
+    applyFilter(DEFAULT_FILTER);
+    if (sel) sel.value = DEFAULT_FILTER;
 
     // Fix Leaflet sizing when the map animates in
     requestAnimationFrame(() => map.invalidateSize());
