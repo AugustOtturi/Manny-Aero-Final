@@ -265,7 +265,7 @@ const categories = mapData.categories;
     type AnyMarker = L.Marker | L.CircleMarker;
     const markers: { airport: Airport; marker: AnyMarker }[] = [];
 
-    // Higher-priority pins added last so they draw on top when they overlap.
+    // Pins with higher sortOrder are added last so they draw on top when they overlap.
     // On canvas this is literal (draw order); on SVG we still set z-index below.
     const sortedAirports = [...AIRPORTS].sort((a, b) => catOf(a).sortOrder - catOf(b).sortOrder);
 
@@ -377,7 +377,7 @@ const categories = mapData.categories;
 
     function applyFilter(filter: string) {
       if (filter === "all") {
-        // Show only highest-priority airport per coordinate
+        // Show only the highest-sortOrder airport per coordinate
         const byCoord = new Map<string, Airport>();
         for (const a of AIRPORTS) {
           const key = `${a.lat.toFixed(4)},${a.lng.toFixed(4)}`;

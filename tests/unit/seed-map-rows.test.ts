@@ -11,7 +11,7 @@ test("categoryRows keeps ids 1-4 and maps priority to sortOrder", () => {
   assert.deepEqual(rows.map((r) => r.sortOrder), [1, 2, 3, 4]);
 });
 
-test("airportRows maps 101 airports, empty strings become null", () => {
+test("airportRows maps 99 airports, empty strings become null", () => {
   const rows = airportRows();
   assert.equal(rows.length, 99);
   const cancun = rows.find((r) => r.name.startsWith("CANCÚN"));

@@ -21,8 +21,9 @@ async function main() {
 
   const existingCategories = await db.select().from(mapCategories);
   if (existingCategories.length === 0) {
-    await db.insert(mapCategories).values(categoryRows());
-    console.log(`Seeded ${categoryRows().length} categories`);
+    const categories = categoryRows();
+    await db.insert(mapCategories).values(categories);
+    console.log(`Seeded ${categories.length} categories`);
   } else {
     console.log(`Skipped categories (table already has ${existingCategories.length})`);
   }
@@ -47,6 +48,7 @@ async function main() {
       }
     }
     await db.insert(airports).values(row);
+    existingNames.add(row.name);
     created++;
   }
 

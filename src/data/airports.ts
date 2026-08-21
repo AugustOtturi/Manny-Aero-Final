@@ -49,7 +49,7 @@ export const CATEGORIES: Record<"1" | "2" | "3" | "4", Category> = {
 
 // ⚠️ Ya no alimenta el mapa — el home lee de MySQL (tablas map_categories y
 // airports). Este archivo es solo la fuente de seed-map.ts. Conservar.
-// 101 airports — migrated from WordPress GeoMaps (manny.aero)
+// 99 airports — migrated from WordPress GeoMaps (manny.aero)
 // PDFs served locally from /files/airports/ (copied via download-airport-pdfs.js).
 // Categories: 1=Agent (73) | 2=FBO (18) | 3=Office (8) | 4=IS-BAH (2)
 export const AIRPORTS: Airport[] = [
