@@ -7,7 +7,7 @@ Guidance for Claude Code when working on the Manny Aero website.
 Marketing site + admin CMS for **Manny Aero** — premium aircraft ground handling, permits, catering and FBO coordination across Mexico. Multi-page **Astro 5 SSR** site (migrated from static in jul 2026). Public content (services, permits, ISBAH modules, airports) is still hardcoded in `src/data/*`; **news, form leads, and index images now live in MySQL** and are editable from `/admin`.
 
 Routes (actualizado jul 2026):
-- `/` — main landing (hero video, subhero, service cards, map, final CTA)
+- `/` — main landing (hero video, subhero, service cards, map, final CTA) — el mapa lee `map_categories` y `airports` de MySQL (editable en `/admin/map`)
 - `/about` — company story, timeline, values (la sección team se eliminó en jul 2026 a pedido del cliente)
 - `/ground-handling` — servicios detallados (tabs desktop, modal bottom-sheet mobile). `/services` redirige aquí via 301 en `server.mjs` (`REDIRECTS`).
 - `/catering` — Manny's In-Flight Catering (foto hero + lista de servicios + CTA)
@@ -17,7 +17,7 @@ Routes (actualizado jul 2026):
 - `/founder` — historia del fundador (sticky photo + body texto)
 - `/news`, `/news/[slug]` — noticias, leídas de MySQL en cada request (SSR, no rebuild al publicar)
 - `/404` — página de error personalizada
-- `/admin/login`, `/admin`, `/admin/news[/new|/[id]/edit]`, `/admin/leads`, `/admin/images` — panel de administración (ver sección **Admin CMS** abajo)
+- `/admin/login`, `/admin`, `/admin/news[/new|/[id]/edit]`, `/admin/leads`, `/admin/images`, `/admin/map`, `/admin/map/categories` — panel de administración (ver sección **Admin CMS** abajo)
 
 ## Stack
 
@@ -25,7 +25,7 @@ Routes (actualizado jul 2026):
 - **TypeScript** (strict)
 - **Express** (`server.mjs`, raíz del proyecto) — envuelve el handler SSR de Astro como middleware y agrega: headers de seguridad (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, HSTS, CSP como defensa en profundidad), `compression()`, los 301 redirects legacy (`REDIRECTS`), servir el directorio de uploads con cache headers, y `trust proxy` para IPs correctas detrás del edge de Hostinger. Es el server de producción (`npm start`). En Hostinger el entry point configurado es **`server.js`** (raíz), un shim que loguea el boot, hace self-build de Astro si falta `dist/`, restaura el exec bit de esbuild y luego importa `server.mjs`. **No se usa en dev** — `astro dev` corre su propio servidor y todas las rutas API (`src/pages/api/**`) funcionan igual ahí, sin Express.
 - **CSP**: el edge CDN de Hostinger (hcdn) **pisa el header** `Content-Security-Policy`, así que la política enforced real se entrega como `<meta http-equiv>` desde `src/lib/csp.ts` (`CSP_META`), inyectada en `BaseLayout.astro` y `AdminLayout.astro` solo en producción. El header de `server.mjs` queda como defensa en profundidad. La política permite GA4/gtag.
-- **MySQL + Drizzle ORM** (`src/lib/server/db/`) — tablas `news`, `leads`, `images`, `permit_downloads`, `admin_users`. Esquema en `src/lib/server/db/schema.ts`.
+- **MySQL + Drizzle ORM** (`src/lib/server/db/`) — tablas `news`, `leads`, `images`, `permit_downloads`, `admin_users`, `map_categories`, `airports`. Esquema en `src/lib/server/db/schema.ts`.
 - **Nodemailer** (`src/lib/server/mail.ts`) — envío de emails para `/contact` y el email gate (el viejo `mail.php`/PHPMailer se eliminó del repo en jul 2026, commit `ceb04a8`).
 - **Auth admin**: JWT (`jose`) en cookie `httpOnly`. `verifyCredentials` busca **primero en la tabla `admin_users`** (por email, hash bcrypt) y solo cae al fallback por variables de entorno (`ADMIN_USERNAME` + `ADMIN_PASSWORD_HASH`) si no hay fila o la DB falla. Ver sección Admin CMS.
 - **sharp** — optimiza imágenes subidas desde `/admin/images` (resize + conversión a WebP) antes de guardarlas en el directorio de uploads (`UPLOADS_DIR`, ver Variables de entorno).
@@ -35,7 +35,7 @@ Routes (actualizado jul 2026):
 - **Fonts** (self-hosted via `@fontsource`, never Google CDN):
   - `Inter` 400–900 → body, UI, navigation (`var(--font-sans)`)
   - `Bebas Neue` 400 → display titles only (`var(--font-display)`)
-- **Hosting (dev/staging — QA)**: Hostinger, cuenta `u676595820` (Engenio Digital). MySQL: host `srv1578.hstgr.io`, db `u676595820_cmsmanny`. SMTP: `smtp.hostinger.com:465` (SSL) con `manny.cms@augustotturi.com`.
+- **Hosting (dev/staging — QA)**: Hostinger, cuenta `u676595820` (Engenio Digital). MySQL: host `srv1578.hstgr.io`, db `u676595820_mannyaero_db` (user `u676595820_mannyaerodb`). `main` se despliega en QA y pega a esta DB; la DB del cliente (producción) es otra. SMTP: `smtp.hostinger.com:465` (SSL) con `manny.cms@augustotturi.com`.
 - **Hosting (cliente/producción)**: Hostinger Business, cuenta del cliente (`u824529850`), como **app Node.js persistente** (ya no static hosting). Ver sección Deploy abajo.
 
 ## Commands
@@ -52,6 +52,9 @@ npm run db:studio      # drizzle-kit studio — explorador visual de la DB
 npm run db:seed-news   # copia src/data/news.ts a la tabla `news` (idempotente, upsert por slug)
 npm run db:seed-logos  # copia los 8 logos originales (src/assets/Logo1..8) a la tabla `images` (idempotente)
 npm run db:seed-permit-downloads  # registra los 10 archivos de public/files/ en `permit_downloads` (idempotente, no copia archivos)
+npm run test                       # tests unitarios (node:test + tsx) de tests/unit/
+npm run db:create-map-tables       # crea map_categories + airports si no existen (CREATE TABLE IF NOT EXISTS vía mysql2)
+npm run db:seed-map                # migra las 4 categorías + 99 aeropuertos de src/data/airports.ts (idempotente)
 ```
 
 ## Variables de entorno
@@ -105,6 +108,7 @@ src/
     format.ts                 # formatNewsDate, newsBodyToParagraphs
     csp.ts                     # CSP_META — política CSP entregada como <meta> (el edge pisa el header)
     imageSlots.ts              # lista canónica de slots reemplazables en /admin/images/[category] (subhero + service — logos NO están acá, son CRUD dinámico)
+    mapData.ts                 # serializeMapData — arma {categories, airports} y escapa `<` para el <script type="application/json"> de MapSection
     server/                    # código SOLO server-side — nunca importar desde componentes que se hidratan en cliente
       env.ts                    # getEnv() — valida process.env con zod, cachea el resultado
       auth.ts                   # signSession/verifySession (JWT), verifyCredentials (DB-first contra admin_users, fallback env vars)
@@ -112,12 +116,13 @@ src/
       mail.ts                    # Nodemailer — sendContactEmail, sendGateEmail
       rateLimit.ts                # rate limiter in-memory (checkRateLimit, getClientIp)
       originCheck.ts               # isAllowedOrigin — localhost cualquier puerto en dev, ALLOWED_ORIGIN exacto en prod
+      airportFiles.ts               # PDFs de /admin/map — valida .pdf/15MB/magic bytes, guarda en UPLOADS_DIR/airport-files/, nunca borra los legacy de public/files/airports/
       db/
-        schema.ts                  # tablas Drizzle: news, leads, images, permitDownloads, adminUsers
+        schema.ts                  # tablas Drizzle: news, leads, images, permitDownloads, adminUsers, mapCategories, airports
         client.ts                   # getDb() — pool mysql2 + instancia drizzle (singleton)
-        scripts/                     # migraciones one-off (seed-news, seed-logos, seed-permit-downloads) — todas idempotentes, correr con tsx
+        scripts/                     # migraciones one-off (seed-news, seed-logos, seed-permit-downloads, create-map-tables, seed-map, seed-map.rows) — todas idempotentes, correr con tsx
       repositories/
-        news.ts, leads.ts, images.ts, permitDownloads.ts  # queries CRUD tipadas, usadas tanto por páginas públicas como por /api/admin/*
+        news.ts, leads.ts, images.ts, permitDownloads.ts, mapCategories.ts, airports.ts  # queries CRUD tipadas, usadas tanto por páginas públicas como por /api/admin/*
       schemas/news.ts               # zod schema + slugify() para el formulario de noticias
   pages/
     index.astro                # main landing
@@ -140,6 +145,7 @@ src/
         leads/index.ts, [id].ts, export.ts
         images/index.ts, upload.ts, [category]/[slug].ts
         permits/index.ts, upload.ts, [id].ts, [id]/file.ts
+        map/categories/index.ts, [id].ts, airports/index.ts, [id].ts, [id]/file.ts
     admin/
       login.astro
       index.astro                 # hub con cards → Noticias / Leads / Imágenes / Permisos (sin "dashboard", sin stats sueltas)
@@ -149,6 +155,8 @@ src/
       images/[category].astro       # sirve /admin/images/subhero y /admin/images/service — reemplazo por slot fijo
       images/logos.astro            # CRUD completo (agregar/eliminar/reemplazar), no slots fijos, sin campo de nombre
       permits.astro                  # CRUD de archivos descargables (agregar/renombrar/cambiar ícono/reemplazar archivo/eliminar)
+      map/index.astro                # CRUD de aeropuertos con mini-mapa Leaflet arrastrable en el modal
+      map/categories.astro           # CRUD de map_categories (nombre, corto, color, orden)
   components/
     admin/
       AdminTopbar.astro    # barra superior persistente del panel (Noticias/Leads/Imágenes/Permisos + logout) — NO usar sidebar lateral, se probó y se veía roto
@@ -161,7 +169,7 @@ src/
     BackToServices.astro       # link de regreso usado en /ground-handling y /catering
     ui/GlassButton.astro, ui/GlassPill.astro
   data/
-    airports.ts                # 80+ airports para el mapa
+    airports.ts                # ⚠️ ya no alimenta el mapa — solo fuente de seed-map.ts — conservar
     airportOptions.ts          # opciones serializadas para el select del formulario de contacto
     services.ts                # minimal data (slug, title, href, tone) para ServiceCards en el index
     servicesDetail.ts          # rich data (tag, desc, features, image) para /ground-handling
@@ -178,6 +186,8 @@ src/
     poster-hero.webp           # hero LQIP fallback
     hero-manny-final.mp4
     mannylogo.png              # logo para el flyout mobile del navbar
+tests/
+  unit/                      # tests unitarios (node:test + tsx): map-schemas, map-data, airport-files, seed-map-rows
 ```
 
 ## Admin CMS (`/admin`)
@@ -213,6 +223,12 @@ Panel de administración integrado en la misma app Astro (no es un proyecto/domi
 - Los 10 archivos originales se migraron con `npm run db:seed-permit-downloads` — a diferencia de logos/imágenes, **no se copiaron los archivos**, la migración solo crea filas en la DB apuntando a las rutas que ya existían en `public/files/*`. Los archivos nuevos que se agreguen desde el admin sí se guardan físicamente en `public/uploads/permit-files/`. El endpoint DELETE solo borra del disco los archivos bajo `/uploads/permit-files/` — nunca toca los originales de `public/files/`.
 - Endpoints: `GET /api/admin/permits` (list), `POST /api/admin/permits/upload` (crear — multipart: `name`, `icon`, `file`), `PUT /api/admin/permits/:id` (JSON — renombrar / cambiar ícono), `POST /api/admin/permits/:id/file` (multipart — reemplazar solo el archivo), `DELETE /api/admin/permits/:id`.
 - `permits-and-authorizations.astro` lee `DOWNLOADS` desde `listPermitDownloads()` en vez de `src/data/permits.ts` (ese archivo sigue exportando `PERMIT_SECTIONS`, que la página todavía usa).
+
+### Mapa (`/admin/map`)
+- CRUD de los pins del mapa del home (tabla `airports`): nombre, categoría, info, lat/lng y PDF. Ubicación con mini-mapa Leaflet en el modal (click coloca, arrastre ajusta, lat/lng sincronizados). `/admin/map/categories` es el CRUD de `map_categories` (nombre, corto, color, orden); no se puede borrar una categoría con pins (409 + FK `restrict`).
+- Endpoints: `GET/POST /api/admin/map/categories`, `PUT/DELETE /api/admin/map/categories/:id`, `GET/POST /api/admin/map/airports`, `PUT/DELETE /api/admin/map/airports/:id`, `POST /api/admin/map/airports/:id/file`. Validación zod en `src/lib/server/schemas/map.ts`; PDFs via `src/lib/server/airportFiles.ts` (solo `.pdf`, 15 MB, magic bytes) a `UPLOADS_DIR/airport-files/`. Los PDFs legacy de `public/files/airports/` son compartidos por varios pins y **nunca** se borran.
+- `MapSection.astro` lee de la DB en el frontmatter y embebe `{categories, airports}` como `<script type="application/json" id="map-data">` (`serializeMapData` escapa `<`). El script cliente ya no importa `src/data/airports.ts`. `sortOrder` reemplaza a `priority` con la misma semántica (mayor orden se dibuja encima).
+- Deploy: 1) `npm run db:create-map-tables` en el servidor, 2) deploy del código, 3) `npm run db:seed-map` una vez. Si el código llega antes que las tablas, el home falla.
 
 ### Modales del admin (no usar `confirm()`/`alert()` nativos)
 - `src/components/admin/ConfirmModal.astro` se monta una sola vez en `AdminLayout.astro` (solo si hay sesión) y expone dos funciones globales: `window.adminConfirm(message, opts?): Promise<boolean>` y `window.adminAlert(message, opts?): Promise<void>`. Tipos declarados en `src/env.d.ts`.
@@ -294,6 +310,7 @@ All primary CTAs share the same hover language: white inset top/bottom border at
 - **Drizzle's `datetime()` column has no `.onUpdateNow()`** (that method only exists on `timestamp()`). Use `.$onUpdate(() => new Date())` instead — it's an ORM-level default applied on every Drizzle `update()`, not a DB-level trigger.
 - **Don't run `git checkout`/`reset`/`clean` etc. against the QA MySQL DB via a list-then-delete-all pattern** in scripts or one-off bash — the permission layer flags unbounded deletes on shared databases. Delete by explicit tracked IDs instead.
 - **`drizzle-kit push` puede colgarse indefinidamente** en "Pulling schema from database..." contra la QA DB (pasó más de una vez, sin patrón claro — no es falta de conectividad, una conexión `mysql2` directa a la misma DB responde en <1s). Si pasa: no reintentar en loop. Usar `drizzle-kit generate` en su lugar (no necesita introspección de la DB, solo diffea contra `drizzle/` local) para obtener el SQL, copiar el `CREATE TABLE`/`ALTER TABLE` de la tabla nueva, y ejecutarlo directo con un script `mysql2` de una sola vez. Borrar la carpeta `drizzle/` después — este proyecto no usa el flujo de migraciones versionadas de drizzle-kit, solo `push`/SQL directo.
+- **El SQL de `create-map-tables.ts` debe seguir a `schema.ts`.** No hay migraciones versionadas; si se cambia una columna de `map_categories`/`airports`, actualizar los dos.
 - **Don't introduce a separate `data-page-theme="internal"` dark gradient.** This was tried (warm dark `#252524 → #424040`, blobs/noise disabled) and reverted because the client wants internal pages to share the home's gradient. If you re-add it, expect to revert it again.
 - **Bebas Neue under ~18px** is condensed/illegible — only for display titles, never for body or labels.
 - **Inputs at `<14px`** trigger iOS auto-zoom on focus. Form inputs are `14px` minimum.
