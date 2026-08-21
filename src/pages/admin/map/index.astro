@@ -1,0 +1,755 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { listMapCategories } from "../../../lib/server/repositories/mapCategories";
+import { listAirports } from "../../../lib/server/repositories/airports";
+import { serializeMapData, toMapData } from "../../../lib/mapData";
+
+export const prerender = false;
+
+const [categoryRows, airportRows] = await Promise.all([listMapCategories(), listAirports()]);
+const mapData = toMapData(categoryRows, airportRows);
+const categoryById = new Map(mapData.categories.map((c) => [c.id, c]));
+---
+
+<AdminLayout title="Mapa" active="map">
+  <main class="page">
+    <header class="page__header">
+      <div>
+        <h1>Aeropuertos del mapa</h1>
+        <a href="/admin/map/categories" class="back-link">Categorías →</a>
+      </div>
+      <button type="button" id="new-btn" class="btn-primary">Nuevo aeropuerto</button>
+    </header>
+    <p class="page__lead">
+      Pins del mapa del home. Cada uno tiene nombre, categoría, ubicación y un PDF descargable. Los cambios se ven en el sitio al instante.
+    </p>
+
+    <div class="filters">
+      <input type="search" id="search" placeholder="Buscar por nombre…" aria-label="Buscar por nombre" />
+      <select id="category-filter" aria-label="Filtrar por categoría">
+        <option value="">Todas las categorías</option>
+        {mapData.categories.map((c) => <option value={String(c.id)}>{c.name}</option>)}
+      </select>
+      <span class="count" id="count">{mapData.airports.length} aeropuertos</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>PDF</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="airports-body">
+          {mapData.airports.map((a) => {
+            const cat = categoryById.get(a.categoryId);
+            return (
+              <tr data-id={a.id} data-name={a.name.toLowerCase()} data-category={String(a.categoryId)}>
+                <td class="name">{a.name}</td>
+                <td>
+                  <span class="cat">
+                    <span class="cat__dot" style={`--dot:${cat?.color ?? "#999"}`} aria-hidden="true" />
+                    {cat?.short ?? "—"}
+                  </span>
+                </td>
+                <td>
+                  {a.pdfUrl ? (
+                    <a href={a.pdfUrl} target="_blank" rel="noopener" class="view-link">Ver PDF</a>
+                  ) : (
+                    <span class="muted">Sin PDF</span>
+                  )}
+                </td>
+                <td class="actions">
+                  <button type="button" class="btn-small edit-btn">Editar</button>
+                  <button type="button" class="delete-btn">Eliminar</button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <p class="empty" id="empty" hidden>Ningún aeropuerto coincide con el filtro.</p>
+    </div>
+  </main>
+
+  <script type="application/json" id="map-data" set:html={serializeMapData(mapData)} />
+
+  <div class="overlay" id="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button type="button" class="modal__close" id="modal-close" aria-label="Cerrar">×</button>
+      <h2 class="modal__title" id="modal-title">Nuevo aeropuerto</h2>
+
+      <form id="airport-form" class="modal__grid">
+        <div class="modal__fields">
+          <label class="field">
+            <span>Nombre</span>
+            <input type="text" name="name" required maxlength="255" placeholder="Ej. CANCÚN (MMUN/CUN)" />
+          </label>
+          <label class="field">
+            <span>Categoría</span>
+            <select name="categoryId" required>
+              {mapData.categories.map((c) => <option value={String(c.id)}>{c.name}</option>)}
+            </select>
+          </label>
+          <label class="field">
+            <span>Información (opcional)</span>
+            <textarea name="info" rows="3" maxlength="2000"></textarea>
+          </label>
+          <div class="coords">
+            <label class="field">
+              <span>Latitud</span>
+              <input type="number" name="lat" step="any" min="-90" max="90" required />
+            </label>
+            <label class="field">
+              <span>Longitud</span>
+              <input type="number" name="lng" step="any" min="-180" max="180" required />
+            </label>
+          </div>
+          <div class="field">
+            <span>PDF</span>
+            <div class="pdf-current" id="pdf-current" hidden>
+              <a href="#" target="_blank" rel="noopener" class="view-link" id="pdf-link">Ver PDF actual</a>
+            </div>
+            <input type="file" name="file" accept=".pdf" id="pdf-input" />
+            <button type="button" class="btn-small" id="pdf-replace" hidden>Reemplazar PDF</button>
+          </div>
+          <p class="status" id="form-status" hidden></p>
+          <div class="modal__actions">
+            <button type="submit" class="btn-primary" id="form-submit">Guardar</button>
+            <button type="button" class="btn-small" id="form-cancel">Cancelar</button>
+          </div>
+        </div>
+
+        <div class="modal__map">
+          <p class="hint">Hacé click en el mapa para ubicar el pin, o arrastralo para ajustarlo.</p>
+          <div id="admin-map" aria-label="Mini mapa para ubicar el aeropuerto"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  import type { MapAirportDTO, MapCategoryDTO, MapData } from "../../../lib/mapData";
+  import type * as Leaflet from "leaflet";
+
+  const dataEl = document.getElementById("map-data")!;
+  const DATA = JSON.parse(dataEl.textContent || "{}") as MapData;
+  const AIRPORT_BY_ID = new Map<number, MapAirportDTO>(DATA.airports.map((a) => [a.id, a]));
+  const CATEGORY_BY_ID = new Map<number, MapCategoryDTO>(DATA.categories.map((c) => [c.id, c]));
+
+  // ---------- filters ----------
+  const search = document.getElementById("search") as HTMLInputElement;
+  const categoryFilter = document.getElementById("category-filter") as HTMLSelectElement;
+  const rows = Array.from(document.querySelectorAll<HTMLTableRowElement>("#airports-body tr"));
+  const countEl = document.getElementById("count")!;
+  const emptyEl = document.getElementById("empty")!;
+
+  function applyFilters() {
+    const q = search.value.trim().toLowerCase();
+    const cat = categoryFilter.value;
+    let visible = 0;
+    for (const tr of rows) {
+      const show = (!q || (tr.dataset.name || "").includes(q)) && (!cat || tr.dataset.category === cat);
+      tr.hidden = !show;
+      if (show) visible++;
+    }
+    countEl.textContent = `${visible} aeropuerto${visible === 1 ? "" : "s"}`;
+    emptyEl.hidden = visible > 0;
+  }
+  search.addEventListener("input", applyFilters);
+  categoryFilter.addEventListener("change", applyFilters);
+
+  // ---------- modal ----------
+  const overlay = document.getElementById("overlay")!;
+  const modalTitle = document.getElementById("modal-title")!;
+  const form = document.getElementById("airport-form") as HTMLFormElement;
+  const formStatus = document.getElementById("form-status")!;
+  const formSubmit = document.getElementById("form-submit") as HTMLButtonElement;
+  const nameInput = form.elements.namedItem("name") as HTMLInputElement;
+  const categorySelect = form.elements.namedItem("categoryId") as HTMLSelectElement;
+  const infoInput = form.elements.namedItem("info") as HTMLTextAreaElement;
+  const latInput = form.elements.namedItem("lat") as HTMLInputElement;
+  const lngInput = form.elements.namedItem("lng") as HTMLInputElement;
+  const pdfInput = document.getElementById("pdf-input") as HTMLInputElement;
+  const pdfCurrent = document.getElementById("pdf-current")!;
+  const pdfLink = document.getElementById("pdf-link") as HTMLAnchorElement;
+  const pdfReplace = document.getElementById("pdf-replace") as HTMLButtonElement;
+
+  let editingId: number | null = null;
+
+  // ---------- mini map ----------
+  const MEXICO_CENTER: [number, number] = [23.4, -102.5];
+  let L: typeof Leaflet | null = null;
+  let miniMap: Leaflet.Map | null = null;
+  let marker: Leaflet.Marker | null = null;
+
+  function pinIcon(color: string) {
+    return L!.divIcon({
+      className: "admin-pin",
+      html: `<svg width="26" height="35" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 0C5.4 0 0 5.4 0 12c0 8 12 20 12 20s12-12 12-20c0-6.6-5.4-12-12-12z" fill="${color}" stroke="rgba(0,0,0,0.3)" stroke-width="0.6"/>
+        <circle cx="12" cy="12" r="4.2" fill="#ffffff" fill-opacity="0.92"/>
+      </svg>`,
+      iconSize: [26, 35],
+      iconAnchor: [13, 35],
+    });
+  }
+
+  function currentColor() {
+    return CATEGORY_BY_ID.get(Number(categorySelect.value))?.color ?? "#ffb900";
+  }
+
+  function setCoords(lat: number, lng: number) {
+    latInput.value = lat.toFixed(6);
+    lngInput.value = lng.toFixed(6);
+  }
+
+  function placeMarker(lat: number, lng: number) {
+    if (!L || !miniMap) return;
+    if (!marker) {
+      marker = L.marker([lat, lng], { draggable: true, icon: pinIcon(currentColor()) }).addTo(miniMap);
+      marker.on("dragend", () => {
+        const p = marker!.getLatLng();
+        setCoords(p.lat, p.lng);
+      });
+    } else {
+      marker.setLatLng([lat, lng]);
+    }
+  }
+
+  async function ensureMiniMap() {
+    if (miniMap) return;
+    await import("leaflet/dist/leaflet.css");
+    L = (await import("leaflet")).default;
+    miniMap = L.map("admin-map", {
+      center: MEXICO_CENTER,
+      zoom: 4,
+      minZoom: 3,
+      maxZoom: 12,
+      attributionControl: false,
+      scrollWheelZoom: true,
+    });
+    try {
+      const res = await fetch("/map/mexico-states.geojson");
+      const geo = await res.json();
+      const layer = L.geoJSON(geo, {
+        style: { color: "rgba(40, 42, 54, 0.55)", weight: 1, fillColor: "#e9e9ec", fillOpacity: 1 },
+      }).addTo(miniMap);
+      miniMap.fitBounds(layer.getBounds(), { padding: [8, 8], animate: false });
+    } catch (e) {
+      console.warn("GeoJSON failed to load", e);
+    }
+    miniMap.on("click", (e: Leaflet.LeafletMouseEvent) => {
+      placeMarker(e.latlng.lat, e.latlng.lng);
+      setCoords(e.latlng.lat, e.latlng.lng);
+    });
+  }
+
+  function syncMarkerFromInputs() {
+    const lat = Number(latInput.value);
+    const lng = Number(lngInput.value);
+    if (Number.isFinite(lat) && Number.isFinite(lng) && latInput.value !== "" && lngInput.value !== "") {
+      placeMarker(lat, lng);
+    }
+  }
+  latInput.addEventListener("change", syncMarkerFromInputs);
+  lngInput.addEventListener("change", syncMarkerFromInputs);
+  categorySelect.addEventListener("change", () => {
+    if (marker && L) marker.setIcon(pinIcon(currentColor()));
+  });
+
+  async function openModal(airport: MapAirportDTO | null) {
+    editingId = airport?.id ?? null;
+    form.reset();
+    formStatus.hidden = true;
+    formSubmit.disabled = false;
+    modalTitle.textContent = airport ? "Editar aeropuerto" : "Nuevo aeropuerto";
+
+    if (airport) {
+      nameInput.value = airport.name;
+      categorySelect.value = String(airport.categoryId);
+      infoInput.value = airport.info;
+      setCoords(airport.lat, airport.lng);
+      pdfCurrent.hidden = !airport.pdfUrl;
+      pdfLink.href = airport.pdfUrl ?? "#";
+      pdfReplace.hidden = false;
+    } else {
+      pdfCurrent.hidden = true;
+      pdfReplace.hidden = true;
+    }
+
+    overlay.hidden = false;
+    await ensureMiniMap();
+    miniMap!.invalidateSize();
+
+    if (marker) {
+      marker.remove();
+      marker = null;
+    }
+    if (airport) {
+      placeMarker(airport.lat, airport.lng);
+      miniMap!.setView([airport.lat, airport.lng], 7, { animate: false });
+    } else {
+      miniMap!.setView(MEXICO_CENTER, 4, { animate: false });
+    }
+    nameInput.focus();
+  }
+
+  function closeModal() {
+    overlay.hidden = true;
+    editingId = null;
+  }
+
+  document.getElementById("new-btn")!.addEventListener("click", () => openModal(null));
+  document.getElementById("modal-close")!.addEventListener("click", closeModal);
+  document.getElementById("form-cancel")!.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !overlay.hidden) closeModal();
+  });
+
+  function showError(msg: string) {
+    formStatus.hidden = false;
+    formStatus.textContent = msg;
+    formStatus.style.color = "#ff6b6b";
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    formStatus.hidden = true;
+    if (latInput.value === "" || lngInput.value === "") {
+      showError("Ubicá el pin en el mapa o ingresá latitud y longitud.");
+      return;
+    }
+    formSubmit.disabled = true;
+    try {
+      let res: Response;
+      if (editingId === null) {
+        const fd = new FormData();
+        fd.append("name", nameInput.value);
+        fd.append("categoryId", categorySelect.value);
+        fd.append("info", infoInput.value);
+        fd.append("lat", latInput.value);
+        fd.append("lng", lngInput.value);
+        if (pdfInput.files && pdfInput.files[0]) fd.append("file", pdfInput.files[0]);
+        res = await fetch("/api/admin/map/airports", { method: "POST", body: fd });
+      } else {
+        res = await fetch(`/api/admin/map/airports/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: nameInput.value,
+            categoryId: categorySelect.value,
+            info: infoInput.value,
+            lat: latInput.value,
+            lng: lngInput.value,
+          }),
+        });
+      }
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Error al guardar");
+      window.location.reload();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "Error inesperado");
+      formSubmit.disabled = false;
+    }
+  });
+
+  pdfReplace.addEventListener("click", async () => {
+    if (editingId === null) return;
+    const file = pdfInput.files?.[0];
+    if (!file) {
+      await window.adminAlert("Selecciona un archivo PDF primero.");
+      return;
+    }
+    pdfReplace.disabled = true;
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await fetch(`/api/admin/map/airports/${editingId}/file`, { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Error al subir");
+      window.location.reload();
+    } catch (err) {
+      await window.adminAlert(err instanceof Error ? err.message : "Error inesperado");
+      pdfReplace.disabled = false;
+    }
+  });
+
+  // ---------- row actions ----------
+  for (const tr of rows) {
+    const id = Number(tr.dataset.id);
+    tr.querySelector<HTMLButtonElement>(".edit-btn")!.addEventListener("click", () => {
+      openModal(AIRPORT_BY_ID.get(id) ?? null);
+    });
+    tr.querySelector<HTMLButtonElement>(".delete-btn")!.addEventListener("click", async () => {
+      const ok = await window.adminConfirm(
+        "Se eliminará el aeropuerto del mapa y su PDF si fue subido desde el panel. Esta acción no se puede deshacer.",
+        { title: "¿Eliminar este aeropuerto?", confirmLabel: "Eliminar", danger: true }
+      );
+      if (!ok) return;
+      try {
+        const res = await fetch(`/api/admin/map/airports/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Error al eliminar");
+        tr.remove();
+        rows.splice(rows.indexOf(tr), 1);
+        applyFilters();
+      } catch (err) {
+        await window.adminAlert(err instanceof Error ? err.message : "Error inesperado");
+      }
+    });
+  }
+</script>
+
+<style>
+  .page {
+    padding: 40px 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .page__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .page__header h1 {
+    font-family: var(--font-display);
+    font-size: 26px;
+    margin: 0 0 4px;
+  }
+
+  .back-link {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    color: var(--color-accent);
+  }
+
+  .page__lead {
+    color: var(--color-text-muted);
+    opacity: 0.85;
+    font-size: 14px;
+    max-width: 720px;
+    margin: 0 0 24px;
+  }
+
+  .btn-primary {
+    padding: 11px 22px;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: #0a0a0a;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+  }
+
+  .filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .filters input[type="search"],
+  .filters select {
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    min-width: 220px;
+  }
+
+  select option {
+    background: #26262a;
+    color: #ffffff;
+  }
+
+  .count {
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .table-wrap {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    overflow: auto;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 720px;
+  }
+
+  .table th,
+  .table td {
+    text-align: left;
+    padding: 14px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  .table th {
+    color: var(--color-text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .table tr[hidden] {
+    display: none;
+  }
+
+  .name {
+    font-weight: 600;
+  }
+
+  .cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cat__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dot);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+  }
+
+  .muted {
+    color: var(--color-text-dim);
+  }
+
+  .view-link {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    text-decoration: underline;
+  }
+
+  .actions {
+    white-space: nowrap;
+  }
+
+  .actions > * + * {
+    margin-left: 12px;
+  }
+
+  .btn-small {
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-strong);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-small:hover {
+    border-color: var(--color-accent);
+  }
+
+  .btn-small:disabled {
+    opacity: 0.6;
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .empty {
+    padding: 32px;
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+
+  /* Modal — [hidden] must beat the display:flex of the base rule */
+  .overlay[hidden] {
+    display: none;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #26262a;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow-card-lg);
+  }
+
+  .modal__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-strong);
+    background: transparent;
+    color: var(--color-text);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .modal__close:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .modal__title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    margin: 0 0 20px;
+  }
+
+  .modal__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 24px;
+  }
+
+  .modal__fields {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
+  .field input[type="text"],
+  .field input[type="number"],
+  .field select,
+  .field textarea {
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    width: 100%;
+  }
+
+  .field textarea {
+    resize: vertical;
+  }
+
+  .field input[type="file"] {
+    font-size: 13px;
+    color: var(--color-text-muted);
+  }
+
+  .field input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .coords {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .pdf-current {
+    margin-bottom: 6px;
+  }
+
+  .status {
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .modal__actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  .modal__map {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  #admin-map {
+    height: 420px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: #1d1d20;
+  }
+
+  @media (max-width: 800px) {
+    .modal__grid {
+      grid-template-columns: 1fr;
+    }
+
+    #admin-map {
+      height: 300px;
+    }
+  }
+</style>
