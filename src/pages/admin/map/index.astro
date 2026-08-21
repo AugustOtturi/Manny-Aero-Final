@@ -56,7 +56,7 @@ const categoryById = new Map(mapData.categories.map((c) => [c.id, c]));
                   </span>
                 </td>
                 <td>
-                  {a.pdfUrl ? (
+                  {a.pdfUrl && a.pdfUrl.startsWith("/") ? (
                     <a href={a.pdfUrl} target="_blank" rel="noopener" class="view-link">Ver PDF</a>
                   ) : (
                     <span class="muted">Sin PDF</span>
@@ -274,8 +274,9 @@ const categoryById = new Map(mapData.categories.map((c) => [c.id, c]));
       categorySelect.value = String(airport.categoryId);
       infoInput.value = airport.info;
       setCoords(airport.lat, airport.lng);
-      pdfCurrent.hidden = !airport.pdfUrl;
-      pdfLink.href = airport.pdfUrl ?? "#";
+      const hasPdf = Boolean(airport.pdfUrl && airport.pdfUrl.startsWith("/"));
+      pdfCurrent.hidden = !hasPdf;
+      pdfLink.href = hasPdf ? (airport.pdfUrl as string) : "#";
       pdfReplace.hidden = false;
     } else {
       pdfCurrent.hidden = true;
@@ -351,6 +352,23 @@ const categoryById = new Map(mapData.categories.map((c) => [c.id, c]));
             lng: lngInput.value,
           }),
         });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || "Error al guardar");
+
+        const newFile = pdfInput.files?.[0];
+        if (newFile) {
+          const fd = new FormData();
+          fd.append("file", newFile);
+          const fileRes = await fetch(`/api/admin/map/airports/${editingId}/file`, { method: "POST", body: fd });
+          const fileData = await fileRes.json();
+          if (!fileRes.ok || !fileData.ok) {
+            showError(fileData.error || "El aeropuerto se guardó pero el PDF no se pudo subir");
+            formSubmit.disabled = false;
+            return;
+          }
+        }
+        window.location.reload();
+        return;
       }
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Error al guardar");

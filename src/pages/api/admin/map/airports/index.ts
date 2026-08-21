@@ -39,18 +39,18 @@ export const POST: APIRoute = async ({ request }) => {
   });
   if (!parsed.success) return json({ ok: false, error: firstIssue(parsed.error) }, 400);
 
-  const category = await getMapCategoryById(parsed.data.categoryId);
-  if (!category) return json({ ok: false, error: "La categoría no existe" }, 400);
-
   let pdfUrl: string | null = null;
-  const file = formData.get("file");
-  if (file instanceof File && file.size > 0) {
-    const pdf = await readPdfUpload(file);
-    if (!pdf.ok) return json({ ok: false, error: pdf.error }, 400);
-    pdfUrl = await storeAirportPdf(pdf.buffer, file.name);
-  }
-
   try {
+    const category = await getMapCategoryById(parsed.data.categoryId);
+    if (!category) return json({ ok: false, error: "La categoría no existe" }, 400);
+
+    const file = formData.get("file");
+    if (file instanceof File && file.size > 0) {
+      const pdf = await readPdfUpload(file);
+      if (!pdf.ok) return json({ ok: false, error: pdf.error }, 400);
+      pdfUrl = await storeAirportPdf(pdf.buffer, file.name);
+    }
+
     const airport = await createAirport({
       name: parsed.data.name,
       lat: parsed.data.lat,
