@@ -3,13 +3,15 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 import { listNews } from "../../lib/server/repositories/news";
 import { listLeads } from "../../lib/server/repositories/leads";
 import { listPermitDownloads } from "../../lib/server/repositories/permitDownloads";
+import { listAirports } from "../../lib/server/repositories/airports";
 
 export const prerender = false;
 
-const [articles, leadsResult, permitDownloads] = await Promise.all([
+const [articles, leadsResult, permitDownloads, airports] = await Promise.all([
   listNews(),
   listLeads({ limit: 1 }),
   listPermitDownloads(),
+  listAirports(),
 ]);
 
 const sections = [
@@ -36,6 +38,12 @@ const sections = [
     title: "Permisos",
     desc: "Archivos descargables de la página de Permits & Authorizations.",
     count: `${permitDownloads.length} archivos`,
+  },
+  {
+    href: "/admin/map",
+    title: "Mapa",
+    desc: "Aeropuertos (pins, PDFs, ubicación) y categorías del mapa del home.",
+    count: `${airports.length} aeropuertos`,
   },
 ];
 ---

@@ -1,6 +1,6 @@
 ---
 interface Props {
-  active?: "news" | "leads" | "images" | "permits";
+  active?: "news" | "leads" | "images" | "permits" | "map";
   username: string;
 }
 
@@ -11,6 +11,7 @@ const links = [
   { key: "leads", href: "/admin/leads", label: "Leads" },
   { key: "images", href: "/admin/images", label: "Imágenes" },
   { key: "permits", href: "/admin/permits", label: "Permisos" },
+  { key: "map", href: "/admin/map", label: "Mapa" },
 ] as const;
 ---
 
