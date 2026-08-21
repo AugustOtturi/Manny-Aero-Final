@@ -72,3 +72,22 @@ test("airport update: keeps Spanish message for too-long info", () => {
 test("stripUndefined removes undefined keys only", () => {
   assert.deepEqual(stripUndefined({ a: 1, b: undefined, c: "" }), { a: 1, c: "" });
 });
+
+test("airport: rejects missing/null/empty lat and lng with Spanish message", () => {
+  for (const bad of [undefined, null, ""]) {
+    const r = airportInputSchema.safeParse({ name: "X", lat: bad, lng: 0, categoryId: 1 });
+    assert.equal(r.success, false);
+    if (!r.success) assert.match(firstIssue(r.error), /latitud es obligatoria/i);
+  }
+  const r2 = airportInputSchema.safeParse({ name: "X", lat: 0, lng: null, categoryId: 1 });
+  assert.equal(r2.success, false);
+  if (!r2.success) assert.match(firstIssue(r2.error), /longitud es obligatoria/i);
+});
+
+test("airport update: missing lat stays undefined, null lat is rejected", () => {
+  const ok = airportUpdateSchema.safeParse({ name: "Y" });
+  assert.ok(ok.success);
+  assert.equal(ok.data.lat, undefined);
+  const bad = airportUpdateSchema.safeParse({ lat: null });
+  assert.equal(bad.success, false);
+});

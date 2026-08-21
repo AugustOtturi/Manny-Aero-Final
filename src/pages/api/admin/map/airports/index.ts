@@ -2,7 +2,11 @@ import type { APIRoute } from "astro";
 import { createAirport, listAirports } from "../../../../../lib/server/repositories/airports";
 import { getMapCategoryById } from "../../../../../lib/server/repositories/mapCategories";
 import { airportInputSchema, firstIssue } from "../../../../../lib/server/schemas/map";
-import { readPdfUpload, storeAirportPdf } from "../../../../../lib/server/airportFiles";
+import {
+  readPdfUpload,
+  removeAirportPdf,
+  storeAirportPdf,
+} from "../../../../../lib/server/airportFiles";
 
 export const prerender = false;
 
@@ -58,6 +62,7 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ ok: true, airport }, 201);
   } catch (err) {
     console.error("[map/airports] create failed", err);
+    if (pdfUrl) await removeAirportPdf(pdfUrl);
     return json({ ok: false, error: "No se pudo crear el aeropuerto" }, 500);
   }
 };

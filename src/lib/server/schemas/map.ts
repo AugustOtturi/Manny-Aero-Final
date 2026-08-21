@@ -10,6 +10,25 @@ const sortOrderField = z.coerce
 
 const infoField = z.string().trim().max(2000, "La descripción es demasiado larga");
 
+// lat/lng arrive as FormData values (string | null, "" when the field is
+// present but empty) on create, and as JSON values (number | null | undefined)
+// on update. Plain z.coerce.number() coerces `null` (and `""`) to `0`, which
+// would silently pass the range check and create a pin at (0,0) instead of
+// rejecting a missing coordinate — so null/""/undefined are normalized to
+// `undefined` first and then explicitly required via refine.
+function requiredCoordinate(min: number, max: number, rangeMessage: string, requiredMessage: string) {
+  return z
+    .preprocess(
+      (v) => (v === null || v === "" ? undefined : v),
+      z.coerce.number().min(min, rangeMessage).max(max, rangeMessage).optional()
+    )
+    .refine((v) => v !== undefined, { message: requiredMessage })
+    // refine already guarantees v is defined at runtime — this transform just
+    // narrows the *type* to `number` so callers don't have to deal with an
+    // `undefined` that can never actually occur.
+    .transform((v) => v as number);
+}
+
 export const mapCategoryInputSchema = z.object({
   name: z.string().trim().min(1, "El nombre es obligatorio").max(100, "Nombre demasiado largo"),
   short: z.string().trim().min(1, "El nombre corto es obligatorio").max(50, "Nombre corto demasiado largo"),
@@ -30,8 +49,8 @@ export const mapCategoryUpdateSchema = z.object({
 
 export const airportInputSchema = z.object({
   name: z.string().trim().min(1, "El nombre es obligatorio").max(255, "Nombre demasiado largo"),
-  lat: z.coerce.number().min(-90, "Latitud fuera de rango").max(90, "Latitud fuera de rango"),
-  lng: z.coerce.number().min(-180, "Longitud fuera de rango").max(180, "Longitud fuera de rango"),
+  lat: requiredCoordinate(-90, 90, "Latitud fuera de rango", "La latitud es obligatoria"),
+  lng: requiredCoordinate(-180, 180, "Longitud fuera de rango", "La longitud es obligatoria"),
   categoryId: z.coerce.number().int().positive("Categoría inválida"),
   info: infoField.optional().default(""),
 });
