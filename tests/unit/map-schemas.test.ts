@@ -57,6 +57,18 @@ test("airport update: accepts only lat", () => {
   assert.equal(r.data.name, undefined);
 });
 
+test("category update: keeps Spanish message for negative sortOrder", () => {
+  const r = mapCategoryUpdateSchema.safeParse({ sortOrder: -1 });
+  assert.equal(r.success, false);
+  if (!r.success) assert.match(firstIssue(r.error), /negativo/);
+});
+
+test("airport update: keeps Spanish message for too-long info", () => {
+  const r = airportUpdateSchema.safeParse({ info: "x".repeat(2001) });
+  assert.equal(r.success, false);
+  if (!r.success) assert.match(firstIssue(r.error), /demasiado larga/);
+});
+
 test("stripUndefined removes undefined keys only", () => {
   assert.deepEqual(stripUndefined({ a: 1, b: undefined, c: "" }), { a: 1, c: "" });
 });
