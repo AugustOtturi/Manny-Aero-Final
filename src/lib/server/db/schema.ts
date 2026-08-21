@@ -5,6 +5,7 @@ import {
   text,
   longtext,
   datetime,
+  double,
   json,
   mysqlEnum,
   uniqueIndex,
@@ -90,6 +91,42 @@ export const adminUsers = mysqlTable("admin_users", {
   createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
 });
 
+export const mapCategories = mysqlTable("map_categories", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  short: varchar("short", { length: 50 }).notNull(),
+  color: varchar("color", { length: 7 }).notNull(),
+  sortOrder: int("sort_order").notNull().default(0),
+  createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  updatedAt: datetime("updated_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const airports = mysqlTable(
+  "airports",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    lat: double("lat").notNull(),
+    lng: double("lng").notNull(),
+    categoryId: int("category_id")
+      .notNull()
+      .references(() => mapCategories.id, { onDelete: "restrict" }),
+    info: text("info"),
+    pdfUrl: varchar("pdf_url", { length: 500 }),
+    createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+    updatedAt: datetime("updated_at")
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => ({
+    categoryIdx: index("airports_category_idx").on(table.categoryId),
+  })
+);
+
 export type NewsRow = typeof news.$inferSelect;
 export type NewNewsRow = typeof news.$inferInsert;
 export type LeadRow = typeof leads.$inferSelect;
@@ -99,3 +136,7 @@ export type NewImageRow = typeof images.$inferInsert;
 export type AdminUserRow = typeof adminUsers.$inferSelect;
 export type PermitDownloadRow = typeof permitDownloads.$inferSelect;
 export type NewPermitDownloadRow = typeof permitDownloads.$inferInsert;
+export type MapCategoryRow = typeof mapCategories.$inferSelect;
+export type NewMapCategoryRow = typeof mapCategories.$inferInsert;
+export type AirportRow = typeof airports.$inferSelect;
+export type NewAirportRow = typeof airports.$inferInsert;

@@ -16,7 +16,8 @@
     "db:studio": "drizzle-kit studio",
     "db:seed-news": "tsx src/lib/server/db/scripts/seed-news.ts",
     "db:seed-logos": "tsx src/lib/server/db/scripts/seed-logos.ts",
-    "db:seed-permit-downloads": "tsx src/lib/server/db/scripts/seed-permit-downloads.ts"
+    "db:seed-permit-downloads": "tsx src/lib/server/db/scripts/seed-permit-downloads.ts",
+    "db:create-map-tables": "tsx src/lib/server/db/scripts/create-map-tables.ts"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.5",
