@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
 import { unlink } from "node:fs/promises";
-import path from "node:path";
 import {
   deletePermitDownload,
   getPermitDownloadById,
   updatePermitDownload,
 } from "../../../../lib/server/repositories/permitDownloads";
+import { uploadsPath } from "../../../../lib/server/uploads";
 
 export const prerender = false;
 
@@ -59,7 +59,7 @@ export const DELETE: APIRoute = async ({ params }) => {
 
   // Only unlink files we manage — never touch the legacy /files/* assets.
   if (existing.fileUrl.startsWith("/uploads/permit-files/")) {
-    const filePath = path.join(process.cwd(), "public", existing.fileUrl);
+    const filePath = uploadsPath(existing.fileUrl.replace("/uploads/", ""));
     await unlink(filePath).catch(() => {});
   }
 
