@@ -51,7 +51,7 @@ export const CATEGORIES: Record<"1" | "2" | "3" | "4", Category> = {
 // airports). Este archivo es solo la fuente de seed-map.ts. Conservar.
 // 99 airports — migrated from WordPress GeoMaps (manny.aero)
 // PDFs served locally from /files/airports/ (copied via download-airport-pdfs.js).
-// Categories: 1=Agent (73) | 2=FBO (18) | 3=Office (8) | 4=IS-BAH (2)
+// Categories: 1=Agent (71) | 2=FBO (18) | 3=Office (8) | 4=IS-BAH (2)
 export const AIRPORTS: Airport[] = [
   { id: 1,   nombre: "ACAPULCO (MMAA/ACA)",                             lat: 16.761885, lng: -99.756415,  categoria: 1, info: "", pdf: "/files/airports/MMAA-ACA.pdf" },
   { id: 2,   nombre: "AGUASCALIENTES(MMAS/AGU)",                        lat: 21.701737, lng: -102.316785, categoria: 1, info: "", pdf: "/files/airports/MMAS-AGS.pdf" },

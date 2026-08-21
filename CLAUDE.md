@@ -4,7 +4,7 @@ Guidance for Claude Code when working on the Manny Aero website.
 
 ## Project
 
-Marketing site + admin CMS for **Manny Aero** — premium aircraft ground handling, permits, catering and FBO coordination across Mexico. Multi-page **Astro 5 SSR** site (migrated from static in jul 2026). Public content (services, permits, ISBAH modules, airports) is still hardcoded in `src/data/*`; **news, form leads, and index images now live in MySQL** and are editable from `/admin`.
+Marketing site + admin CMS for **Manny Aero** — premium aircraft ground handling, permits, catering and FBO coordination across Mexico. Multi-page **Astro 5 SSR** site (migrated from static in jul 2026). Public content (services, permits, ISBAH modules) is still hardcoded in `src/data/*`; **news, form leads, index images, and the map (airports + categories) now live in MySQL** and are editable from `/admin`.
 
 Routes (actualizado jul 2026):
 - `/` — main landing (hero video, subhero, service cards, map, final CTA) — el mapa lee `map_categories` y `airports` de MySQL (editable en `/admin/map`)
@@ -228,7 +228,7 @@ Panel de administración integrado en la misma app Astro (no es un proyecto/domi
 - CRUD de los pins del mapa del home (tabla `airports`): nombre, categoría, info, lat/lng y PDF. Ubicación con mini-mapa Leaflet en el modal (click coloca, arrastre ajusta, lat/lng sincronizados). `/admin/map/categories` es el CRUD de `map_categories` (nombre, corto, color, orden); no se puede borrar una categoría con pins (409 + FK `restrict`).
 - Endpoints: `GET/POST /api/admin/map/categories`, `PUT/DELETE /api/admin/map/categories/:id`, `GET/POST /api/admin/map/airports`, `PUT/DELETE /api/admin/map/airports/:id`, `POST /api/admin/map/airports/:id/file`. Validación zod en `src/lib/server/schemas/map.ts`; PDFs via `src/lib/server/airportFiles.ts` (solo `.pdf`, 15 MB, magic bytes) a `UPLOADS_DIR/airport-files/`. Los PDFs legacy de `public/files/airports/` son compartidos por varios pins y **nunca** se borran.
 - `MapSection.astro` lee de la DB en el frontmatter y embebe `{categories, airports}` como `<script type="application/json" id="map-data">` (`serializeMapData` escapa `<`). El script cliente ya no importa `src/data/airports.ts`. `sortOrder` reemplaza a `priority` con la misma semántica (mayor orden se dibuja encima).
-- Deploy: 1) `npm run db:create-map-tables` en el servidor, 2) deploy del código, 3) `npm run db:seed-map` una vez. Si el código llega antes que las tablas, el home falla.
+- Deploy: 1) deploy del código (o, si se quiere evitar el mapa vacío en el medio, ejecutar antes el SQL `CREATE TABLE` de `create-map-tables.ts` en phpMyAdmin), 2) `npm run db:create-map-tables` en el servidor, 3) `npm run db:seed-map` (una sola vez, ANTES de crear categorías desde el admin — el seed fija ids 1–4 y solo siembra categorías si la tabla está vacía), 4) reiniciar la app Node. Entre el deploy y el seed el mapa del home queda vacío.
 
 ### Modales del admin (no usar `confirm()`/`alert()` nativos)
 - `src/components/admin/ConfirmModal.astro` se monta una sola vez en `AdminLayout.astro` (solo si hay sesión) y expone dos funciones globales: `window.adminConfirm(message, opts?): Promise<boolean>` y `window.adminAlert(message, opts?): Promise<void>`. Tipos declarados en `src/env.d.ts`.
