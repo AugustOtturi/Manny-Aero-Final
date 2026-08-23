@@ -7,11 +7,12 @@ import { UPLOADS_ROOT } from "../../../../lib/server/uploads";
 
 export const prerender = false;
 
-const ALLOWED_CATEGORIES = new Set(["subhero", "service", "logo", "news", "team", "catering", "og"]);
+const ALLOWED_CATEGORIES = new Set(["subhero", "service", "logo", "news", "team", "catering", "og", "hero"]);
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_SIZE = 8 * 1024 * 1024; // 8MB
 const LOGO_MAX_WIDTH = 400;
 const PHOTO_MAX_WIDTH = 1600;
+const HERO_POSTER_MAX_WIDTH = 1920;
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -66,7 +67,8 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const maxWidth = category === "logo" ? LOGO_MAX_WIDTH : PHOTO_MAX_WIDTH;
+  const maxWidth =
+    category === "logo" ? LOGO_MAX_WIDTH : category === "hero" ? HERO_POSTER_MAX_WIDTH : PHOTO_MAX_WIDTH;
 
   let optimized: Buffer;
   let width: number | undefined;

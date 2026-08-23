@@ -4,24 +4,41 @@ import GlassButton from "./ui/GlassButton.astro";
 import posterHero from "../assets/poster-hero.webp";
 import heroVideo from "../assets/hero-manny-final.mp4?url";
 import mannyLogoHero from "../assets/logo-manny-hero.png";
+import { getImage } from "../lib/server/repositories/images";
+
+const heroVideoOverride = await getImage("hero", "video");
+const heroPosterOverride = await getImage("hero", "poster");
+const heroVideoSrc = heroVideoOverride ? `/uploads/hero/${heroVideoOverride.fileName}` : heroVideo;
+const heroPosterSrc = heroPosterOverride ? `/uploads/hero/${heroPosterOverride.fileName}` : null;
 ---
 
 <section class="hero" aria-labelledby="hero-title">
   <div class="hero__media" aria-hidden="true">
-    <Image
-      src={posterHero}
-      alt=""
-      widths={[640, 960, 1280, 1600, 1920]}
-      sizes="100vw"
-      loading="eager"
-      fetchpriority="high"
-      decoding="async"
-      class="hero__poster"
-    />
+    {heroPosterSrc ? (
+      <img
+        src={heroPosterSrc}
+        alt=""
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        class="hero__poster"
+      />
+    ) : (
+      <Image
+        src={posterHero}
+        alt=""
+        widths={[640, 960, 1280, 1600, 1920]}
+        sizes="100vw"
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        class="hero__poster"
+      />
+    )}
     <video
       id="hero-video"
       class="hero__video"
-      src={heroVideo}
+      src={heroVideoSrc}
       autoplay
       muted
       loop
