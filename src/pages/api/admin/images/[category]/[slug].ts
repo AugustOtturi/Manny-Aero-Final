@@ -7,7 +7,7 @@ export const prerender = false;
 
 // Same allowlist/pattern the upload endpoint enforces — the delete path builds
 // a filesystem path from these, so validate them here too (defense in depth).
-const ALLOWED_CATEGORIES = new Set(["subhero", "service", "logo", "news", "team", "catering", "og"]);
+const ALLOWED_CATEGORIES = new Set(["subhero", "service", "logo", "news", "team", "catering", "og", "hero"]);
 const SAFE_SLUG = /^[a-z0-9-]+$/;
 
 export const DELETE: APIRoute = async ({ params }) => {
