@@ -162,7 +162,10 @@ const categories = mapData.categories;
         link.href = a.pdfUrl;
         link.target = "_blank";
         link.rel = "noopener";
-        link.setAttribute("download", "");
+        // Download with the original file name when the pin has one stored
+        // (uploads get a timestamp-prefixed name on disk); empty attr falls
+        // back to the URL basename for the legacy /files/airports/ PDFs.
+        link.setAttribute("download", a.pdfName || "");
         link.append("Download Now");
 
         const svgNS = "http://www.w3.org/2000/svg";

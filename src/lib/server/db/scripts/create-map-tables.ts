@@ -30,6 +30,7 @@ const STATEMENTS = [
     \`category_id\` int NOT NULL,
     \`info\` text NULL,
     \`pdf_url\` varchar(500) NULL,
+    \`pdf_name\` varchar(255) NULL,
     \`created_at\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     \`updated_at\` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (\`id\`),

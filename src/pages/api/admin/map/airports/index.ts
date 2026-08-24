@@ -40,6 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!parsed.success) return json({ ok: false, error: firstIssue(parsed.error) }, 400);
 
   let pdfUrl: string | null = null;
+  let pdfName: string | null = null;
   try {
     const category = await getMapCategoryById(parsed.data.categoryId);
     if (!category) return json({ ok: false, error: "La categoría no existe" }, 400);
@@ -49,6 +50,7 @@ export const POST: APIRoute = async ({ request }) => {
       const pdf = await readPdfUpload(file);
       if (!pdf.ok) return json({ ok: false, error: pdf.error }, 400);
       pdfUrl = await storeAirportPdf(pdf.buffer, file.name);
+      pdfName = file.name.slice(0, 255);
     }
 
     const airport = await createAirport({
@@ -58,6 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
       categoryId: parsed.data.categoryId,
       info: parsed.data.info || null,
       pdfUrl,
+      pdfName,
     });
     return json({ ok: true, airport }, 201);
   } catch (err) {

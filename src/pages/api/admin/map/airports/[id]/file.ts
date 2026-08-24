@@ -40,7 +40,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   const pdfUrl = await storeAirportPdf(pdf.buffer, file.name);
 
   try {
-    const airport = await updateAirport(id, { pdfUrl });
+    const airport = await updateAirport(id, { pdfUrl, pdfName: file.name.slice(0, 255) });
     await removeAirportPdf(existing.pdfUrl);
     return json({ ok: true, airport });
   } catch (err) {

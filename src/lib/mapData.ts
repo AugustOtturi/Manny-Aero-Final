@@ -16,6 +16,7 @@ export interface MapAirportDTO {
   categoryId: number;
   info: string;
   pdfUrl: string | null;
+  pdfName: string | null;
 }
 
 export interface MapData {
@@ -36,6 +37,7 @@ export function toMapData(categories: MapCategoryRow[], airports: AirportRow[]):
       categoryId: a.categoryId,
       info: a.info ?? "",
       pdfUrl: a.pdfUrl ?? null,
+      pdfName: a.pdfName ?? null,
     })),
   };
 }

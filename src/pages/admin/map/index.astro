@@ -57,7 +57,9 @@ const categoryById = new Map(mapData.categories.map((c) => [c.id, c]));
                 </td>
                 <td>
                   {a.pdfUrl && a.pdfUrl.startsWith("/") ? (
-                    <a href={a.pdfUrl} target="_blank" rel="noopener" class="view-link">Ver PDF</a>
+                    <a href={a.pdfUrl} target="_blank" rel="noopener" class="view-link" title={a.pdfName ?? undefined}>
+                      {a.pdfName ?? "Ver PDF"}
+                    </a>
                   ) : (
                     <span class="muted">Sin PDF</span>
                   )}
@@ -277,6 +279,7 @@ const categoryById = new Map(mapData.categories.map((c) => [c.id, c]));
       const hasPdf = Boolean(airport.pdfUrl && airport.pdfUrl.startsWith("/"));
       pdfCurrent.hidden = !hasPdf;
       pdfLink.href = hasPdf ? (airport.pdfUrl as string) : "#";
+      pdfLink.textContent = airport.pdfName || "Ver PDF actual";
       pdfReplace.hidden = false;
     } else {
       pdfCurrent.hidden = true;

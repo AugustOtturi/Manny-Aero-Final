@@ -116,6 +116,7 @@ export const airports = mysqlTable(
       .references(() => mapCategories.id, { onDelete: "restrict" }),
     info: text("info"),
     pdfUrl: varchar("pdf_url", { length: 500 }),
+    pdfName: varchar("pdf_name", { length: 255 }),
     createdAt: datetime("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
     updatedAt: datetime("updated_at")
       .default(sql`CURRENT_TIMESTAMP`)

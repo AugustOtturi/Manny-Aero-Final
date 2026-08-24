@@ -8,7 +8,7 @@ const categories = [
   { id: 1, name: "Agent", short: "Agent", color: "#ffb900", sortOrder: 1, createdAt: now, updatedAt: now },
 ];
 const airports = [
-  { id: 7, name: "X </script>", lat: 1.5, lng: -2.5, categoryId: 1, info: null, pdfUrl: null, createdAt: now, updatedAt: now },
+  { id: 7, name: "X </script>", lat: 1.5, lng: -2.5, categoryId: 1, info: null, pdfUrl: null, pdfName: null, createdAt: now, updatedAt: now },
 ];
 
 test("toMapData keeps only public fields, sorts categories, nulls info to empty string", () => {
@@ -16,7 +16,7 @@ test("toMapData keeps only public fields, sorts categories, nulls info to empty 
   assert.deepEqual(data.categories.map((c) => c.id), [1, 2]);
   assert.deepEqual(Object.keys(data.categories[0]), ["id", "name", "short", "color", "sortOrder"]);
   assert.deepEqual(data.airports[0], {
-    id: 7, name: "X </script>", lat: 1.5, lng: -2.5, categoryId: 1, info: "", pdfUrl: null,
+    id: 7, name: "X </script>", lat: 1.5, lng: -2.5, categoryId: 1, info: "", pdfUrl: null, pdfName: null,
   });
 });
 
