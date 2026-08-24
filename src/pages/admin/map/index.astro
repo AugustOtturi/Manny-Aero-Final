@@ -14,11 +14,11 @@ const categoryById = new Map(mapData.categories.map((c) => [c.id, c]));
 <AdminLayout title="Mapa" active="map">
   <main class="page">
     <header class="page__header">
-      <div>
-        <h1>Aeropuertos del mapa</h1>
-        <a href="/admin/map/categories" class="back-link">Categorías →</a>
+      <h1>Aeropuertos del mapa</h1>
+      <div class="page__actions">
+        <a href="/admin/map/categories" class="btn-secondary">Categorías</a>
+        <button type="button" id="new-btn" class="btn-primary">Nuevo aeropuerto</button>
       </div>
-      <button type="button" id="new-btn" class="btn-primary">Nuevo aeropuerto</button>
     </header>
     <p class="page__lead">
       Pins del mapa del home. Cada uno tiene nombre, categoría, ubicación y un PDF descargable. Los cambios se ven en el sitio al instante.
@@ -435,25 +435,41 @@ const categoryById = new Map(mapData.categories.map((c) => [c.id, c]));
 
   .page__header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
+    flex-wrap: wrap;
     margin-bottom: 8px;
   }
 
   .page__header h1 {
     font-family: var(--font-display);
     font-size: 26px;
-    margin: 0 0 4px;
+    margin: 0;
   }
 
-  .back-link {
+  .page__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-secondary {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border-strong);
+    background: transparent;
+    color: var(--color-text);
+    font-weight: 600;
     font-size: 13px;
-    color: var(--color-text-muted);
     text-decoration: none;
+    white-space: nowrap;
   }
 
-  .back-link:hover {
+  .btn-secondary:hover {
+    border-color: var(--color-accent);
     color: var(--color-accent);
   }
 
