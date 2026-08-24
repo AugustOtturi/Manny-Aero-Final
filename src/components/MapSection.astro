@@ -320,7 +320,12 @@ const categories = mapData.categories;
           opacity: 1,
           bubblingMouseEvents: false,
         }).addTo(map);
-        marker.on("click", () => openModal(a));
+        marker.on("click", () => {
+          // Canvas hit-testing ignores opacity — a filtered-out (invisible)
+          // circle still receives taps, so gate on the current style.
+          if (marker.options.fillOpacity === 0) return;
+          openModal(a);
+        });
         markers.push({ airport: a, marker });
       }
     } else {
@@ -850,6 +855,13 @@ const categories = mapData.categories;
 
   .map-pin.is-hidden {
     opacity: 0;
+  }
+
+  /* Leaflet's stylesheet loads after ours (dynamic import) and its
+     `.leaflet-marker-icon.leaflet-interactive { pointer-events: auto }`
+     ties a two-class selector on specificity, so hidden pins stayed
+     hoverable. The extra class wins regardless of load order. */
+  .leaflet-marker-icon.map-pin.is-hidden {
     pointer-events: none;
   }
 
